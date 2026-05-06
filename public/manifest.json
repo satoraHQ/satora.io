@@ -1,0 +1,21 @@
+{
+  "name": "Satora - Make Bitcoin Move",
+  "short_name": "Satora",
+  "description": "Trustless Bitcoin swaps. Lightning, on-chain, and EVM.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon/dot.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["finance", "business"],
+  "lang": "en-US",
+  "dir": "ltr"
+}

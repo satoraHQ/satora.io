@@ -1,0 +1,134 @@
+@import "tailwindcss";
+@import "./custom.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@source './app/**/*.{ts,tsx}';
+@source './components/**/*.{ts,tsx}';
+@source './lib/**/*.{ts,tsx}';
+@source './hooks/**/*.{ts,tsx}';
+@source './utils/**/*.{ts,tsx}';
+
+@theme {
+  --color-fd-background: hsl(0, 0%, 100%);
+  --color-fd-foreground: hsl(0, 0%, 0%);
+  --color-fd-muted: hsl(0, 0%, 96%);
+  --color-fd-muted-foreground: hsl(0, 0%, 20%);
+  --color-fd-popover: hsl(0, 0%, 100%);
+  --color-fd-popover-foreground: hsl(0, 0%, 5%);
+  --color-fd-card: hsl(0, 0%, 98%);
+  --color-fd-card-foreground: hsl(0, 0%, 0%);
+  --color-fd-border: hsla(0, 0%, 88%, 0.5);
+  --color-fd-primary: hsl(0, 0%, 0%);
+  --color-fd-primary-foreground: hsl(0, 0%, 100%);
+  --color-fd-secondary: hsl(0, 0%, 94%);
+  --color-fd-secondary-foreground: hsl(0, 0%, 0%);
+  --color-fd-accent: hsla(40, 96%, 65%, 0.5);
+  --color-fd-accent-foreground: hsl(0, 0%, 0%);
+  --color-fd-ring: hsl(38, 92%, 50%);
+
+  --color-lime: #a3c410;
+  --color-lime-light: #c2e821;
+}
+
+/*
+ * Theme CSS Variables
+ * Light mode is the default - variables are set on :root
+ * Dark mode overrides via .dark class (set by next-themes)
+ * This ensures correct styling on initial SSR render (always light mode initially)
+ */
+:root {
+	/* HSL values without hsl() wrapper - used with hsl(var(...)) */
+	--background: 0 0% 100%;
+	--foreground: 0 0% 0%;
+
+	/* Grid pattern color for landing page */
+	--grid-color: rgba(0, 0, 0, 0.08);
+	--background-color: #ffffff;
+
+	/* Fumadocs theme variables for light mode */
+	--color-fd-background: hsl(0, 0%, 100%);
+	--color-fd-foreground: hsl(0, 0%, 0%);
+	--color-fd-muted: hsl(0, 0%, 96%);
+	--color-fd-muted-foreground: hsl(0, 0%, 20%);
+	--color-fd-popover: hsl(0, 0%, 100%);
+	--color-fd-popover-foreground: hsl(0, 0%, 5%);
+	--color-fd-card: hsl(0, 0%, 98%);
+	--color-fd-card-foreground: hsl(0, 0%, 0%);
+	--color-fd-border: hsla(0, 0%, 88%, 0.5);
+	--color-fd-primary: hsl(0, 0%, 0%);
+	--color-fd-primary-foreground: hsl(0, 0%, 100%);
+	--color-fd-secondary: hsl(0, 0%, 94%);
+	--color-fd-secondary-foreground: hsl(0, 0%, 0%);
+	--color-fd-accent: hsla(40, 96%, 65%, 0.5);
+	--color-fd-accent-foreground: hsl(0, 0%, 0%);
+	--color-fd-ring: hsl(38, 92%, 50%);
+}
+
+/* Dark mode overrides - applied when next-themes adds .dark class to html */
+.dark {
+	--background: 0 0% 0%;
+	--foreground: 0 0% 98%;
+
+	/* Grid pattern color for landing page */
+	--grid-color: rgba(255, 255, 255, 0.08);
+	--background-color: #000000;
+
+	/* Fumadocs theme variables for dark mode */
+	--color-fd-background: hsl(0, 0%, 0%);
+	--color-fd-foreground: hsl(0, 0%, 98%);
+	--color-fd-muted: hsl(0, 0%, 13%);
+	--color-fd-muted-foreground: hsl(0, 0%, 65%);
+	--color-fd-popover: hsl(0, 0%, 10%);
+	--color-fd-popover-foreground: hsl(0, 0%, 88%);
+	--color-fd-card: hsl(0, 0%, 9%);
+	--color-fd-card-foreground: hsl(0, 0%, 98%);
+	--color-fd-border: hsla(0, 0%, 20%, 0.5);
+	--color-fd-primary: hsl(0, 0%, 98%);
+	--color-fd-primary-foreground: hsl(0, 0%, 9%);
+	--color-fd-secondary: hsl(0, 0%, 13%);
+	--color-fd-secondary-foreground: hsl(0, 0%, 98%);
+	--color-fd-accent: hsla(40, 90%, 60%, 0.3);
+	--color-fd-accent-foreground: hsl(0, 0%, 98%);
+	--color-fd-ring: hsl(142, 71%, 55%);
+}
+
+/* Base body styles using CSS variables */
+body {
+	color: hsl(var(--foreground));
+	background: hsl(var(--background));
+}
+
+/* Animated gradient text for hero */
+@keyframes gradient-shift {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+.animate-gradient-shift {
+	animation: gradient-shift 4s ease infinite;
+}
+
+/* Animated underline expand */
+@keyframes underline-expand {
+	0% {
+		transform: scaleX(0);
+		transform-origin: left;
+	}
+	100% {
+		transform: scaleX(1);
+		transform-origin: left;
+	}
+}
+
+.animate-underline-expand {
+	animation: underline-expand 0.8s ease-out 0.5s forwards;
+	transform: scaleX(0);
+}

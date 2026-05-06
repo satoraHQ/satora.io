@@ -1,0 +1,460 @@
+/* Reset default browser styles to match Tailwind v3 behavior */
+@layer base {
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		font-size: inherit;
+		font-weight: inherit;
+		margin: 0;
+	}
+
+	p {
+		margin: 0;
+	}
+}
+
+/* Custom Fonts - loaded via next/font in app/layout.tsx */
+
+/* Base Styles */
+html,
+body {
+	@apply w-full;
+	-webkit-text-size-adjust: 100%;
+	-moz-text-size-adjust: 100%;
+	text-size-adjust: 100%;
+}
+
+:root {
+	font-family: var(--font-poppins), system-ui, sans-serif;
+	color-scheme: light dark;
+	scroll-behavior: smooth;
+	line-height: 1.5;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Fix for partner logos in AsSeenIn component */
+/* Light mode: make logos clean black with multiple filters */
+img[class*="brightness-0"] {
+	filter: grayscale(1) contrast(2) brightness(0);
+}
+
+/* Special case for 10101 logo in light mode */
+img[class*="grayscale contrast-200"]:not(.dark *) {
+	filter: grayscale(1) contrast(2);
+}
+
+/* Dark mode: invert logos to make them white */
+html.dark img[class*="brightness-0"] {
+	filter: grayscale(1) contrast(2) brightness(0) invert(1);
+}
+
+/* Special case for 10101 logo in dark mode */
+html.dark img[class*="grayscale contrast-200"] {
+	filter: grayscale(1) contrast(2) invert(1);
+}
+
+/* Typography - Only apply to landing page hero sections, NOT articles/blog */
+/* Use :where() for lower specificity so article styles can override */
+:where(section)
+	> h1:not([class*="text-"]):not(article h1):not(.prose h1):not(.markdown h1) {
+	font-family: var(--font-poppins), system-ui, sans-serif;
+	@apply lg:text-5xl md:text-4xl text-3xl lg:leading-[1.2] text-black dark:text-white font-bold;
+}
+
+:where(section)
+	> h2:not([class*="text-"]):not(article h2):not(.prose h2):not(.markdown h2) {
+	@apply lg:text-4xl md:text-3xl text-2xl text-black dark:text-white font-bold;
+}
+
+:where(section)
+	> h3:not([class*="text-"]):not(article h3):not(.prose h3):not(.markdown h3) {
+	@apply md:text-2xl text-xl text-black dark:text-white font-bold;
+}
+
+:where(section)
+	> h4:not([class*="text-"]):not(article h4):not(.prose h4):not(.markdown h4) {
+	font-family: var(--font-poppins), system-ui, sans-serif;
+	@apply leading-[1.4] md:text-xl text-lg text-black dark:text-white font-bold;
+}
+
+:where(section)
+	> h5:not([class*="text-"]):not(article h5):not(.prose h5):not(.markdown h5) {
+	font-family: var(--font-poppins), system-ui, sans-serif;
+	@apply md:text-lg text-base text-black dark:text-white font-bold;
+}
+
+p:not([class*="text-"]) {
+	@apply text-gray-700 dark:text-gray-300;
+}
+
+li:not([class*="text-"]) {
+	@apply text-gray-700 dark:text-gray-300;
+}
+
+/* Layout Utilities */
+.section {
+	@apply px-5 md:px-14 lg:px-20 xl:px-28 max-w-screen-2xl mx-auto flex items-center justify-center py-12 w-full;
+}
+
+body {
+	margin: 0;
+	@apply overflow-x-hidden;
+	background: hsl(var(--background));
+}
+
+/* Navbar Utility */
+.fade-bottom {
+	-webkit-mask-image: linear-gradient(to bottom, black 70%, transparent);
+	mask-image: linear-gradient(to bottom, black 70%, transparent);
+}
+
+/* Background Gradients */
+.gradient_bg {
+	background: linear-gradient(
+		to bottom right,
+		var(--color-fd-background),
+		var(--color-fd-muted)
+	);
+}
+
+.dark .gradient_bg {
+	background: linear-gradient(to bottom, var(--color-fd-background), #050505);
+}
+
+.gradient_bg_one {
+	background: linear-gradient(
+		to bottom right,
+		var(--color-fd-background),
+		var(--color-fd-secondary)
+	);
+}
+
+.dark .gradient_bg_one {
+	background: linear-gradient(
+		to bottom right,
+		var(--color-fd-background),
+		#171717
+	);
+}
+
+.how_it_works {
+	background: linear-gradient(
+		to bottom,
+		var(--color-fd-background),
+		var(--color-fd-muted)
+	);
+}
+
+.dark .how_it_works {
+	background: linear-gradient(to bottom, var(--color-fd-background), #171717);
+}
+
+/* Animations */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.animate-fade-in {
+	animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes float {
+	0%,
+	100% {
+		transform: translate3d(0, 0, 0);
+	}
+
+	50% {
+		transform: translate3d(0, -10px, 0);
+	}
+}
+
+.animate-float {
+	animation: float 3s ease-in-out infinite;
+}
+
+/* Inverted boxes: black bg + white text in light mode, white bg + black text in dark mode */
+.inverted-box {
+	background-color: #000 !important;
+	color: #fff !important;
+}
+html.dark .inverted-box {
+	background-color: #fff !important;
+	color: #000 !important;
+}
+/* Override global gray text rules for elements inside inverted-box (but not elements with explicit text- classes) */
+.inverted-box p:not([class*="text-"]),
+.inverted-box li:not([class*="text-"]),
+.inverted-box span:not([class*="text-"]),
+.inverted-box div:not([class*="text-"]),
+.inverted-box h1:not([class*="text-"]),
+.inverted-box h2:not([class*="text-"]),
+.inverted-box h3:not([class*="text-"]) {
+	color: inherit !important;
+}
+
+/* Buttons */
+.btn-primary {
+	@apply bg-black text-white dark:bg-white dark:text-black;
+	@apply hover:bg-gray-800 dark:hover:bg-gray-100;
+	@apply transition-all duration-300;
+}
+
+.btn-outline {
+	@apply border-2 border-black dark:border-white;
+	@apply text-black dark:text-white bg-transparent;
+	@apply hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black;
+	@apply transition-all duration-300;
+}
+
+/* Links */
+a:hover {
+	@apply no-underline;
+}
+
+/* CTA button links - preserve their text colors on hover */
+a.cta-btn {
+	@apply text-white dark:text-black;
+}
+a.cta-btn:hover {
+	@apply text-white dark:text-black;
+}
+
+/* Prevent underline on heading anchor links */
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a,
+h1 a:hover,
+h2 a:hover,
+h3 a:hover,
+h4 a:hover,
+h5 a:hover,
+h6 a:hover,
+article h1,
+article h2,
+article h3,
+article h4,
+article h5,
+article h6,
+article h1:hover,
+article h2:hover,
+article h3:hover,
+article h4:hover,
+article h5:hover,
+article h6:hover {
+	text-decoration: none !important;
+}
+
+/* Prose heading sizes */
+.prose h1 {
+	font-size: 1.25rem !important;
+	font-weight: 700 !important;
+}
+
+.prose h2 {
+	font-size: 1.125rem !important;
+	font-weight: 700 !important;
+}
+
+.prose h3 {
+	font-size: 1rem !important;
+	font-weight: 600 !important;
+}
+
+.prose h4 {
+	font-size: 0.875rem !important;
+	font-weight: 600 !important;
+}
+
+.prose h5 {
+	font-size: 0.875rem !important;
+	font-weight: 500 !important;
+}
+
+.prose h6 {
+	font-size: 0.75rem !important;
+	font-weight: 500 !important;
+}
+
+/* Blog Post Styles */
+article {
+	padding-top: 1rem;
+}
+
+/* Blog list styles - override CSS reset */
+article ol {
+	list-style-type: decimal;
+	padding-left: 1.5rem;
+	margin: 1rem 0;
+}
+
+article ul {
+	list-style-type: disc;
+	padding-left: 1.5rem;
+	margin: 1rem 0;
+}
+
+article li {
+	padding-left: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+
+/* Blog heading hierarchy - readable balanced sizes */
+article h1,
+article h2,
+article h3,
+article h4,
+article h5,
+article h6 {
+	text-decoration: none !important;
+}
+
+article h1 {
+	font-size: 1.5rem !important; /* 24px */
+	font-weight: 700 !important;
+	margin-top: 2rem !important;
+	margin-bottom: 1rem !important;
+}
+
+article h2 {
+	font-size: 1.25rem !important; /* 20px */
+	font-weight: 700 !important;
+	margin-top: 1.5rem !important;
+	margin-bottom: 0.75rem !important;
+}
+
+article h3 {
+	font-size: 1.125rem !important; /* 18px */
+	font-weight: 600 !important;
+	margin-top: 1.25rem !important;
+	margin-bottom: 0.5rem !important;
+}
+
+article h4 {
+	font-size: 1rem !important; /* 16px */
+	font-weight: 600 !important;
+	margin-top: 1rem !important;
+	margin-bottom: 0.5rem !important;
+}
+
+article h5 {
+	font-size: 1rem !important; /* 16px */
+	font-weight: 500 !important;
+	margin-top: 0.75rem !important;
+	margin-bottom: 0.25rem !important;
+}
+
+article h6 {
+	font-size: 0.875rem !important; /* 14px */
+	font-weight: 500 !important;
+	margin-top: 0.75rem !important;
+	margin-bottom: 0.25rem !important;
+}
+
+/* Utilities */
+.scrollbar-hide {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+	display: none;
+}
+
+*:focus-visible {
+	outline: none;
+}
+
+/* Hover Effects - Fix for Tailwind v4 dark mode */
+/* Nav link hover */
+.nav-link-hover:hover {
+	color: #000;
+}
+
+html.dark .nav-link-hover:hover {
+	color: #fff;
+}
+
+/* Button primary hover */
+.btn-primary-hover:hover {
+	background-color: rgb(38, 38, 38) !important;
+	/* neutral-800 */
+	color: #fff !important;
+	/* Keep text white in light mode */
+}
+
+html.dark .btn-primary-hover:hover {
+	background-color: rgb(229, 229, 229) !important;
+	/* neutral-200 */
+	color: #000 !important;
+	/* Keep text black in dark mode */
+}
+
+/* Button secondary hover - only text color changes */
+.btn-secondary-hover:hover {
+	color: #000;
+}
+
+html.dark .btn-secondary-hover:hover {
+	color: #fff;
+}
+
+/* Button outline hover */
+.btn-outline-hover:hover {
+	border-color: #000;
+}
+
+html.dark .btn-outline-hover:hover {
+	border-color: #fff;
+}
+
+/* Mobile touch press animation - matches native app LongButtonWidget */
+/* Scale 1.0 → 0.95 on press, 100ms ease-in-out, back on release */
+@media (hover: none) and (pointer: coarse) {
+	button:not([disabled]):active,
+	[data-slot="button"]:active,
+	.btn-primary-hover:active,
+	.btn-secondary-hover:active,
+	.btn-outline-hover:active,
+	a.group:active {
+		transform: scale(0.95) !important;
+		transition: transform 100ms ease-in-out !important;
+	}
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+	* {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+
+	.animate-float,
+	.animate-fade-in {
+		animation: none !important;
+	}
+}
