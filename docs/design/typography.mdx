@@ -1,0 +1,102 @@
+---
+title: "Typography & Spacing"
+description: "Font families, type scale, spacing tokens, and icon usage"
+---
+
+## Poppins - Primary
+
+<div style={{ margin: "1.5rem 0", padding: "2rem", background: "#fafafa", borderRadius: "16px", border: "1px solid #e5e5e5" }}>
+  <div style={{ fontFamily: "Poppins, sans-serif", fontWeight: 400, fontSize: "14px", color: "#737373", marginBottom: "0.25rem" }}>Regular 400</div>
+  <div style={{ fontFamily: "Poppins, sans-serif", fontWeight: 400, fontSize: "18px", marginBottom: "1.25rem" }}>The quick brown fox jumps over the lazy dog</div>
+  <div style={{ fontFamily: "Poppins, sans-serif", fontWeight: 500, fontSize: "14px", color: "#737373", marginBottom: "0.25rem" }}>Medium 500</div>
+  <div style={{ fontFamily: "Poppins, sans-serif", fontWeight: 500, fontSize: "18px", marginBottom: "1.25rem" }}>The quick brown fox jumps over the lazy dog</div>
+  <div style={{ fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: "14px", color: "#737373", marginBottom: "0.25rem" }}>Semibold 600</div>
+  <div style={{ fontFamily: "Poppins, sans-serif", fontWeight: 600, fontSize: "18px", marginBottom: "1.25rem" }}>The quick brown fox jumps over the lazy dog</div>
+  <div style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: "14px", color: "#737373", marginBottom: "0.25rem" }}>Bold 700</div>
+  <div style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, fontSize: "18px" }}>The quick brown fox jumps over the lazy dog</div>
+</div>
+
+## Space Grotesk - Accent
+
+Used for hero accent headlines. Italic with lime gradient.
+
+<div style={{ margin: "1.5rem 0", padding: "2rem", background: "#fafafa", borderRadius: "16px", border: "1px solid #e5e5e5" }}>
+  <div style={{ fontFamily: "Space Grotesk, sans-serif", fontWeight: 600, fontSize: "32px", fontStyle: "italic", background: "linear-gradient(to right, #a3c410, #8ab800, #c2e821)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>21 lines of code.</div>
+</div>
+
+## Type Scale
+
+| Element         | Font          | Weight | Size |
+| --------------- | ------------- | ------ | ---- |
+| Hero headline   | Poppins       | 600    | 48px |
+| Hero accent     | Space Grotesk | 600    | 48px |
+| Section heading | Poppins       | 600    | 30px |
+| Card title      | Poppins       | 600    | 15px |
+| Body            | Poppins       | 400    | 15px |
+| Labels          | Poppins       | 500    | 11px |
+| Code            | System mono   | 400    | 13px |
+
+---
+
+## Spacing
+
+| Token               | Value                           |
+| ------------------- | ------------------------------- |
+| Container max-width | `72rem` / `max-w-6xl`           |
+| Page padding        | `px-6` / `sm:px-8` / `lg:px-12` |
+| Section vertical    | `py-32` (128px)                 |
+| Card padding        | `p-7` (28px)                    |
+
+### Border Radius
+
+| Element            | Radius               |
+| ------------------ | -------------------- |
+| Buttons, Navbar    | `rounded-full`       |
+| Cards, Code window | `rounded-2xl` (16px) |
+| Inputs, Icon boxes | `rounded-xl` (12px)  |
+
+---
+
+## Icons
+
+Heroicons v2 Outline (`react-icons/hi2`). Always outline, never filled.
+
+| Context       | Size    |
+| ------------- | ------- |
+| Feature cards | 28px    |
+| Buttons / nav | 14-16px |
+
+Feature card icons are always lime. Nav/UI icons are gray. Chain icons use official colored SVGs from `/assets/chains/`.
+
+---
+
+## Chains
+
+Official chain icons in `/assets/chains/`:
+
+| Chain     | File            |
+| --------- | --------------- |
+| Bitcoin   | `bitcoin.svg`   |
+| Lightning | `lightning.svg` |
+| Ethereum  | `ethereum.svg`  |
+| Polygon   | `polygon.svg`   |
+| Arbitrum  | `arbitrum.svg`  |
+| Base      | `base.svg`      |
+| Optimism  | `optimism.svg`  |
+| Avalanche | `avalanche.svg` |
+| USDC      | `usdc.svg`      |
+| USDT      | `usdt.svg`      |
+
+---
+
+## Code Syntax
+
+Two-color theme: **lime** (structure) + **Bitcoin orange** (values).
+
+| Token             | Light     | Dark      |
+| ----------------- | --------- | --------- |
+| Keywords          | `#7a8a0e` | `#c2e821` |
+| Functions         | `#7a8a0e` | `#a3c410` |
+| Strings           | `#e88332` | `#f7931a` |
+| Types / Variables | `#c07415` | `#f0a94e` |
+| Comments          | `#9ca3af` | `#6b7280` |

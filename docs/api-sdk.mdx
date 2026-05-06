@@ -1,0 +1,57 @@
+---
+title: API, SDK & Iframe
+description: Integrate Satora Swaps into your application using our TypeScript SDK, REST API, or iframe embed
+icon: "code"
+---
+
+## TypeScript SDK (Recommended)
+
+Our SDK is pure TypeScript - no WASM or native dependencies. It works in browsers, React Native, and Node.js out of the box.
+
+<CardGroup>
+    <Card icon="npm" title="NPM Package" href="https://www.npmjs.com/package/@lendasat/lendaswap-sdk-pure" />
+    <Card icon="github" title="GitHub Repository" href="https://github.com/lendasat/lendaswap-sdk/tree/main/ts-pure-sdk" />
+</CardGroup>
+
+If the TypeScript SDK doesn't work for your use case - whether you're using a different language, need a custom integration, or have specific requirements - please reach out to us directly.
+
+<Card 
+  title="Contact us" 
+  icon="envelope" 
+  href="mailto:support@lendasat.com?subject=Satora%20Swaps%20API%20Integration%20Request&body=Hi%20Satora%20team%2C%0A%0AI%27d%20like%20to%20integrate%20Satora%20Swaps%20but%20the%20TypeScript%20SDK%20doesn%27t%20fit%20my%20use%20case.%0A%0A%23%23%20My%20use%20case%0A%5BDescribe%20what%20you%27re%20building%20and%20how%20you%20plan%20to%20use%20Satora%20Swaps%5D%0A%0A%23%23%20Language%20%2F%20Platform%0A%5Be.g.%20Python%2C%20Go%2C%20Rust%2C%20Swift%2C%20Kotlin%2C%20etc.%5D%0A%0A%23%23%20Expected%20volume%0A%5Be.g.%20number%20of%20swaps%20per%20day%2Fmonth%5D%0A%0AThanks!"
+>
+Tell us about your project and we'll work with you on a solution.
+</Card>
+
+## Iframe
+
+Embed Satora Swaps directly into your application - no SDK integration required. Already used by [Arkade Wallet](https://arkade.money), [Alby Hub](https://albyhub.com), and more.
+
+```html
+<!-- Add your reflink from the Developer Portal to track swaps -->
+<iframe
+  src="https://lendaswap.com?ref=YOUR_REFLINK"
+  width="100%"
+  height="700"
+  frameborder="0"
+  allow="clipboard-write"
+/>
+```
+
+## Developer Portal
+
+Sign up to track your swaps, manage referral codes, and monitor your integration.
+
+<Card title="Developer Portal" icon="gauge" href="https://developer.lendaswap.com/">
+  developer.lendaswap.com
+</Card>
+
+## REST API
+
+<Warning>
+**The REST API is not intended for direct production use.** The API surface may change without notice and lacks guarantees around stability, rate limits, and support. We strongly recommend using the TypeScript SDK instead.
+</Warning>
+
+<Card title="API Reference" icon="book" href="/api-reference/health">
+  Browse the full REST API documentation.
+</Card>

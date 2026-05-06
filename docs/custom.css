@@ -1,0 +1,36 @@
+/*
+ * Force black text on lime CTA button.
+ * Mintlify hardcodes text-white on #topbar-cta-button.
+ */
+
+#topbar-cta-button span {
+  color: #000000 !important;
+}
+
+#topbar-cta-button svg {
+  color: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Smaller navbar logo */
+.nav-logo {
+  height: 18px !important;
+}
+
+/* Dark/light mode image switching for use case cards */
+.dark .img-light {
+  display: none !important;
+}
+.light .img-dark,
+:not(.dark) .img-dark {
+  display: none !important;
+}
+.dark .img-dark {
+  display: block !important;
+}
+
+/* Rounder Mermaid nodes */
+.mermaid .node rect,
+.mermaid .node .label-container {
+  rx: 16 !important;
+  ry: 16 !important;
+}

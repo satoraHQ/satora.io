@@ -1,0 +1,77 @@
+---
+title: Getting Started
+description: Quick start guide for developers integrating Satora Swaps
+icon: "rocket"
+---
+
+## Your First Swap
+
+The fastest way to get started is with a **Lightning to USDC** swap - it takes just a few lines of code.
+
+<video
+width="100%"
+style={{ aspectRatio: "16/9", borderRadius: "12px" }}
+controls
+preload="metadata"
+playsInline
+>
+
+<source src="/assets/videos/yourfirstswap.mp4" type="video/mp4" />
+</video>
+
+<Card title="Lightning → USDC" icon="bolt" href="/create-swaps/btc-to-evm">
+  Follow the step-by-step guide to install the SDK, create a swap, and claim your tokens gaslessly.
+</Card>
+
+---
+
+## Use Cases
+
+Satora Swaps provides the building blocks for any application that needs to move value between Bitcoin and stablecoins.
+
+<CardGroup cols={3}>
+  <Card title="Receive">
+    <img src="/assets/usecases/receive-light.webp" className="img-light" />
+    <img src="/assets/usecases/receive-dark.webp" className="img-dark" />
+    Receive BTC, auto-convert to stablecoins.
+  </Card>
+  <Card title="Send">
+    <img src="/assets/usecases/send-light.webp" className="img-light" />
+    <img src="/assets/usecases/send-dark.webp" className="img-dark" />
+    Send stablecoins, deliver as BTC.
+  </Card>
+  <Card title="Swap">
+    <img src="/assets/usecases/swap-light.webp" className="img-light" />
+    <img src="/assets/usecases/swap-dark.webp" className="img-dark" />
+    BTC ↔ stablecoin swaps, self-custodial and gasless.
+  </Card>
+  <Card title="Lightning">
+    <img src="/assets/usecases/lightning-light.webp" className="img-light" />
+    <img src="/assets/usecases/lightning-dark.webp" className="img-dark" />
+    Lightning payments with one SDK call. No nodes, no channels.
+  </Card>
+  <Card title="Payouts">
+    <img src="/assets/usecases/payouts-light.webp" className="img-light" />
+    <img src="/assets/usecases/payouts-dark.webp" className="img-dark" />
+    Pay out BTC or stablecoins from your company treasury.
+  </Card>
+  <Card title="DeFi">
+    <img src="/assets/usecases/defi-light.webp" className="img-light" />
+    <img src="/assets/usecases/defi-dark.webp" className="img-dark" />
+    Bridge BTC into on-chain DeFi protocols.
+  </Card>
+</CardGroup>
+
+---
+
+## Build with AI
+
+We have generated a [llms-full.txt](/llms-full.txt) file that converts all our documentation into a single markdown document following the [llmstxt.org](https://llmstxt.org/) standard. Feed it to any AI coding agent (Claude, Cursor, Copilot, etc.) and it will have everything it needs to integrate the Satora Swaps SDK into your project.
+
+---
+
+## Next Steps
+
+- [SDK & API Reference](/api-sdk) - Full SDK and REST API documentation
+- [EVM → BTC Swaps](/create-swaps/evm-to-btc) - Swap EVM tokens back to Bitcoin
+- [Supported Tokens](/quotes-rates/supported-tokens) - See all available swap pairs

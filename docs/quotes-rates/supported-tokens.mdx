@@ -1,0 +1,209 @@
+---
+title: Supported Tokens & Pairs
+description: List of supported tokens and trading pairs
+icon: "coins"
+---
+
+## Specifying a Token
+
+A token in the API is **always identified by two fields together**: a `chain` and a `token_id`. Both are required in every quote and swap request.
+
+- **`chain`** — for Bitcoin variants this is a named string (`"Lightning"`, `"Arkade"`, `"Bitcoin"`); for EVM tokens it's the **chain ID as a string** (`"1"` for Ethereum, `"137"` for Polygon, `"42161"` for Arbitrum).
+- **`token_id`** — for Bitcoin variants this is always the literal string `"btc"`; for EVM tokens it's the **ERC-20 contract address**.
+
+The SDK provides convenience constants under `Asset` that bundle both fields:
+
+```ts
+import { Asset } from "@lendasat/lendaswap-sdk-pure";
+
+Asset.BTC_LIGHTNING; // { chain: "Lightning", tokenId: "btc" }
+Asset.BTC_ARKADE; // { chain: "Arkade",    tokenId: "btc" }
+Asset.BTC_ONCHAIN; // { chain: "Bitcoin",   tokenId: "btc" }
+
+Asset.USDC_POLYGON; // { chain: "137",   tokenId: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359" }
+Asset.USDC_ARBITRUM; // { chain: "42161", tokenId: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831" }
+Asset.USDC_ETHEREUM; // { chain: "1",     tokenId: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48" }
+Asset.USDT_POLYGON; // ... (and USDT_ARBITRUM, USDT_ETHEREUM)
+Asset.WBTC_POLYGON; // ... (and WBTC_ETHEREUM)
+Asset.TBTC_ETHEREUM; // ... (and TBTC_ARBITRUM)
+```
+
+Use `Asset` objects directly with `client.createSwap({ source, target, ... })`. For `client.getQuote(...)` pass the four fields separately (see example below).
+
+## Supported Tokens
+
+### Bitcoin
+
+For all three BTC variants `token_id` is always `"btc"`. The `chain` distinguishes the variant.
+
+| Token | chain       | token_id | Description                   |
+| ----- | ----------- | -------- | ----------------------------- |
+| BTC   | `Lightning` | `btc`    | Bitcoin via Lightning Network |
+| BTC   | `Arkade`    | `btc`    | Bitcoin via Arkade (instant)  |
+| BTC   | `Bitcoin`   | `btc`    | Bitcoin on-chain (L1)         |
+
+### EVM Chains (HTLC + CCTP source/destination)
+
+For EVM tokens, `chain` is the chain ID as a string and `token_id` is the ERC-20 contract address.
+
+| Chain    | chain (chain ID) | HTLC Swaps | CCTP Bridge |
+| -------- | ---------------- | ---------- | ----------- |
+| Polygon  | `137`            | Yes        | Yes         |
+| Ethereum | `1`              | Yes        | Yes         |
+| Arbitrum | `42161`          | Yes        | Yes         |
+
+Common token contract addresses on these chains:
+
+| Token | Polygon (`137`)                              | Ethereum (`1`)                               | Arbitrum (`42161`)                           |
+| ----- | -------------------------------------------- | -------------------------------------------- | -------------------------------------------- |
+| USDC  | `0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359` | `0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48` | `0xaf88d065e77c8cC2239327C5EDb3A432268e5831` |
+| USDT  | `0xc2132D05D31c914a87C6611C10748AEb04B58e8F` | `0xdAC17F958D2ee523a2206206994597C13D831ec7` | `0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9` |
+| WBTC  | `0x1BFD67037B42Cf73acF2047067bd4F2C47D9BfD6` | `0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599` | -                                            |
+| tBTC  | -                                            | `0x18084fbA666a33d37592fA2633fD49a74DD93a88` | `0x6c84a8f1c29108F47a79964b5Fe888D4f4D0dE40` |
+
+Any other ERC-20 on these three chains is also supported via DEX aggregation — see [Dynamic EVM Tokens](#dynamic-evm-tokens) below.
+
+## Example: Specifying tokens in a request
+
+Quote (uses the four explicit fields):
+
+```ts
+const quote = await client.getQuote({
+  sourceChain: "Lightning",
+  sourceToken: "btc",
+  targetChain: "137",
+  targetToken: "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359", // USDC on Polygon
+  sourceAmount: 100_000,
+});
+```
+
+Create swap (idiomatic with `Asset`):
+
+```ts
+import { Asset } from "@lendasat/lendaswap-sdk-pure";
+
+const swap = await client.createSwap({
+  source: Asset.BTC_LIGHTNING,
+  target: Asset.USDC_POLYGON,
+  sourceAmount: 100_000,
+  targetAddress: "0x...",
+});
+```
+
+### Bridge-Only Chains
+
+Satora bridges to the target chain via two protocols depending on the target token:
+
+- **USDC** is bridged via [Circle CCTP](https://www.circle.com/cross-chain-transfer-protocol)
+- **USDT** is bridged via [LayerZero USDT0](https://www.usdt0.to/) OFT (Omnichain Fungible Token)
+
+The SDK auto-detects which protocol to use based on the target token address — match against the known USDT0 deployments routes through LayerZero, otherwise CCTP is used.
+
+#### USDC Bridge Chains (via CCTP)
+
+Swap BTC to USDC on any of these chains.
+
+| Chain       | Chain ID |
+| ----------- | -------- |
+| Base        | `8453`   |
+| Optimism    | `10`     |
+| Avalanche   | `43114`  |
+| Linea       | `59144`  |
+| Unichain    | `130`    |
+| Sonic       | `146`    |
+| World Chain | `480`    |
+| Ink         | `57073`  |
+| Sei         | `1329`   |
+| HyperEVM    | `999`    |
+| Monad       | `10143`  |
+
+#### USDT Bridge Chains (via LayerZero USDT0)
+
+Swap BTC to USDT on any of these chains.
+
+| Chain          | Chain ID   |
+| -------------- | ---------- |
+| Optimism       | `10`       |
+| Flare          | `14`       |
+| Rootstock      | `30`       |
+| Hedera         | `295`      |
+| Unichain       | `130`      |
+| Monad          | `143`      |
+| XLayer         | `196`      |
+| Stable         | `988`      |
+| HyperEVM       | `999`      |
+| Conflux eSpace | `1030`     |
+| Sei            | `1329`     |
+| Morph          | `2818`     |
+| Tempo          | `4217`     |
+| MegaETH        | `4326`     |
+| Mantle         | `5000`     |
+| Plasma         | `9745`     |
+| Ink            | `57073`    |
+| Berachain      | `80094`    |
+| Corn           | `21000000` |
+
+### Dynamic EVM Tokens
+
+Satora Swaps supports a changing list of tokens on Polygon, Ethereum, and Arbitrum via DEX aggregation. Any ERC-20 token available on a DEX is usable as a source or target for swaps.
+
+Retrieve all available tokens:
+
+```ts
+const tokens = await client.getTokens();
+
+console.log("=== BTC tokens ===");
+for (const t of tokens.btc_tokens) {
+  console.log(`  ${t.symbol} on ${t.chain} (${t.decimals} decimals)`);
+}
+// ... BTC on Lightning (8 decimals)
+// ... BTC on Arkade (8 decimals)
+// ... BTC on Bitcoin (8 decimals)
+
+console.log("\n=== EVM tokens ===");
+for (const t of tokens.evm_tokens) {
+  console.log(
+    `  ${t.symbol} on chain ${t.chain} - ${t.token_id} (${t.decimals} decimals)`,
+  );
+}
+// ... USDT on chain 137 - 0xc2132d05... (6 decimals)
+// ... USDC on chain 137 - 0x3c499c54... (6 decimals)
+// ... WBTC on chain 137 - 0x1bfd6703... (8 decimals)
+// ... tBTC on chain 1   - 0x18084fba... (18 decimals)
+// ... etc.
+```
+
+---
+
+## Available Swap Directions
+
+### BTC → EVM
+
+| From      | To                            | Gasless Claiming |
+| --------- | ----------------------------- | ---------------- |
+| Lightning | Polygon / Ethereum / Arbitrum | Yes              |
+| Arkade    | Polygon / Ethereum / Arbitrum | Yes              |
+| On-chain  | Polygon / Ethereum / Arbitrum | Yes              |
+| Lightning | Bridge chains (via CCTP)      | Yes              |
+| Arkade    | Bridge chains (via CCTP)      | Yes              |
+| On-chain  | Bridge chains (via CCTP)      | Yes              |
+
+### EVM → BTC
+
+| From                          | To        |
+| ----------------------------- | --------- |
+| Polygon / Ethereum / Arbitrum | Lightning |
+| Polygon / Ethereum / Arbitrum | Arkade    |
+| Polygon / Ethereum / Arbitrum | On-chain  |
+
+### BTC ↔ BTC
+
+| From      | To        |
+| --------- | --------- |
+| Lightning | Arkade    |
+| Arkade    | Lightning |
+| On-chain  | Arkade    |
+
+<Info>
+**Gasless claiming on all EVM chains** - Satora covers gas fees on Polygon, Ethereum, and Arbitrum via EIP-712 signature-based claiming. A small gas fee is deducted from the swap amount depending on network conditions. Alternatively, you can claim manually with your own wallet and pay gas yourself.
+</Info>

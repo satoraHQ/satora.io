@@ -1,0 +1,111 @@
+---
+title: Get Exchange Rate
+description: Retrieve current exchange rates and quotes for swap pairs
+icon: "money-bill-transfer"
+---
+
+## Get Quote
+
+Get a quote for a specific swap. The quote includes the exchange rate, fees, gasless fee, and expected amounts.
+
+First, find the token pair you want to quote:
+
+```ts
+const usdtPolygon = tokens.evm_tokens.find(
+  (t) => t.symbol === "USDT" && t.chain === "137",
+);
+if (!usdtPolygon) throw new Error("USDT on Polygon not found");
+
+const btcLightning = tokens.btc_tokens.find((t) => t.chain === "Lightning");
+if (!btcLightning) throw new Error("BTC on Lightning not found");
+```
+
+Then get a quote for selling BTC for USDT:
+
+```ts
+// Quote: sell 100,000 sats (0.001 BTC) for USDT on Polygon
+const sellBtcQuote = await client.getQuote({
+  sourceChain: btcLightning.chain,
+  sourceToken: btcLightning.token_id,
+  targetChain: usdtPolygon.chain,
+  targetToken: usdtPolygon.token_id,
+  sourceAmount: 100_000, // 100,000 sats
+});
+
+console.log("\n=== Lightning BTC → USDT (Polygon) ===");
+console.log(`  Selling:      100,000 sats (0.001 BTC)`);
+console.log(
+  `  You receive:  ${sellBtcQuote.target_amount} USDT smallest units`,
+);
+console.log(`  Exchange rate: ${sellBtcQuote.exchange_rate}`);
+console.log(`  Network fee:  ${sellBtcQuote.network_fee} sats`);
+console.log(
+  `  Protocol fee: ${sellBtcQuote.protocol_fee} sats (${
+    sellBtcQuote.protocol_fee_rate * 100
+  }%)`,
+);
+console.log(
+  `  Limits:       ${sellBtcQuote.min_amount}-${sellBtcQuote.max_amount} sats`,
+);
+```
+
+Or get a quote for buying BTC with USDT:
+
+```ts
+// Quote: sell 50 USDT (50,000,000 smallest units) for Lightning BTC
+const buyBtcQuote = await client.getQuote({
+  sourceChain: usdtPolygon.chain,
+  sourceToken: usdtPolygon.token_id,
+  targetChain: btcLightning.chain,
+  targetToken: btcLightning.token_id,
+  sourceAmount: 50_000_000, // 50 USDT (6 decimals)
+});
+
+console.log("\n=== USDT (Polygon) → Lightning BTC ===");
+console.log(`  Selling:      50 USDT`);
+console.log(`  You receive:  ${buyBtcQuote.target_amount} sats`);
+console.log(`  Exchange rate: ${buyBtcQuote.exchange_rate}`);
+console.log(`  Network fee:  ${buyBtcQuote.network_fee} sats`);
+console.log(
+  `  Protocol fee: ${buyBtcQuote.protocol_fee} sats (${
+    buyBtcQuote.protocol_fee_rate * 100
+  }%)`,
+);
+console.log(
+  `  Limits:       ${buyBtcQuote.min_amount}-${buyBtcQuote.max_amount} sats`,
+);
+```
+
+**Parameters:**
+
+| Parameter      | Type   | Description                                                                           |
+| -------------- | ------ | ------------------------------------------------------------------------------------- |
+| `sourceChain`  | string | Source blockchain (`"Lightning"`, `"Arkade"`, `"Bitcoin"`, `"137"`, `"1"`, `"42161"`) |
+| `sourceToken`  | string | Source token ID or contract address (`"btc"` for BTC, or ERC-20 address)              |
+| `targetChain`  | string | Target blockchain (same values as `sourceChain`)                                      |
+| `targetToken`  | string | Target token ID or contract address                                                   |
+| `sourceAmount` | number | Amount in smallest unit (mutually exclusive with `targetAmount`)                      |
+| `targetAmount` | number | Amount in smallest unit (mutually exclusive with `sourceAmount`)                      |
+
+<Info>
+Specify either `sourceAmount` OR `targetAmount`, not both. Use `targetAmount` to receive an exact token amount, or `sourceAmount` to send an exact amount.
+</Info>
+
+---
+
+## Quote Response
+
+| Field                 | Type           | Description                                                                                                                                                               |
+| --------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `exchange_rate`       | string         | BTC-denominated exchange rate: how much of the EVM token you get/pay per 1 BTC. String to preserve precision.                                                             |
+| `network_fee`         | number         | Network fee estimate in satoshis — covers server-paid gas for HTLC create/claim plus BTC mining fee when applicable.                                                      |
+| `gasless_network_fee` | number         | Gasless network fee in satoshis — additional gas the server pays to execute the DEX swap on behalf of the user (`redeemAndExecute` via the coordinator).                  |
+| `protocol_fee`        | number         | Protocol fee in satoshis.                                                                                                                                                 |
+| `protocol_fee_rate`   | number         | Protocol fee rate as decimal (e.g., `0.0025` = 0.25%).                                                                                                                    |
+| `min_amount`          | number         | Minimum BTC value of the swap in satoshis.                                                                                                                                |
+| `max_amount`          | number         | Maximum BTC value of the swap in satoshis.                                                                                                                                |
+| `source_amount`       | string         | Pre-calculated source amount in the smallest unit of the source token (pre-fee). String for BigInt safety.                                                                |
+| `target_amount`       | string         | Pre-calculated target amount in the smallest unit of the target token (pre-fee). String for BigInt safety.                                                                |
+| `net_source_amount`   | string         | Net source amount the user actually sends, including all fees. Equals `source_amount` when `sourceAmount` was provided; otherwise `source_amount + fees_in_source_units`. |
+| `net_target_amount`   | string         | Net target amount the user actually receives, after all fees. Equals `target_amount` when `targetAmount` was provided; otherwise `target_amount - fees_in_target_units`.  |
+| `bridge_fee`          | number \| null | CCTP bridge forwarding fee in USDC smallest units (6 decimals). Only present when `bridge_target_chain` was specified in the quote request.                               |

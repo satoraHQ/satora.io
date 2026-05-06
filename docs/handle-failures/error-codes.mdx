@@ -1,0 +1,137 @@
+---
+title: Error Codes
+description: Complete reference of all API and SDK error codes with solutions.
+icon: "triangle-exclamation"
+---
+
+## Error Handling Overview
+
+Basic error handling pattern:
+
+```ts
+try {
+  const result = await client.createSwap({/* ... */});
+} catch (error) {
+  if (error instanceof Error) {
+    console.error("Swap failed:", error.message);
+  }
+}
+```
+
+---
+
+## API Error Response Format
+
+API errors return a JSON object with a single `error` field containing a human-readable message:
+
+```ts
+// API error response structure
+interface ErrorResponse {
+  error: string; // Human-readable error message
+}
+
+// Example error responses
+{ "error": "Min amount is 0.001 BTC" }
+{ "error": "Sats to receive must be positive" }
+{ "error": "Swap not found" }
+{ "error": "hash_lock must be valid hexadecimal: ..." }
+```
+
+The `error` field contains a descriptive string. Parse the message text to determine the error type.
+
+---
+
+## HTTP Status Codes
+
+The API uses the following HTTP status codes:
+
+| Code | Meaning             | Description                                            |
+| ---- | ------------------- | ------------------------------------------------------ |
+| 200  | OK                  | Request successful (also used for swap creation)       |
+| 400  | Bad Request         | Invalid parameters or business logic validation failed |
+| 500  | Internal Error      | Unexpected server error                                |
+| 503  | Service Unavailable | Service temporarily down (e.g. MTP not yet available)  |
+
+---
+
+## Swap Creation Errors (400)
+
+These errors are returned as `400 Bad Request` when creating a swap:
+
+| Error Message (contains)                                      | Description                        | Solution                         |
+| ------------------------------------------------------------- | ---------------------------------- | -------------------------------- |
+| `"must be positive"` or `"must be > 0"`                       | Amount is zero or negative         | Use a positive amount            |
+| `"Min amount is ..."`                                         | Below minimum swap amount          | Increase swap amount             |
+| `"Max amount is ..."`                                         | Exceeds maximum swap amount        | Reduce swap amount               |
+| `"address is required"`                                       | Missing target or user address     | Provide the required address     |
+| `"hash_lock must be valid hexadecimal"`                       | Invalid hash lock format           | Check hex encoding               |
+| `"hash_lock must be 20 bytes"` / `"invalid hash lock length"` | Hash lock wrong size               | Use correct hash lock size       |
+| `"Unsupported chain"`                                         | Chain ID not supported             | Use a supported EVM chain        |
+| `"not a supported token"`                                     | Token not available for this chain | Check `/tokens` endpoint         |
+| `"Provide exactly one of source_amount or target_amount"`     | Both or neither amount given       | Provide exactly one amount field |
+| `"Invalid Lightning invoice"`                                 | Bolt11 invoice cannot be parsed    | Check invoice format             |
+| `"Invoices without amounts are not supported"`                | Lightning invoice missing amount   | Use an invoice with amount       |
+
+---
+
+## Swap Lookup Errors (400)
+
+| Error Message (contains)   | Description                     | Solution        |
+| -------------------------- | ------------------------------- | --------------- |
+| `"Swap not found"`         | Swap ID does not exist          | Check swap ID   |
+| `"Swap details not found"` | Swap exists but details missing | Contact support |
+
+---
+
+## VTXO Swap Errors (400)
+
+| Error Message (contains)                           | Description                           | Solution                     |
+| -------------------------------------------------- | ------------------------------------- | ---------------------------- |
+| `"At least one VTXO is required"`                  | Empty VTXO list                       | Provide at least one VTXO    |
+| `"Server cannot fund this swap"`                   | Server lacks sufficient VTXOs         | Retry later or reduce amount |
+| `"VTXOs total value ... must be greater than fee"` | VTXOs too small to cover fees         | Add more VTXOs               |
+| `"not fresher than client's VTXOs"`                | Swap would not improve VTXO freshness | No refresh needed            |
+
+---
+
+## SDK-Specific Errors
+
+The SDK throws standard JavaScript `Error` objects. Match on the `message` property.
+
+### Initialization Errors
+
+| Error Message                    | Description            | Solution                              |
+| -------------------------------- | ---------------------- | ------------------------------------- |
+| `"Invalid mnemonic phrase"`      | Seed phrase is invalid | Check 12, 15, 18, 21, or 24 words     |
+| `"No signer storage configured"` | Storage not set up     | Pass storage factory to ClientBuilder |
+
+### Swap Operation Errors
+
+| Error Message (contains)                  | Description                            | Solution                                    |
+| ----------------------------------------- | -------------------------------------- | ------------------------------------------- |
+| `"Swap not found in local storage"`       | Swap not in local storage              | Use `recoverSwaps()` to restore from server |
+| `"Swap ... not found in local storage"`   | Specific swap missing                  | Recover or re-create swap                   |
+| `"does not have an Arkade VHTLC address"` | Swap type mismatch for operation       | Check swap direction                        |
+| `"Unsupported direction"`                 | Operation not valid for this swap type | Use correct method for this swap direction  |
+
+### API Call Errors
+
+| Error Message (contains)    | Description             | Solution                 |
+| --------------------------- | ----------------------- | ------------------------ |
+| `"Health check failed"`     | Server unreachable      | Check connection and URL |
+| `"Failed to get quote"`     | Quote request failed    | Check parameters         |
+| `"Failed to get swap"`      | Swap lookup failed      | Verify swap ID           |
+| `"Failed to recover swaps"` | Recovery request failed | Check connection         |
+
+---
+
+## Common Solutions
+
+| Error                               | Quick Fix                                    |
+| ----------------------------------- | -------------------------------------------- |
+| `"Min amount is ..."`               | Increase swap amount above the minimum       |
+| `"Invalid mnemonic phrase"`         | Check spelling, use 12 or 24 words           |
+| `"Swap not found"`                  | Use `recoverSwaps()` for xpub-based recovery |
+| `"Swap not found in local storage"` | Call `recoverSwaps()` to restore swap data   |
+| `"Server cannot fund this swap"`    | Wait and retry later                         |
+| `"Health check failed"`             | Check internet connection and server URL     |

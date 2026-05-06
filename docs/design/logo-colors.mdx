@@ -1,0 +1,148 @@
+---
+title: "Logo, Motto & Colors"
+description: "Satora logo usage, brand motto, and color palette"
+---
+
+## Motto
+
+> **Make Bitcoin Move.**
+
+This is the Satora tagline. Use it in page titles, social media, and marketing materials.
+
+---
+
+## Logo
+
+### Wordmark
+
+The Satora logo is a pure text wordmark: **satora** followed by a small lime-green dot. No icon is used. The dot scales proportionally with the font size (0.3em).
+
+<div style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap", margin: "1.5rem 0" }}>
+  <div style={{ padding: "1.5rem 2rem", background: "#fff", borderRadius: "16px", border: "1px solid #e5e5e5" }}>
+    <img src="/assets/logo/satora_logo_lightmode.svg" alt="Satora logo (light mode)" height="32" />
+  </div>
+  <div style={{ padding: "1.5rem 2rem", background: "#0a0a0a", borderRadius: "16px", border: "1px solid #222" }}>
+    <img src="/assets/logo/satora_logo_darkmode.svg" alt="Satora logo (dark mode)" height="32" />
+  </div>
+</div>
+
+### Logo Variants
+
+| Variant               | Background    | Usage                  |
+| --------------------- | ------------- | ---------------------- |
+| Black text + lime dot | White / light | Navbar, headers, press |
+| White text + lime dot | Black / dark  | Navbar, headers, press |
+
+### The Green Dot
+
+The green dot is the core element of the Satora brand identity. Used on its own, it serves as the **profile picture**, **favicon**, and **app icon** across all platforms. Whenever a square or circular brand mark is needed, use the dot alone.
+
+<div style={{ display: "flex", gap: "2rem", alignItems: "center", flexWrap: "wrap", margin: "1.5rem 0" }}>
+  <div style={{ padding: "1.5rem 2rem", background: "#fff", borderRadius: "16px", border: "1px solid #e5e5e5", display: "flex", alignItems: "center", gap: "1rem" }}>
+    <img src="/assets/logo/satora_dot_lightmode.svg" alt="Satora dot (light mode)" width="48" height="48" />
+    <span style={{ fontSize: "13px", color: "#737373" }}>Light mode dot</span>
+  </div>
+  <div style={{ padding: "1.5rem 2rem", background: "#0a0a0a", borderRadius: "16px", border: "1px solid #222", display: "flex", alignItems: "center", gap: "1rem" }}>
+    <img src="/assets/logo/satora_dot_darkmode.svg" alt="Satora dot (dark mode)" width="48" height="48" />
+    <span style={{ fontSize: "13px", color: "#999" }}>Dark mode dot</span>
+  </div>
+</div>
+
+| Asset           | Usage                                                       |
+| --------------- | ----------------------------------------------------------- |
+| Green dot alone | Profile pictures, favicons, app icons, social media avatars |
+| Full wordmark   | Website headers, documentation, press materials             |
+
+<Warning>
+  **Never use the lime-green wordmark on a white or light background.** The lime-green variant (`#c2e821`) is only permitted on black or dark backgrounds. On white or light backgrounds, always use the pure black version.
+</Warning>
+
+### Logo Usage in Code
+
+```tsx
+/* The SatoraLogo component - use this everywhere */
+<span className="font-bold text-black dark:text-white select-none">
+  satora
+  <span
+    className="inline-block rounded-full bg-lime-400 align-baseline"
+    style={{ width: "0.3em", height: "0.3em", marginLeft: "0.05em" }}
+  />
+</span>;
+```
+
+The dot is sized at **0.3em** relative to the font, so it scales automatically at any size. It sits on the **baseline** of the text.
+
+---
+
+## Colors
+
+### Primary
+
+<div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", margin: "1rem 0" }}>
+  <div style={{ width: "120px" }}>
+    <div style={{ height: "80px", background: "#a3c410", borderRadius: "12px", marginBottom: "0.5rem" }} />
+    <div style={{ fontSize: "13px", fontWeight: 600 }}>Lime</div>
+    <div style={{ fontSize: "12px", color: "#737373" }}>#a3c410</div>
+  </div>
+  <div style={{ width: "120px" }}>
+    <div style={{ height: "80px", background: "#c2e821", borderRadius: "12px", marginBottom: "0.5rem" }} />
+    <div style={{ fontSize: "13px", fontWeight: 600 }}>Lime Light</div>
+    <div style={{ fontSize: "12px", color: "#737373" }}>#c2e821</div>
+  </div>
+  <div style={{ width: "120px" }}>
+    <div style={{ height: "80px", background: "#000000", borderRadius: "12px", marginBottom: "0.5rem" }} />
+    <div style={{ fontSize: "13px", fontWeight: 600 }}>Black</div>
+    <div style={{ fontSize: "12px", color: "#737373" }}>#000000</div>
+  </div>
+  <div style={{ width: "120px" }}>
+    <div style={{ height: "80px", background: "#FFFFFF", borderRadius: "12px", border: "1px solid #e5e5e5", marginBottom: "0.5rem" }} />
+    <div style={{ fontSize: "13px", fontWeight: 600 }}>White</div>
+    <div style={{ fontSize: "12px", color: "#737373" }}>#FFFFFF</div>
+  </div>
+  <div style={{ width: "120px" }}>
+    <div style={{ height: "80px", background: "#737373", borderRadius: "12px", marginBottom: "0.5rem" }} />
+    <div style={{ fontSize: "13px", fontWeight: 600 }}>Gray</div>
+    <div style={{ fontSize: "12px", color: "#737373" }}>#737373</div>
+  </div>
+</div>
+
+### Accent
+
+<div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", margin: "1rem 0" }}>
+  <div style={{ width: "120px" }}>
+    <div style={{ height: "80px", background: "#f7931a", borderRadius: "12px", marginBottom: "0.5rem" }} />
+    <div style={{ fontSize: "13px", fontWeight: 600 }}>Bitcoin Orange</div>
+    <div style={{ fontSize: "12px", color: "#737373" }}>#f7931a</div>
+  </div>
+  <div style={{ width: "120px" }}>
+    <div style={{ height: "80px", background: "#0A0908", borderRadius: "12px", border: "1px solid #333", marginBottom: "0.5rem" }} />
+    <div style={{ fontSize: "13px", fontWeight: 600 }}>Dark BG</div>
+    <div style={{ fontSize: "12px", color: "#737373" }}>#0A0908</div>
+  </div>
+</div>
+
+### Semantic Colors
+
+<div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", margin: "1rem 0" }}>
+  <div style={{ width: "120px" }}>
+    <div style={{ height: "80px", background: "#c2e821", borderRadius: "12px", marginBottom: "0.5rem" }} />
+    <div style={{ fontSize: "13px", fontWeight: 600 }}>Success</div>
+    <div style={{ fontSize: "12px", color: "#737373" }}>Lime Light #c2e821</div>
+  </div>
+  <div style={{ width: "120px" }}>
+    <div style={{ height: "80px", background: "#f7931a", borderRadius: "12px", marginBottom: "0.5rem" }} />
+    <div style={{ fontSize: "13px", fontWeight: 600 }}>Warning</div>
+    <div style={{ fontSize: "12px", color: "#737373" }}>Bitcoin Orange #f7931a</div>
+  </div>
+  <div style={{ width: "120px" }}>
+    <div style={{ height: "80px", background: "#ef4444", borderRadius: "12px", marginBottom: "0.5rem" }} />
+    <div style={{ fontSize: "13px", fontWeight: 600 }}>Error</div>
+    <div style={{ fontSize: "12px", color: "#737373" }}>#ef4444</div>
+  </div>
+</div>
+
+| State   | Color     | Tailwind          | Usage                                                       |
+| ------- | --------- | ----------------- | ----------------------------------------------------------- |
+| Success | `#c2e821` | `text-lime-light` | Confirmation messages, "Copied!" feedback, completed states |
+| Warning | `#f7931a` | `text-[#f7931a]`  | Caution notices, pending states, important notes            |
+| Error   | `#ef4444` | `text-red-500`    | Error messages, failed states, destructive actions          |

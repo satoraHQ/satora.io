@@ -1,0 +1,21 @@
+---
+title: Troubleshooting
+description: Common issues and how to resolve them
+icon: "screwdriver-wrench"
+---
+
+<AccordionGroup>
+
+<Accordion title="My swap shows 'expired' - what happened?">
+The swap wasn't completed within the timelock period. This usually means the Lightning invoice wasn't paid in time, or the EVM funding transaction wasn't submitted. Your funds are safe - use the refund flow to reclaim them.
+</Accordion>
+
+<Accordion title="I lost my device - can I recover my swaps?">
+Yes, if you have your mnemonic seed phrase. Use `client.recoverSwaps()` to restore all swap data from the server. See [Recover Swaps from Seed](/handle-failures/recover-swaps-from-seed).
+</Accordion>
+
+<Accordion title="The SDK throws 'Swap not found in local storage'">
+This means the swap exists on the server but not in your local storage (e.g., after clearing browser data). Call `client.recoverSwaps()` to re-sync. See [Error Codes](/handle-failures/error-codes) for all error types.
+</Accordion>
+
+</AccordionGroup>

@@ -1,0 +1,131 @@
+---
+title: "Buttons"
+description: "Button system - variants, states, and sizing"
+---
+
+## Ground Rules
+
+- **Shape:** All buttons use `rounded-full` (pill-shaped), no exceptions
+- **Font:** Poppins, `font-semibold` (600), sentence case
+- **Transition:** `transition-all duration-150 ease-out`
+
+### Sizes
+
+| Size | Font   | Height | Padding-X | Tailwind              |
+| ---- | ------ | ------ | --------- | --------------------- |
+| `sm` | `12px` | `36px` | `16px`    | `h-9 px-4 text-xs`    |
+| `md` | `14px` | `44px` | `20px`    | `h-11 px-5 text-sm`   |
+| `lg` | `16px` | `48px` | `24px`    | `h-12 px-6 text-base` |
+
+Height is fixed via `h-*`, no vertical padding. Icons are `font x 1.15`, gap is `font x 0.5`.
+
+---
+
+## States
+
+### Hover
+
+<video width="440" style={{ display: "block" }} autoPlay loop muted playsInline>
+
+<source src="/assets/videos/button_animate.mp4" type="video/mp4" />
+</video>
+
+| Variant     | Hover effect                                            |
+| ----------- | ------------------------------------------------------- |
+| **Lime**    | `hover:brightness-[0.93]` / `dark:hover:brightness-110` |
+| **Glass**   | `hover:bg-white/80` / `dark:hover:bg-white/[0.1]`       |
+| **Outline** | `hover:bg-gray-50` / `dark:hover:bg-white/5`            |
+| **Ghost**   | `hover:bg-gray-100` / `dark:hover:bg-white/5`           |
+
+### Pressed
+
+`active:scale-95` - the button shrinks inward on click (Phantom-style tactile press).
+
+<video width="440" style={{ display: "block" }} autoPlay loop muted playsInline>
+
+<source src="/assets/videos/button_action.mp4" type="video/mp4" />
+</video>
+
+<Warning>
+  The press animation (`scale-95`) is a **core brand interaction**. Never remove it from any button.
+</Warning>
+
+### Focus
+
+`2px` lime ring on `:focus-visible` (keyboard only, never on mouse click):
+
+```
+focus-visible:ring-2 focus-visible:ring-lime-light
+focus-visible:ring-offset-2 focus-visible:ring-offset-white
+dark:focus-visible:ring-offset-black
+```
+
+### Disabled
+
+```
+opacity-50 cursor-not-allowed pointer-events-none active:scale-100
+```
+
+---
+
+## Icon Buttons
+
+### Icon Right
+
+Used for forward actions, external links, CTAs.
+
+<video width="440" style={{ display: "block" }} autoPlay loop muted playsInline>
+
+<source src="/assets/videos/button_launch_icon.mp4" type="video/mp4" />
+</video>
+
+```jsx
+<Button variant="lime" icon={<ArrowUpRight />} iconPosition="right">
+  Get Started
+</Button>;
+```
+
+---
+
+## Lime Usage Rules
+
+<Warning>
+  **Button backgrounds always use Lime Light (`#c2e821`)** - the same color in both light and dark mode.
+</Warning>
+
+| Element            | Light Mode         | Dark Mode           |
+| ------------------ | ------------------ | ------------------- |
+| Button backgrounds | `#c2e821`          | `#c2e821` (same)    |
+| Text / icons       | `#a3c410` (darker) | `#c2e821` (lighter) |
+| Hover borders      | `#c2e821` + ring   | `#c2e821` + ring    |
+
+---
+
+## Tailwind Classes
+
+<Tabs>
+  <Tab title="Lime">
+    ```
+    bg-lime-light text-black
+    hover:brightness-[0.93] dark:hover:brightness-110
+    ```
+  </Tab>
+  <Tab title="Glass">
+    ```
+    bg-white/60 dark:bg-white/[0.06] backdrop-blur-lg
+    border border-gray-200/60 dark:border-white/[0.08]
+    hover:bg-white/80 dark:hover:bg-white/[0.1]
+    ```
+  </Tab>
+  <Tab title="Outline">
+    ```
+    bg-transparent border border-gray-200 dark:border-white/10
+    hover:bg-gray-50 dark:hover:bg-white/5
+    ```
+  </Tab>
+  <Tab title="Ghost">
+    ```
+    bg-transparent hover:bg-gray-100 dark:hover:bg-white/5
+    ```
+  </Tab>
+</Tabs>

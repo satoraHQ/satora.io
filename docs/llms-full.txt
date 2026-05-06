@@ -1,0 +1,1532 @@
+# LendaSwap Documentation
+
+> LendaSwap enables instant, trustless swaps between Bitcoin (via Lightning, Arkade, or on-chain) and EVM tokens on Polygon, Ethereum, and Arbitrum.
+
+- NPM: https://www.npmjs.com/package/@lendasat/lendaswap-sdk-pure
+- GitHub: https://github.com/lendasat/lendaswap-sdk/tree/main/ts-pure-sdk
+- Docs: https://docs.satora.io
+
+---
+
+## Overview
+
+LendaSwap is designed for developers and power users who need a seamless, non-custodial bridge between Bitcoin and stablecoins.
+
+- **Non-Custodial**: You retain control through atomic swaps (HTLCs).
+- **Fast**: Swaps complete in minutes via Lightning/Arkade/On-chain.
+- **Gasless**: LendaSwap covers gas fees on all EVM chains (Polygon, Ethereum, Arbitrum) for token claims. A small gas fee is deducted from the swap amount.
+- **Multi-Token**: Swap to supported ERC-20 tokens via Uniswap V3 DEX routing.
+- **Developer First**: Clean REST API and idiomatic TypeScript SDK.
+
+---
+
+## API & SDK
+
+**The REST API is not intended for direct production use.** The API surface may change without notice and lacks guarantees around stability, rate limits, and support.
+
+We strongly recommend using the **TypeScript SDK** for all integrations. It handles wallet management, state tracking, error recovery, and edge cases that are difficult to get right with raw API calls.
+
+The SDK is pure TypeScript - no WASM or native dependencies. It works in browsers, React Native, and Node.js out of the box.
+
+If the TypeScript SDK doesn't work for your use case, contact support@lendasat.com.
+
+---
+
+## Setup & Installation
+
+### Installation
+
+```bash
+npm install @lendasat/lendaswap-sdk-pure
+# or
+pnpm add @lendasat/lendaswap-sdk-pure
+```
+
+The SDK is pure TypeScript - no WASM, no native dependencies. It works in browsers, React Native, and Node.js without any bundler configuration.
+
+**React Native:** The examples below use browser storage (`IdbWalletStorage`). For React Native, replace with MMKV-based storage adapters - see the React Native Setup section below.
+
+### Initialize Client
+
+```ts
+import {
+  Client,
+  IdbSwapStorage,
+  IdbWalletStorage,
+} from "@lendasat/lendaswap-sdk-pure";
+
+const client = await Client.builder()
+  .withSignerStorage(new IdbWalletStorage())
+  .withSwapStorage(new IdbSwapStorage())
+  .build();
+```
+
+**Authentication:** The API does not require authentication. All endpoints are publicly accessible.
+
+### Get Version
+
+Verify the API is running before making swap requests.
+
+```ts
+const version = await client.getVersion();
+console.log(`${JSON.stringify(version)}`);
+```
+
+### Best Practices
+
+1. **Initialize Once** - Create the client once using the builder, then reuse it for all operations
+2. **Check Version First** - Use `getVersion()` to verify API connectivity before critical operations
+3. **Handle Errors** - Wrap SDK calls in try/catch for proper error handling
+4. **Use SDK** - The TypeScript SDK handles complexity like wallet management, state tracking, and storage automatically
+
+---
+
+## Production UX Requirements (Mandatory)
+
+These four patterns are **not optional** for any production integration. An app that ships without them will lose user funds on reload, navigation, or browser close. Implement all four before launch.
+
+### 1. Pair Limits Preflight — call `getSwapPairs()` on app init
+
+`getQuote()` is per-amount and fails for amounts outside the per-pair `min_sats`/`max_sats`. Don't make the user discover that by typing an amount and getting a generic error. Fetch the full pair list **once on app mount**, cache it, and use it to gate the UI before the user even reaches the swap form.
+
+```ts
+// On app mount — call once, cache for the session.
+const { pairs } = await client.getSwapPairs();
+// pairs[i] = { source, target, min_sats, max_sats, fee_percentage }
+
+// Before offering a flow (e.g. LN → USDC on Polygon):
+const pair = pairs.find(p => p.source === "Lightning" && p.target === "137");
+if (!pair || userBalanceSats < pair.min_sats) {
+  // Disable the flow OR show "Minimum X sats required" up front.
+  // Do NOT let the user type an amount and then fail at getQuote().
+}
+```
+
+The same data is exposed at `GET /swap-pairs` (REST). Re-validate per-amount limits against `quote.min_amount` / `quote.max_amount` at quote time — these can be tighter than pair limits.
+
+### 2. Swap ID = mandatory UI element
+
+The swap ID returned by `createSwap()` is the **only recovery key** for an interrupted flow. If the user loses it, you cannot trigger refunds or query state. Surface it immediately and persist it.
+
+```ts
+const { response } = await client.createSwap({ /* ... */ });
+
+// REQUIRED: display the swap ID in the UI as soon as the swap is created.
+// - Make it copyable (so users can share with support).
+// - Log it for your own observability.
+// - Persist it in your app's swap history (see #3 below).
+console.log("Swap ID (save this!):", response.id);
+```
+
+For **EVM→BTC** especially: once `fundSwap()` is called, the user's EVM tokens are locked. Losing the swap ID at that point means losing the ability to trigger a collaborative refund.
+
+### 3. Swap history view backed by `listAllSwaps()`
+
+Build a "Swaps" / "Activity" view backed by `client.listAllSwaps()`. Each row must show: swap ID (copyable), direction, amount, status, and per-row actions (inspect, claim, refund). This is how users recover from any interrupted flow — they may only discover the failure after a reload.
+
+```ts
+const all = await client.listAllSwaps();
+// Render rows with per-row actions:
+//   - Copy swap ID
+//   - Inspect (calls getSwap(swapId))
+//   - Claim       (if status === "serverfunded" for BTC→EVM)
+//   - Refund      (collabRefundEvmSwap or refundSwap, depending on direction & locktime)
+```
+
+**Never rely on the user holding a reference to an in-flight swap.** If they close the modal or reload mid-swap, they must be able to find it again from the history view.
+
+### 4. Background polling that survives navigation and reload
+
+Polling **must not** be tied to the send-modal's lifecycle. If it lives inside the modal component, closing the modal kills the poller — and an EVM→BTC swap whose poller died can no longer auto-claim or surface a refund CTA.
+
+Mount polling in a **store, provider, or service** that outlives any individual view. On every app mount, enumerate stored swaps and resume polling for the non-terminal ones:
+
+```ts
+// On app mount, in your global store/provider — NOT in a component.
+const stored = await client.listAllSwaps();
+const NON_TERMINAL = new Set([
+  "pending",
+  "clientfundingseen",
+  "clientfunded",
+  "serverfunded",
+]);
+
+for (const s of stored.filter(x => NON_TERMINAL.has(x.response.status))) {
+  resumePoll(s.swapId); // your background poller
+}
+
+// Also fire-and-forget recoverSwaps() to repopulate storage from the server
+// for any swap the local storage lost (e.g. cleared browser data):
+await client.recoverSwaps();
+```
+
+When a polled swap reaches `serverfunded` (BTC→EVM):
+- **Gasless flows:** auto-fire `claimViaGasless()` from the background poller.
+- **Manual flows:** surface a prominent "Claim" CTA in the history view.
+
+### Why these are non-negotiable
+
+| Pattern | What breaks without it |
+| --- | --- |
+| Pair-limits preflight | Users hit confusing `getQuote` errors instead of a clear "Minimum X sats" message |
+| Swap ID in UI | No way to reach support, no way to trigger refund after a reload |
+| `listAllSwaps()` history view | Interrupted swaps become invisible to the user |
+| Background polling | EVM tokens locked by `fundSwap()` cannot be recovered if the modal closes |
+
+---
+
+## Wallet & Mnemonic
+
+### Self-Custody Model
+
+Your mnemonic seed phrase is the master key to all your swap operations. LendaSwap never has access to your private keys - all cryptographic operations happen locally.
+
+Key principles:
+
+- **Your keys, your coins** - Private keys never leave your device
+- **Deterministic derivation** - All swap parameters derived from your seed
+- **Recoverable** - Restore pending swaps anytime with your mnemonic
+- **Automatic storage** - The SDK stores your mnemonic securely via the configured storage provider
+
+### Generate New Mnemonic
+
+Generate a new 12-word BIP39 mnemonic using the `Signer` class:
+
+```ts
+import { Client, InMemoryWalletStorage } from "@lendasat/lendaswap-sdk-pure";
+
+// The SDK generates a mnemonic automatically when none is provided
+const client = await Client.builder()
+  .withSignerStorage(new InMemoryWalletStorage())
+  .build();
+```
+
+### Import Existing Mnemonic
+
+To restore from an existing mnemonic, pass it to the client builder:
+
+```ts
+import {
+  Client,
+  IdbSwapStorage,
+  IdbWalletStorage,
+} from "@lendasat/lendaswap-sdk-pure";
+
+const client = await Client.builder()
+  .withSignerStorage(new IdbWalletStorage())
+  .withSwapStorage(new IdbSwapStorage())
+  .withMnemonic("your twelve word mnemonic phrase goes here ...")
+  .build();
+```
+
+### Get Xpub
+
+Retrieve the user ID xpub from the initialized client. Note: This is an identifier, not a wallet.
+
+```ts
+const xpub = await client.getXpub();
+console.log("Xpub:", xpub);
+```
+
+### Key Derivation
+
+The SDK uses BIP32/BIP39 standards for deterministic key derivation. Each swap gets unique cryptographic parameters derived from your mnemonic:
+
+- **Preimage** - Random secret for HTLC
+- **Preimage Hash** - SHA256 hash used as hash lock
+- **Own Public Key** - For VHTLC scripts
+- **User ID** - Derived identifier for swap recovery
+
+All derivation happens locally - your mnemonic never leaves your device.
+
+**Critical:** Your mnemonic is the only way to recover pending swaps. If you lose it, you cannot recover funds locked in HTLCs.
+
+---
+
+## React Native Setup
+
+The LendaSwap SDK is pure TypeScript with no WASM or native dependencies. It works in React Native out of the box - you just need to provide storage adapters since IndexedDB is not available.
+
+### Installation
+
+```bash
+npm install @lendasat/lendaswap-sdk-pure react-native-mmkv
+```
+
+### Storage Adapters
+
+The SDK requires two storage interfaces: `WalletStorage` (for your mnemonic and key index) and `SwapStorage` (for swap state). On the web, the SDK ships `IdbWalletStorage` and `IdbSwapStorage` backed by IndexedDB. In React Native, you need to implement these interfaces using a native storage solution.
+
+Below is a complete implementation using react-native-mmkv, a fast key-value storage library for React Native.
+
+#### Wallet Storage
+
+```ts
+import type { WalletStorage } from "@lendasat/lendaswap-sdk-pure";
+import { MMKV } from "react-native-mmkv";
+
+const mmkv = new MMKV({ id: "lendaswap-wallet" });
+
+export class MmkvWalletStorage implements WalletStorage {
+  async getMnemonic(): Promise<string | null> {
+    return mmkv.getString("mnemonic") ?? null;
+  }
+
+  async setMnemonic(mnemonic: string): Promise<void> {
+    mmkv.set("mnemonic", mnemonic);
+  }
+
+  async getKeyIndex(): Promise<number> {
+    return mmkv.getNumber("keyIndex") ?? 0;
+  }
+
+  async setKeyIndex(index: number): Promise<void> {
+    mmkv.set("keyIndex", index);
+  }
+
+  async incrementKeyIndex(): Promise<number> {
+    const current = await this.getKeyIndex();
+    await this.setKeyIndex(current + 1);
+    return current;
+  }
+
+  async clear(): Promise<void> {
+    mmkv.delete("mnemonic");
+    mmkv.delete("keyIndex");
+  }
+}
+```
+
+#### Swap Storage
+
+```ts
+import type { StoredSwap, SwapStorage } from "@lendasat/lendaswap-sdk-pure";
+import type { GetSwapResponse } from "@lendasat/lendaswap-sdk-pure";
+import { MMKV } from "react-native-mmkv";
+
+const mmkv = new MMKV({ id: "lendaswap-swaps" });
+
+export class MmkvSwapStorage implements SwapStorage {
+  private key(swapId: string): string {
+    return `swap:${swapId}`;
+  }
+
+  async get(swapId: string): Promise<StoredSwap | null> {
+    const data = mmkv.getString(this.key(swapId));
+    return data ? JSON.parse(data) : null;
+  }
+
+  async store(swap: StoredSwap): Promise<void> {
+    mmkv.set(this.key(swap.swapId), JSON.stringify(swap));
+  }
+
+  async update(swapId: string, response: GetSwapResponse): Promise<void> {
+    const swap = await this.get(swapId);
+    if (!swap) throw new Error(`Swap ${swapId} not found`);
+    swap.response = response;
+    swap.updatedAt = Date.now();
+    await this.store(swap);
+  }
+
+  async delete(swapId: string): Promise<void> {
+    mmkv.delete(this.key(swapId));
+  }
+
+  async list(): Promise<string[]> {
+    return mmkv
+      .getAllKeys()
+      .filter((k) => k.startsWith("swap:"))
+      .map((k) => k.replace("swap:", ""));
+  }
+
+  async getAll(): Promise<StoredSwap[]> {
+    const ids = await this.list();
+    const swaps = await Promise.all(ids.map((id) => this.get(id)));
+    return swaps.filter(Boolean) as StoredSwap[];
+  }
+
+  async clear(): Promise<void> {
+    mmkv
+      .getAllKeys()
+      .filter((k) => k.startsWith("swap:"))
+      .forEach((k) => mmkv.delete(k));
+  }
+}
+```
+
+### Initialize Client (React Native)
+
+```ts
+import { Client } from "@lendasat/lendaswap-sdk-pure";
+import { MmkvSwapStorage, MmkvWalletStorage } from "./storage";
+
+const client = await Client.builder()
+  .withSignerStorage(new MmkvWalletStorage())
+  .withSwapStorage(new MmkvSwapStorage())
+  .build();
+```
+
+From here, all SDK methods (`createSwap`, `claim`, `getSwap`, `listAllSwaps`, etc.) work identically to the web version.
+
+### EVM Transactions in React Native
+
+React Native does not have `window.ethereum` or `BrowserProvider`. For EVM interactions (depositing stablecoins, manual claiming on Ethereum), use ethers.js with a direct provider:
+
+```ts
+import { JsonRpcProvider, Wallet } from "ethers";
+
+const provider = new JsonRpcProvider("https://polygon-rpc.com");
+const signer = new Wallet(YOUR_PRIVATE_KEY, provider);
+```
+
+### Notes
+
+1. **Secure storage** - MMKV stores data unencrypted by default. For production apps, enable MMKV encryption or use a secure enclave for the mnemonic.
+2. **Alternative storage** - You can use any storage backend (`AsyncStorage`, `expo-sqlite`, etc.) by implementing the `WalletStorage` and `SwapStorage` interfaces.
+3. **WebSocket support** - React Native has built-in WebSocket support, so `PriceFeedService` works without changes.
+4. **No polyfills needed** - The SDK uses only standard JavaScript APIs available in React Native.
+
+---
+
+## Supported Tokens & Pairs
+
+### Bitcoin Tokens
+
+| Token | Chain     | ID              | Description                   |
+| ----- | --------- | --------------- | ----------------------------- |
+| BTC   | Lightning | `btc_lightning` | Bitcoin via Lightning Network |
+| BTC   | Arkade    | `btc_arkade`    | Bitcoin via Arkade (instant)  |
+| BTC   | On-chain  | `btc_onchain`   | Bitcoin on-chain              |
+
+### EVM Chains
+
+| Chain    | Chain ID | HTLC Swaps | CCTP Bridge |
+| -------- | -------- | ---------- | ----------- |
+| Polygon  | `137`    | Yes        | Yes         |
+| Ethereum | `1`      | Yes        | Yes         |
+| Arbitrum | `42161`  | Yes        | Yes         |
+
+### Bridge-Only Chains (via Circle CCTP)
+
+Swap BTC to USDC on any of these chains. The SDK swaps to USDC on a source chain (Polygon / Ethereum / Arbitrum) and bridges it via Circle CCTP to the destination. Set `bridge_target_chain` on the quote/swap request to enable this — `bridge_fee` (in USDC smallest units) is then included in the quote.
+
+| Chain       | Chain ID |
+| ----------- | -------- |
+| Base        | `8453`   |
+| Optimism    | `10`     |
+| Avalanche   | `43114`  |
+| Linea       | `59144`  |
+| Unichain    | `130`    |
+| Sonic       | `146`    |
+| World Chain | `480`    |
+| Ink         | `57073`  |
+| Sei         | `1329`   |
+| HyperEVM    | `999`    |
+| Monad       | `10143`  |
+
+### Dynamic EVM Tokens
+
+LendaSwap supports a changing list of tokens on Polygon, Ethereum, and Arbitrum via DEX aggregation. Any ERC-20 token available on a DEX will be usable as a source or target for swaps.
+
+Retrieve all available tokens, optionally filtered by chain:
+
+```ts
+const tokens = await client.getTokens();
+
+console.log("=== BTC tokens ===");
+for (const t of tokens.btc_tokens) {
+  console.log(`  ${t.symbol} on ${t.chain} (${t.decimals} decimals)`);
+}
+// ... BTC on Lightning (8 decimals)
+// ... BTC on Arkade (8 decimals)
+// ... BTC on Bitcoin (8 decimals)
+
+console.log("\n=== EVM tokens ===");
+for (const t of tokens.evm_tokens) {
+  console.log(
+    `  ${t.symbol} on chain ${t.chain} - ${t.token_id} (${t.decimals} decimals)`,
+  );
+}
+// ... USDT on chain 137 - 0xc2132d05... (6 decimals)
+// ... USDC on chain 137 - 0x3c499c54... (6 decimals)
+// ... WBTC on chain 137 - 0x1bfd6703... (8 decimals)
+// ... tBTC on chain 1   - 0x18084fba... (18 decimals)
+// ... etc.
+```
+
+### Available Swap Directions
+
+#### BTC to EVM
+
+| From      | To       | Gasless Claiming |
+| --------- | -------- | ---------------- |
+| Arkade    | Polygon  | Yes              |
+| Arkade    | Arbitrum | Yes              |
+| Arkade    | Ethereum | Yes              |
+| Lightning | Polygon  | Yes              |
+| Lightning | Arbitrum | Yes              |
+| Lightning | Ethereum | Yes              |
+| On-chain  | Polygon  | Yes              |
+| On-chain  | Arbitrum | Yes              |
+| On-chain  | Ethereum | Yes              |
+
+**Gasless claiming on all EVM chains** - LendaSwap covers gas fees on Polygon, Ethereum, and Arbitrum via EIP-712 signature-based claiming. A small gas fee is deducted from the swap amount depending on network conditions. Alternatively, you can claim manually with your own wallet and pay gas yourself.
+
+---
+
+## Get Exchange Rate
+
+### Get Quote
+
+Get a quote for a specific swap. The quote includes the exchange rate, fees, gasless fee, and expected amounts.
+
+First, find the token pair you want to quote:
+
+```ts
+const usdtPolygon = tokens.evm_tokens.find(
+  (t) => t.symbol === "USDT" && t.chain === "137",
+);
+if (!usdtPolygon) throw new Error("USDT on Polygon not found");
+
+const btcLightning = tokens.btc_tokens.find((t) => t.chain === "Lightning");
+if (!btcLightning) throw new Error("BTC on Lightning not found");
+```
+
+Then get a quote for selling BTC for USDT:
+
+```ts
+// Quote: sell 100,000 sats (0.001 BTC) for USDT on Polygon
+const sellBtcQuote = await client.getQuote({
+  sourceChain: btcLightning.chain,
+  sourceToken: btcLightning.token_id,
+  targetChain: usdtPolygon.chain,
+  targetToken: usdtPolygon.token_id,
+  sourceAmount: 100_000, // 100,000 sats
+});
+
+console.log("\n=== Lightning BTC -> USDT (Polygon) ===");
+console.log(`  Selling:      100,000 sats (0.001 BTC)`);
+console.log(
+  `  You receive:  ${sellBtcQuote.target_amount} USDT smallest units`,
+);
+console.log(`  Exchange rate: ${sellBtcQuote.exchange_rate}`);
+console.log(`  Network fee:  ${sellBtcQuote.network_fee} sats`);
+console.log(
+  `  Protocol fee: ${sellBtcQuote.protocol_fee} sats (${sellBtcQuote.protocol_fee_rate * 100}%)`,
+);
+console.log(
+  `  Limits:       ${sellBtcQuote.min_amount}-${sellBtcQuote.max_amount} sats`,
+);
+```
+
+Or get a quote for buying BTC with USDT:
+
+```ts
+// Quote: sell 50 USDT (50,000,000 smallest units) for Lightning BTC
+const buyBtcQuote = await client.getQuote({
+  sourceChain: usdtPolygon.chain,
+  sourceToken: usdtPolygon.token_id,
+  targetChain: btcLightning.chain,
+  targetToken: btcLightning.token_id,
+  sourceAmount: 50_000_000, // 50 USDT (6 decimals)
+});
+
+console.log("\n=== USDT (Polygon) -> Lightning BTC ===");
+console.log(`  Selling:      50 USDT`);
+console.log(`  You receive:  ${buyBtcQuote.target_amount} sats`);
+console.log(`  Exchange rate: ${buyBtcQuote.exchange_rate}`);
+console.log(`  Network fee:  ${buyBtcQuote.network_fee} sats`);
+console.log(
+  `  Protocol fee: ${buyBtcQuote.protocol_fee} sats (${buyBtcQuote.protocol_fee_rate * 100}%)`,
+);
+console.log(
+  `  Limits:       ${buyBtcQuote.min_amount}-${buyBtcQuote.max_amount} sats`,
+);
+```
+
+**Parameters:**
+
+| Parameter      | Type   | Description                                                                           |
+| -------------- | ------ | ------------------------------------------------------------------------------------- |
+| `sourceChain`  | string | Source blockchain (`"Lightning"`, `"Arkade"`, `"Bitcoin"`, `"137"`, `"1"`, `"42161"`) |
+| `sourceToken`  | string | Source token ID or contract address (`"btc"` for BTC, or ERC-20 address)              |
+| `targetChain`  | string | Target blockchain (same values as `sourceChain`)                                      |
+| `targetToken`  | string | Target token ID or contract address                                                   |
+| `sourceAmount` | number | Amount in smallest unit (mutually exclusive with `targetAmount`)                      |
+| `targetAmount` | number | Amount in smallest unit (mutually exclusive with `sourceAmount`)                      |
+
+Specify either `sourceAmount` OR `targetAmount`, not both. Use `targetAmount` to receive an exact token amount, or `sourceAmount` to send an exact amount.
+
+### Quote Response
+
+| Field                 | Type   | Description                              |
+| --------------------- | ------ | ---------------------------------------- |
+| `exchange_rate`       | string | Exchange rate                            |
+| `network_fee`         | number | Network fee estimate in satoshis         |
+| `gasless_network_fee` | number | Gasless coordinator fee in satoshis      |
+| `protocol_fee`        | number | Protocol fee in satoshis                 |
+| `protocol_fee_rate`   | number | Protocol fee rate (e.g., 0.0025 = 0.25%) |
+| `min_amount`          | number | Minimum swap amount in satoshis          |
+| `max_amount`          | number | Maximum swap amount in satoshis          |
+| `source_amount`       | number | Calculated source amount                 |
+| `target_amount`       | number | Calculated target amount                 |
+
+---
+
+## Create Swaps
+
+### BTC to EVM: Lightning to USDC
+
+Follow these steps to complete a swap from Bitcoin (Lightning) to USDC (Polygon).
+
+First create a new client:
+
+```ts
+const client = await Client.builder()
+  .withSignerStorage(new InMemoryWalletStorage())
+  .withSwapStorage(new InMemorySwapStorage())
+  .withApiKey(process.env.API_KEY || "")
+  .build();
+```
+
+Specify the target token using the Asset enum:
+
+```ts
+// Target token is specified directly via Asset enum
+// e.g. Asset.USDC_POLYGON, Asset.USDT_POLYGON, etc.
+```
+
+Create the swap request:
+
+```ts
+const result = await client.createSwap({
+  source: Asset.BTC_LIGHTNING,
+  target: Asset.USDC_POLYGON,
+  targetAddress: destinationAddress,
+  sourceAmount: amountSats,
+});
+
+const { response } = result;
+```
+
+Pay the Lightning invoice returned in the response with any Lightning wallet (e.g., Phoenix, Wallet of Satoshi). The SDK generates the secret and shares the hash - the service creates a Boltz reverse swap it can only settle after you reveal the secret.
+
+```ts
+console.log("Pay invoice:", response.bolt11_invoice);
+```
+
+Wait for the status to become `ServerFunded`, then claim your tokens.
+
+**Gasless on all chains:** Claiming is gasless on Polygon, Ethereum, and Arbitrum via EIP-712 signatures. A small gas fee is deducted from the swap amount depending on network conditions. Alternatively, you can claim manually with your own wallet and pay gas yourself.
+
+```ts
+const claim = await client.claimViaGasless(response.id, destinationAddress);
+console.log("Claimed! TX:", claim.txHash);
+// ... "0xabc123..."
+```
+
+#### Full Example: Lightning to USDC
+
+```ts
+/**
+ * Lightning -> USDC on Polygon: end-to-end example.
+ */
+
+import {
+  Asset,
+  Client,
+  InMemorySwapStorage,
+  InMemoryWalletStorage,
+} from "@lendasat/lendaswap-sdk-pure";
+
+const client = await Client.builder()
+  .withSignerStorage(new InMemoryWalletStorage())
+  .withSwapStorage(new InMemorySwapStorage())
+  .withApiKey(process.env.API_KEY || "")
+  .build();
+
+const destinationAddress = "0xYourPolygonAddress";
+const amountSats = 100_000;
+
+const result = await client.createSwap({
+  source: Asset.BTC_LIGHTNING,
+  target: Asset.USDC_POLYGON,
+  targetAddress: destinationAddress,
+  sourceAmount: amountSats,
+});
+
+const { response } = result;
+
+if (!("bolt11_invoice" in response)) {
+  throw new Error("Expected Lightning swap response");
+}
+
+console.log("Pay invoice:", response.bolt11_invoice);
+// ... "lnbc1m1p..."
+console.log("Swap ID:", response.id);
+// ... "550e8400-e29b-41d4-a716-446655440000"
+
+let swap = await client.getSwap(response.id);
+while (swap.status !== "serverfunded" && swap.status !== "expired") {
+  await new Promise((r) => setTimeout(r, 3000));
+  swap = await client.getSwap(response.id);
+  console.log("Status:", swap.status);
+  // ... "pending" -> "clientfunded" -> "serverfunded"
+}
+
+if (swap.status === "expired") {
+  throw new Error("Swap expired - invoice was not paid in time.");
+}
+
+const claim = await client.claimViaGasless(response.id, destinationAddress);
+console.log("Claimed! TX:", claim.txHash);
+// ... "0xabc123..."
+
+const final = await client.getSwap(response.id);
+console.log("Final status:", final.status);
+// ... "clientredeemed"
+console.log("Source:", final.source_amount, "sats");
+console.log("Target:", final.target_amount, final.target_token.symbol);
+// ... "Target: 48250000 USDC"
+```
+
+---
+
+### EVM to BTC: USDT to Lightning
+
+This guide covers buying BTC using USDT and receiving it via Lightning.
+
+Create the swap request:
+
+```ts
+const client = await Client.builder()
+  .withSignerStorage(new InMemoryWalletStorage())
+  .withSwapStorage(new InMemorySwapStorage())
+  .withApiKey(process.env.API_KEY || "")
+  .build();
+```
+
+We only support invoices with amounts. However, you can provide an LNURL instead and we will fetch an invoice based on source or target amount.
+
+```ts
+const result = await client.createSwap({
+  source: Asset.USDT_POLYGON,
+  target: Asset.BTC_LIGHTNING,
+  targetAddress: lightningInvoice,
+});
+
+const { response } = result;
+```
+
+Next, fund the swap by sending the EVM tokens to the contract:
+
+```ts
+// Build an EvmSigner from your wallet (wagmi/viem example):
+//
+// import { createPublicClient, http } from "viem";
+// const publicClient = createPublicClient({ chain, transport: http() });
+// const signer: EvmSigner = {
+//   address: walletClient.account.address,
+//   chainId: chain.id,
+//   signTypedData: (td) => walletClient.signTypedData({ ...td, account: walletClient.account }),
+//   sendTransaction: (tx) => walletClient.sendTransaction({ to: tx.to, data: tx.data, chain, gas: tx.gas }),
+//   waitForReceipt: (h) => publicClient.waitForTransactionReceipt({ hash: h }).then((r) => ({ status: r.status, blockNumber: r.blockNumber, transactionHash: r.transactionHash })),
+//   getTransaction: (h) => publicClient.getTransaction({ hash: h }).then((tx) => ({ to: tx.to ?? null, input: tx.input, from: tx.from })),
+//   call: (tx) => publicClient.call({ to: tx.to, data: tx.data, account: tx.from, blockNumber: tx.blockNumber }).then((r) => r.data ?? "0x"),
+// };
+
+declare const signer: EvmSigner; // your wallet - see EvmSigner docs
+
+// fundSwap handles everything: allowance check, ERC-20 approval,
+// Permit2 EIP-712 signing, and transaction submission.
+const { txHash } = await client.fundSwap(response.id, signer);
+console.log("Funded! TX:", txHash);
+```
+
+Wait for the status to become `ServerFunded`, the lightning invoice will settle in your lightning wallet automatically.
+
+#### Full Example: USDT to Lightning
+
+```ts
+/**
+ * USDT on Polygon -> Lightning: end-to-end example (non-gasless).
+ *
+ * The user submits the funding transaction via `fundSwap`.
+ */
+
+import {
+  Asset,
+  Client,
+  type EvmSigner,
+  InMemorySwapStorage,
+  InMemoryWalletStorage,
+} from "@lendasat/lendaswap-sdk-pure";
+
+const client = await Client.builder()
+  .withSignerStorage(new InMemoryWalletStorage())
+  .withSwapStorage(new InMemorySwapStorage())
+  .withApiKey(process.env.API_KEY || "")
+  .build();
+
+const lightningInvoice = "lnbc1m1p..."; // Your BOLT11 invoice
+
+const result = await client.createSwap({
+  source: Asset.USDT_POLYGON,
+  target: Asset.BTC_LIGHTNING,
+  targetAddress: lightningInvoice,
+});
+
+const { response } = result;
+
+if (!("evm_htlc_address" in response)) {
+  throw new Error("Expected EVM-to-Lightning swap response");
+}
+
+console.log("Swap ID:", response.id);
+console.log("Source amount:", response.source_amount);
+
+// Build an EvmSigner from your wallet (see above for wagmi/viem example)
+declare const signer: EvmSigner;
+
+const { txHash } = await client.fundSwap(response.id, signer);
+console.log("Funded! TX:", txHash);
+
+let swap = await client.getSwap(response.id);
+while (swap.status !== "serverfunded" && swap.status !== "expired") {
+  await new Promise((r) => setTimeout(r, 3000));
+  swap = await client.getSwap(response.id);
+  console.log("Status:", swap.status);
+  // ... "pending" -> "clientfunded" -> "serverfunded"
+}
+
+if (swap.status === "expired") {
+  throw new Error("Swap expired - deposit was not completed in time.");
+}
+
+const finalSwap = await client.getSwap(response.id);
+console.log("Final status:", finalSwap.status);
+// ... "clientredeemed"
+console.log("Source:", finalSwap.source_amount, "USDT");
+console.log("Target:", finalSwap.target_amount, "sats");
+```
+
+---
+
+### Onchain BTC to Arkade
+
+On-chain to Arkade swaps allow you to move Bitcoin from the main chain to Arkade. The process:
+
+1. **Create swap** - Get a P2WSH HTLC address to send BTC
+2. **Send BTC** - Send on-chain Bitcoin to the HTLC address
+3. **Claim VTXOs** - Receive Arkade VTXOs once the BTC confirms
+
+On-chain swaps require waiting for Bitcoin confirmations (typically 1-6 blocks). For instant swaps, consider using Lightning to Arkade instead.
+
+#### Create Swap
+
+```ts
+const result = await client.createSwap({
+  source: Asset.BTC_ONCHAIN,
+  target: Asset.BTC_ARKADE,
+  targetAddress: arkadeAddress,
+  targetAmount: amountSats,
+});
+
+const { response } = result;
+```
+
+#### Send BTC
+
+Send on-chain Bitcoin to the HTLC address returned in the response:
+
+```ts
+console.log("Swap ID:", response.id);
+console.log("Send BTC to:", response.btc_htlc_address);
+console.log("Amount to send:", response.source_amount, "sats");
+```
+
+#### Monitor Swap Status
+
+```ts
+let swap = await client.getSwap(response.id);
+while (swap.status !== "serverfunded" && swap.status !== "expired") {
+  await new Promise((r) => setTimeout(r, 10_000)); // on-chain, so poll less frequently
+  swap = await client.getSwap(response.id);
+  console.log("Status:", swap.status);
+}
+```
+
+#### Claim VTXOs
+
+Once the status is `serverfunded`, claim your Arkade VTXOs:
+
+```ts
+const claimResult = await client.claim(response.id);
+if (!claimResult.success) {
+  throw new Error(`Claim failed: ${claimResult.message}`);
+}
+console.log("Claimed! TX:", claimResult.txHash);
+```
+
+#### Verify Completion
+
+```ts
+const finalSwap = await client.getSwap(response.id);
+console.log("Final status:", finalSwap.status);
+console.log("Source:", finalSwap.source_amount, "sats (on-chain)");
+console.log("Target:", finalSwap.target_amount, "sats (Arkade)");
+```
+
+---
+
+## Handle Failures & Recovery
+
+### Refund Onchain HTLC
+
+**Locktime Required:** Refunds are only possible AFTER the HTLC locktime expires. This is typically 24 hours after swap creation on mainnet.
+
+Refunds are typically needed when:
+
+- The swap status is `expired` (no funding was received before timeout)
+- The service didn't respond to your BTC payment
+- You want to recover funds from an incomplete swap
+
+```ts
+const swap = await client.getSwap(swapId);
+console.log("Status:", swap.status);
+// ... "expired"
+
+// Build and broadcast the refund transaction.
+const result = await client.refundSwap(swapId, {
+  destinationAddress: "bc1q...", // Your Bitcoin address to receive the refund
+  feeRateSatPerVb: 5, // Fee rate
+});
+
+if (!result.success) {
+  throw new Error(`Refund failed: ${result.message}`);
+}
+
+console.log("Refund TX broadcast:", result.broadcast);
+console.log("Transaction ID:", result.txId);
+console.log("Refund amount:", result.refundAmount, "sats");
+console.log("Mining fee:", result.fee, "sats");
+```
+
+Important notes:
+1. Onchain HTLCs have longer locktimes (24h on mainnet) than VHTLCs
+2. You'll pay standard BTC transaction fees for the refund
+
+---
+
+### Refund EVM HTLC
+
+Refunds are needed when:
+
+- You deposited tokens but didn't receive BTC
+- The swap timed out (service didn't complete)
+- Network issues prevented swap completion
+
+#### Option 1: Collaborative Refund (Recommended)
+
+No timelock wait required. The server cosigns the refund and submits it on-chain - gasless for you. This is only possible if the server has not yet funded or if the swap is in an error state.
+
+```ts
+// Settlement modes:
+// - "swap-back": swap WBTC back to your original token (e.g. USDT) via DEX
+// - "direct":    return the locked WBTC/tBTC directly
+const result = await client.collabRefundEvmSwap(swapId, "swap-back");
+
+console.log("Refund TX:", result.txHash);
+console.log("Message:", result.message);
+```
+
+#### Option 2: Timeout-Based Refund (Fallback)
+
+If the server is unresponsive, you can refund yourself after the HTLC timelock expires (24h on mainnet). You submit the transaction with your own EVM wallet.
+
+```ts
+declare const signer: EvmSigner; // your wallet
+
+// Settlement modes:
+// - "swap-back": swap WBTC back to your original token (e.g. USDT) via DEX
+// - "direct":    return the locked WBTC/tBTC directly
+const { txHash } = await client.refundEvmWithSigner(
+  swapId,
+  signer,
+  "swap-back",
+);
+
+console.log("Refund TX:", txHash);
+```
+
+#### Refund Methods Summary
+
+| Method                       | When Available         | Server Required | Gas Required |
+| ---------------------------- | ---------------------- | --------------- | ------------ |
+| **Collaborative** (gasless)  | Anytime                | Yes             | No           |
+| **Timeout-based** (fallback) | After timelock expires | No              | Yes          |
+
+Important notes:
+1. **Settlement modes** - Both methods support `"swap-back"` (receive your original token) or `"direct"` (receive WBTC/tBTC)
+2. **Automatic refunds** - The server also detects expired HTLCs and processes refunds automatically in the background
+3. **Gas fees** - Only the timeout-based refund requires gas (ETH/MATIC)
+
+---
+
+### Recover Swaps from Seed
+
+**Backup Your Mnemonic:** Always store your mnemonic seed phrase securely. It's the only way to recover funds if you lose access to your device.
+
+Recovery is needed when:
+
+- You cleared browser data (IndexedDB) or app storage
+- You're moving to a new device
+- App reinstallation cleared local storage
+- You want to check for missed swaps
+
+```ts
+import {
+  Client,
+  IdbSwapStorage,
+  IdbWalletStorage,
+} from "@lendasat/lendaswap-sdk-pure";
+
+// Initialize client with your mnemonic
+const client = await Client.builder()
+  .withSignerStorage(new IdbWalletStorage())
+  .withSwapStorage(new IdbSwapStorage())
+  .withMnemonic("your twelve word mnemonic phrase ...")
+  .build();
+
+// Recover all swaps from the server
+const recovered = await client.recoverSwaps();
+console.log(`Recovered ${recovered.length} swaps`);
+```
+
+Best practices:
+1. **Secure your mnemonic** - Store it offline in multiple secure locations
+2. **Test recovery** - Periodically verify you can recover with your seed
+3. **Act quickly** - Recovered swaps may have time-sensitive actions
+4. **Check all statuses** - Don't assume swaps are complete without verifying
+
+---
+
+### Error Codes
+
+#### Error Handling Overview
+
+```ts
+try {
+  const result = await client.createSwap({ /* ... */ });
+} catch (error) {
+  if (error instanceof Error) {
+    console.error("Swap failed:", error.message);
+  }
+}
+```
+
+#### API Error Response Format
+
+API errors return a JSON object with a single `error` field containing a human-readable message:
+
+```ts
+interface ErrorResponse {
+  error: string;
+}
+
+// Example error responses
+{ "error": "Min amount is 0.001 BTC" }
+{ "error": "Sats to receive must be positive" }
+{ "error": "Swap not found" }
+```
+
+#### HTTP Status Codes
+
+| Code | Meaning             | Description                                            |
+| ---- | ------------------- | ------------------------------------------------------ |
+| 200  | OK                  | Request successful                                     |
+| 400  | Bad Request         | Invalid parameters or business logic validation failed |
+| 500  | Internal Error      | Unexpected server error                                |
+| 503  | Service Unavailable | Service temporarily down                               |
+
+#### Swap Creation Errors (400)
+
+| Error Message (contains)                                      | Solution                         |
+| ------------------------------------------------------------- | -------------------------------- |
+| `"must be positive"` or `"must be > 0"`                       | Use a positive amount            |
+| `"Min amount is ..."`                                         | Increase swap amount             |
+| `"Max amount is ..."`                                         | Reduce swap amount               |
+| `"address is required"`                                       | Provide the required address     |
+| `"hash_lock must be valid hexadecimal"`                       | Check hex encoding               |
+| `"hash_lock must be 20 bytes"` / `"invalid hash lock length"` | Use correct hash lock size       |
+| `"Unsupported chain"`                                         | Use a supported EVM chain        |
+| `"not a supported token"`                                     | Check `/tokens` endpoint         |
+| `"Provide exactly one of source_amount or target_amount"`     | Provide exactly one amount field |
+| `"Invalid Lightning invoice"`                                 | Check invoice format             |
+| `"Invoices without amounts are not supported"`                | Use an invoice with amount       |
+
+#### SDK-Specific Errors
+
+Initialization Errors:
+
+| Error Message                    | Solution                              |
+| -------------------------------- | ------------------------------------- |
+| `"Invalid mnemonic phrase"`      | Check 12, 15, 18, 21, or 24 words     |
+| `"No signer storage configured"` | Pass storage factory to ClientBuilder |
+
+Swap Operation Errors:
+
+| Error Message (contains)                  | Solution                                    |
+| ----------------------------------------- | ------------------------------------------- |
+| `"Swap not found in local storage"`       | Use `recoverSwaps()` to restore from server |
+| `"does not have an Arkade VHTLC address"` | Check swap direction                        |
+| `"Unsupported direction"`                 | Use correct method for this swap direction  |
+
+#### Common Solutions
+
+| Error                               | Quick Fix                                    |
+| ----------------------------------- | -------------------------------------------- |
+| `"Min amount is ..."`               | Increase swap amount above the minimum       |
+| `"Invalid mnemonic phrase"`         | Check spelling, use 12 or 24 words           |
+| `"Swap not found"`                  | Use `recoverSwaps()` for xpub-based recovery |
+| `"Swap not found in local storage"` | Call `recoverSwaps()` to restore swap data   |
+| `"Server cannot fund this swap"`    | Wait and retry later                         |
+| `"Health check failed"`             | Check internet connection and server URL     |
+
+---
+
+## Advanced: Hash Time-Locked Contracts (HTLC)
+
+Hash Time-Locked Contracts (HTLCs) are the foundation of LendaSwap's atomic swap protocol. They enable trustless, conditional payments across blockchains.
+
+### What is an HTLC?
+
+An HTLC is a smart contract that locks funds with two conditions:
+
+1. **Hash Lock**: Funds can be claimed by revealing a secret (preimage)
+2. **Time Lock**: Funds are automatically refunded after a timeout
+
+### How It Works
+
+**Hash Lock:**
+
+```
+secret = random 32 bytes
+hash_lock = SHA256(secret)
+```
+
+- Only the party with the secret can claim funds
+- Contract verifies: `SHA256(provided_secret) == hash_lock`
+- 32-byte secret = 2^256 possible values (cryptographically secure)
+
+**Time Lock:**
+
+```
+timelock_client = current_time + 24 hours  // client's HTLC
+timelock_server = current_time + 12 hours  // server's HTLC
+```
+
+- Before timeout: Only recipient can claim with secret
+- After timeout: Sender can refund (no secret needed)
+
+### Contract Architecture
+
+LendaSwap uses a two-contract architecture on each EVM chain (Polygon, Ethereum, Arbitrum):
+
+**HTLCErc20** - The core HTLC contract that holds ERC-20 tokens. Supports:
+- Direct claiming by the designated claim address
+- EIP-712 signature-based claiming for gasless execution (`redeemBySig`)
+- Refund to sender or explicit destination after timelock
+
+**HTLCCoordinator** - An orchestration layer that combines DEX swaps with HTLC operations in a single atomic transaction:
+- `executeAndCreate` - Execute DEX swap calls, then lock the result in an HTLC
+- `redeemAndExecute` - Redeem an HTLC via EIP-712 signature, execute DEX swap, sweep tokens to destination
+- `refundAndExecute` - Refund an expired HTLC, optionally swap tokens back, sweep to destination
+- `refundTo` - Simple refund of an expired HTLC directly to the original depositor or a specified address
+
+**DEX-agnostic design:** The coordinator accepts arbitrary call arrays, currently routing through Uniswap V3 (primary) (fallback) for DEX aggregation.
+
+### LendaSwap HTLC Flow (BTC to EVM)
+
+1. **Client Generates Secret** - Client generates a random 32-byte preimage S and computes H = SHA256(S). The client shares H with the service - never the preimage itself.
+2. **Client Pays BTC** - Client pays via a Boltz reverse swap (Lightning), sends to an Arkade VHTLC, or sends to an on-chain P2WSH HTLC.
+3. **Service Creates EVM HTLC** - Service locks tokens in the EVM smart contract (HTLCErc20) using the same hash H. For BTC to EVM swaps, the service uses `executeAndCreate` on the coordinator to swap WBTC to the target token and lock it in the HTLC in a single transaction.
+4. **Client Claims Tokens** - Client reveals the preimage S to claim their tokens. Gasless (recommended): Client signs an EIP-712 message. Server calls `redeemAndExecute` on the coordinator. Manual: Client calls `redeem` directly on HTLCErc20 with the preimage.
+5. **Service Settles BTC** - Service extracts S from the blockchain and claims the Arkade VHTLC via Boltz (or claims the on-chain P2WSH HTLC).
+
+### Gasless Execution
+
+LendaSwap uses EIP-712 typed data signatures so users never need to pay gas:
+
+1. User signs an EIP-712 message binding: preimage, destination address, sweep token, and minimum output amount
+2. Server submits `redeemAndExecute` on the HTLCCoordinator (server pays gas)
+3. The coordinator redeems the HTLC, executes any DEX swap calls, and sweeps tokens to the user's signed destination
+4. User receives tokens with zero gas cost
+
+The EIP-712 signature cryptographically binds the claim to the coordinator contract as `msg.sender`, preventing front-running. The signed destination address ensures tokens can only go to the address the user specified.
+
+**Gasless fee:** A small gas fee is deducted from the swap amount depending on network conditions. This fee is included in the quote.
+
+### Security
+
+| Protection              | How                                                        |
+| ----------------------- | ---------------------------------------------------------- |
+| **Atomic**              | Either both parties get funds, or neither does             |
+| **Trustless**           | No third party controls funds                              |
+| **Time-bounded**        | Automatic refund if unclaimed                              |
+| **Slippage protection** | Minimum output amount enforced in coordinator calls        |
+| **Front-running safe**  | EIP-712 signature binds claim to coordinator as msg.sender |
+| **Destination binding** | Signed destination prevents token redirection              |
+| **Reentrancy safe**     | Transient storage (EIP-1153) for reentrancy protection     |
+
+### Timelock Safety
+
+```
+EVM HTLC timeout (client): 24 hours
+EVM HTLC timeout (server): 12 hours
+Bitcoin timeout:            > EVM timeout (always longer)
+```
+
+This ensures the service has time to claim BTC after the user reveals the secret on the EVM chain.
+
+### Smart Contract Interface
+
+```solidity
+// -- HTLCErc20 --
+
+// Create HTLC (5-param: service locks tokens)
+function create(
+    bytes32 preimageHash, uint256 amount, address token,
+    address claimAddress, uint256 timelock
+) external;
+
+// Create HTLC (6-param: with explicit refund address)
+function create(
+    bytes32 preimageHash, uint256 amount, address token,
+    address refundAddress, address claimAddress, uint256 timelock
+) external;
+
+// Direct redeem (claimAddress must be msg.sender)
+function redeem(
+    bytes32 preimage, uint256 amount, address token,
+    address sender, uint256 timelock
+) external;
+
+// Gasless redeem via EIP-712 signature
+function redeemBySig(
+    bytes32 preimage, uint256 amount, address token,
+    address sender, uint256 timelock, address destination,
+    address sweepToken, uint256 minAmountOut,
+    uint8 v, bytes32 r, bytes32 s
+) external returns (address);
+
+// Refund after timelock expires (5-param)
+function refund(
+    bytes32 preimageHash, uint256 amount, address token,
+    address claimAddress, uint256 timelock
+) external;
+
+// Refund after timelock expires (6-param: with destination)
+function refund(
+    bytes32 preimageHash, uint256 amount, address token,
+    address claimAddress, uint256 timelock, address destination
+) external;
+
+// -- HTLCCoordinator --
+
+// DEX swap + HTLC create (5-param: server locks tokens)
+function executeAndCreate(
+    Call[] calls, bytes32 preimageHash,
+    address token, address claimAddress, uint256 timelock
+) external;
+
+// DEX swap + HTLC create (6-param: with refund address)
+function executeAndCreate(
+    Call[] calls, bytes32 preimageHash,
+    address token, address refundAddress, address claimAddress,
+    uint256 timelock
+) external;
+
+// HTLC redeem + DEX swap + sweep (gasless claiming)
+function redeemAndExecute(
+    bytes32 preimage, uint256 amount, address token,
+    address htlcSender, uint256 timelock, Call[] calls,
+    address sweepToken, uint256 minAmountOut,
+    address destination, uint8 v, bytes32 r, bytes32 s
+) external;
+
+// HTLC refund + DEX swap-back + sweep
+function refundAndExecute(
+    bytes32 preimageHash, uint256 amount, address token,
+    address claimAddress, uint256 timelock,
+    Call[] calls, address sweepToken, uint256 minAmountOut
+) external;
+
+// Simple refund to original depositor or specified address
+function refundTo(
+    bytes32 preimageHash, uint256 amount, address token,
+    address claimAddress, uint256 timelock
+) external;
+```
+
+### Deterministic Deployment
+
+LendaSwap uses CREATE2 for deterministic contract addresses across all chains. This means the HTLCErc20 and HTLCCoordinator contracts have the same address on Polygon, Ethereum, and Arbitrum.
+
+---
+
+## Advanced: Swap State Machine
+
+LendaSwap swaps progress through a well-defined state machine that ensures atomicity and proper handling of all scenarios. The state machine is the same for both directions (BTC to EVM and EVM to BTC) - the difference is which addresses the client and server fund.
+
+### Who Funds What
+
+#### BTC to EVM (Client sends BTC, receives tokens)
+
+| Step               | Who     | What                              | Address                                                                                     |
+| ------------------ | ------- | --------------------------------- | ------------------------------------------------------------------------------------------- |
+| **Client funds**   | Client  | Sends BTC                         | `boltz_invoice` (Lightning), `btc_vhtlc_address` (Arkade), or `btc_htlc_address` (On-chain) |
+| **Server funds**   | Service | Locks tokens in EVM HTLC          | `evm_htlc_address` (the HTLC smart contract on Polygon/Ethereum/Arbitrum)                   |
+| **Client claims**  | Client  | Reveals preimage, receives tokens | Claims from `evm_htlc_address` (gasless via EIP-712)                                        |
+| **Server redeems** | Service | Extracts preimage, claims BTC     | Claims from Arkade VHTLC / Boltz / On-chain HTLC                                            |
+
+#### EVM to BTC (Client sends tokens, receives BTC)
+
+**Gasless flow (recommended):**
+
+| Step                       | Who     | What                                        | Address                                                                      |
+| -------------------------- | ------- | ------------------------------------------- | ---------------------------------------------------------------------------- |
+| **Client deposits**        | Client  | Sends stablecoins to deposit address        | `client_evm_address` - an SDK-derived address (NOT the HTLC)                |
+| **Client funds (gasless)** | SDK     | Signs Permit2, server relays tokens to HTLC | Tokens move from `client_evm_address` -> `evm_htlc_address` (server pays gas) |
+| **Server funds**           | Service | Sends BTC to client                         | Pays Lightning invoice, funds Arkade VHTLC, or funds on-chain HTLC           |
+| **Server claims**          | Service | Uses preimage to claim tokens               | Claims from `evm_htlc_address`                                               |
+
+**Manual flow (with wallet):**
+
+| Step              | Who     | What                                       | Address                                                                                  |
+| ----------------- | ------- | ------------------------------------------ | ---------------------------------------------------------------------------------------- |
+| **Client funds**  | Client  | Approves + deposits tokens via Coordinator | `evm_htlc_address` via `HTLCCoordinator.executeAndCreateWithPermit2()` (client pays gas) |
+| **Server funds**  | Service | Sends BTC to client                        | Pays Lightning invoice, funds Arkade VHTLC, or funds on-chain HTLC                       |
+| **Server claims** | Service | Uses preimage to claim tokens              | Claims from `evm_htlc_address`                                                           |
+
+**EVM to BTC gasless:** The user sends stablecoins to `client_evm_address`, NOT to `evm_htlc_address`. The SDK derives `client_evm_address` from the swap's secret key and uses Permit2 to relay tokens to the HTLC contract.
+
+### State Overview
+
+```
+                    +----------+
+                    | Pending  |
+                    +----+-----+
+                         |
+              +----------+----------+
+              |                     |
+    (Client funds)          (Timeout: ~10 min)
+              |                     |
+              v                     v
+   +--------------------+    +----------+
+   | ClientFundingSeen  |    | Expired  |
+   +---------+----------+    +----------+
+             |
+             v
+      +---------------+
+      | ClientFunded  |
+      +-------+-------+
+              |
+    +---------+----------+
+    |         |          |
+(Server    (Early     (Invalid
+ funds)     exit)      amount)
+    |        |          |
+    |        v          v
+    |  +------------+  +----------------------+
+    |  |ClientRefund|  | ClientInvalidFunded  |
+    |  +------------+  +----------------------+
+    v
++---------------+
+| ServerFunded  |
++-------+-------+
+        |
++-------+-------------------+
+|                            |
+(Client/Server            (HTLC timeout)
+ claims)                     |
+|                            v
+v                     +----------------------------+
++------------------+  |ClientFundedServerRefunded  |
+| ClientRedeeming  |  +----------------------------+
++--------+---------+
+         |
+         v
++------------------+
+| ServerRedeemed   |  <- True success terminal
++------------------+
+```
+
+### States Explained
+
+| State                               | Description                                           | Action Required                                       |
+| ----------------------------------- | ----------------------------------------------------- | ----------------------------------------------------- |
+| **Pending**                         | Swap created, waiting for client to fund              | Fund the swap                                         |
+| **ClientFundingSeen**               | Client's funding detected, waiting for confirmations  | Wait                                                  |
+| **ClientFunded**                    | Client's funding confirmed, server preparing its side | Wait or early exit                                    |
+| **ClientInvalidFunded**             | Client sent wrong amount or invalid funding           | Contact support                                       |
+| **ClientFundedTooLate**             | Client funded after the swap expired                  | Refund                                                |
+| **ServerFunded**                    | Server has funded - ready for final claim/settlement  | Claim now (BTC to EVM) or wait for BTC (EVM to BTC)   |
+| **ClientRedeeming**                 | Preimage revealed, claim in progress                  | Wait                                                  |
+| **ClientRedeemed**                  | Client received funds, server settling                | Wait                                                  |
+| **ServerRedeemed**                  | Swap fully complete - both sides settled              | None (terminal)                                       |
+| **Expired**                         | Pending timeout, no funding received                  | None (terminal)                                       |
+| **ClientRefunded**                  | Client exited early before server funded              | None (terminal)                                       |
+| **ClientFundedServerRefunded**      | HTLC timeout, service reclaimed its funds             | Refund client side                                    |
+| **ClientRefundedServerFunded**      | Client refunded but server had already funded         | Server reclaims                                       |
+| **ClientRefundedServerRefunded**    | Both sides refunded                                   | None (terminal)                                       |
+| **ClientRedeemedAndClientRefunded** | Edge case: client redeemed and also got refund        | None (terminal)                                       |
+
+**Early exit:** In the `ClientFunded` state, if the server hasn't funded its side yet, you can refund immediately without waiting for the timelock.
+
+### Handling Each Status in Code
+
+```ts
+const swaps = await client.listAllSwaps();
+
+for (const stored of swaps) {
+  const swap = stored.response;
+  switch (swap.status) {
+    case "pending":
+      console.log(`Swap ${stored.swapId}: Awaiting payment`);
+      break;
+    case "clientfundingseen":
+      console.log(`Swap ${stored.swapId}: Payment detected, confirming...`);
+      break;
+    case "clientfunded":
+      console.log(`Swap ${stored.swapId}: Funded, waiting for HTLC`);
+      break;
+    case "serverfunded":
+      console.log(`Swap ${stored.swapId}: Ready to claim!`);
+      await client.claim(stored.swapId);
+      break;
+    case "clientredeeming":
+      console.log(`Swap ${stored.swapId}: Claiming in progress...`);
+      break;
+    case "clientredeemed":
+      console.log(`Swap ${stored.swapId}: Tokens received, server settling...`);
+      break;
+    case "serverredeemed":
+      console.log(`Swap ${stored.swapId}: Complete!`);
+      break;
+    case "expired":
+      console.log(`Swap ${stored.swapId}: Expired (no payment)`);
+      break;
+    case "clientrefunded":
+      console.log(`Swap ${stored.swapId}: Refunded (early exit)`);
+      break;
+    case "clientfundedserverrefunded":
+      console.log(`Swap ${stored.swapId}: Timed out - refund BTC`);
+      break;
+    case "clientinvalidfunded":
+      console.log(`Swap ${stored.swapId}: Invalid funding`);
+      break;
+    case "clientfundedtoolate":
+      console.log(`Swap ${stored.swapId}: Funded too late`);
+      break;
+    case "clientrefundedserverfunded":
+      console.log(`Swap ${stored.swapId}: Refunded, server reclaiming`);
+      break;
+    case "clientrefundedserverrefunded":
+      console.log(`Swap ${stored.swapId}: Both sides refunded`);
+      break;
+    case "clientredeemedandclientrefunded":
+      console.log(`Swap ${stored.swapId}: Edge case resolved`);
+      break;
+    default:
+      console.log(`Swap ${stored.swapId}: ${swap.status}`);
+  }
+}
+```
+
+### Terminal States
+
+These states are final - no further transitions occur:
+
+- `ServerRedeemed` - Success (both parties received funds)
+- `Expired` - No payment was made
+- `ClientRefunded` - Client exited early
+- `ClientFundedServerRefunded` - EVM HTLC timed out
+- `ClientRefundedServerRefunded` - Both sides refunded
+- `ClientRedeemedAndClientRefunded` - Edge case resolved
+
+### Best Practices
+
+1. **Monitor `Pending` swaps** - Prompt users to pay before the ~10 minute timeout
+2. **Auto-claim `ServerFunded`** - Claim immediately when ready
+3. **Handle `ClientRedeeming`** - Show a loading state; claim is in progress
+4. **Wait for `ServerRedeemed`** - This is the true success terminal, not `ClientRedeemed`
+5. **Track terminal states** - Clean up UI for completed/expired swaps
+
+---
+
+## FAQ
+
+### General
+
+**What is LendaSwap?**
+LendaSwap enables instant, trustless swaps between Bitcoin (Lightning, Arkade, or on-chain) and EVM tokens (USDC, USDT, etc.) on Polygon, Ethereum, and Arbitrum. All swaps are non-custodial using Hash Time-Locked Contracts (HTLCs).
+
+**Is LendaSwap custodial?**
+No. LendaSwap is fully non-custodial. Swaps use atomic HTLCs - either both sides complete, or neither does. At no point does LendaSwap hold your funds without a cryptographic guarantee that you can reclaim them.
+
+**Which chains and tokens are supported?**
+Bitcoin side: Lightning Network, Arkade (off-chain), and on-chain BTC. EVM side: Polygon, Ethereum, and Arbitrum. Supported tokens include USDC, USDT, and other ERC-20 tokens routed via Uniswap V3.
+
+**What are the fees?**
+LendaSwap charges a small percentage fee on each swap, plus network fees. Use the quote endpoint to get an exact fee breakdown before creating a swap. Gasless claiming on EVM chains deducts a small gas fee from the swap amount.
+
+### Integration
+
+**Should I use the SDK or the REST API?**
+Use the TypeScript SDK. It handles wallet management, state tracking, error recovery, and gasless claiming out of the box. The REST API is available but not recommended for production use.
+
+**Which platforms does the SDK support?**
+The SDK is pure TypeScript with zero native dependencies. It works in browsers (any modern browser), React Native (with custom storage adapters), and Node.js (server-side integrations). No WASM, no native modules.
+
+**Do I need an API key?**
+No authentication is required to use LendaSwap. You can optionally pass an API key for tracking and analytics purposes.
+
+**How do I handle errors and failed swaps?**
+The SDK has built-in error handling. See the Error Codes section for common error codes and recovery strategies.
+
+**What happens if a swap gets stuck?**
+Swaps have built-in timeouts. If a swap isn't completed within the timelock period (typically 24 hours for the client side), funds are automatically refundable. The SDK can detect stuck swaps and initiate refunds. You can also recover swaps using your mnemonic seed phrase.
+
+### Gasless & Fees
+
+**What does 'gasless' mean?**
+When claiming EVM tokens (BTC to EVM swaps), you don't need to hold ETH/MATIC for gas. Instead, you sign an EIP-712 message and LendaSwap's server submits the transaction on your behalf. A small gas fee is deducted from the swap amount.
+
+**Can I pay gas myself instead of using gasless?**
+Yes. You can claim manually by calling the HTLC contract directly with your own wallet. This requires holding native gas tokens (ETH/MATIC/ARB) but avoids the gasless fee deduction.
+
+**How is the exchange rate determined?**
+Rates are sourced from DEX liquidity at the time of the swap. Use the quote endpoint to get a real-time quote before creating a swap.
+
+### Security
+
+**What if LendaSwap goes offline during my swap?**
+Your funds are safe. HTLCs have a built-in timelock - if the service doesn't complete its side, you can refund after the timeout expires.
+
+**Can LendaSwap steal my funds?**
+No. The HTLC protocol is cryptographically enforced on-chain. LendaSwap never has unilateral access to your funds. Either the swap completes atomically or you can reclaim your funds after the timelock.
+
+**How are smart contracts audited?**
+LendaSwap's HTLC contracts use deterministic CREATE2 deployment across all chains. The contracts are open-source and verifiable.
+
+### Troubleshooting
+
+**My swap shows 'expired' - what happened?**
+The swap wasn't completed within the timelock period. This usually means the Lightning invoice wasn't paid in time, or the EVM funding transaction wasn't submitted. Your funds are safe - use the refund flow to reclaim them.
+
+**I lost my device - can I recover my swaps?**
+Yes, if you have your mnemonic seed phrase. Use `client.recoverSwaps()` to restore all swap data from the server.
+
+**The SDK throws 'Swap not found in local storage'**
+This means the swap exists on the server but not in your local storage (e.g., after clearing browser data). Call `client.recoverSwaps()` to re-sync.

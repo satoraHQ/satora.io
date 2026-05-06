@@ -1,0 +1,105 @@
+---
+title: Onchain → Arkade
+description: Create a swap from on-chain Bitcoin to Arkade VTXOs for instant, low-fee transactions.
+icon: "bitcoin"
+---
+
+## Overview
+
+On-chain to Arkade swaps allow you to move Bitcoin from the main chain to Arkade. The process:
+
+1. **Create swap** - Get a Taproot (P2TR) HTLC address to send BTC
+2. **Send BTC** - Send on-chain Bitcoin to the HTLC address
+3. **Claim VTXOs** - Receive Arkade VTXOs once the BTC confirms
+
+<Info>
+On-chain swaps require waiting for Bitcoin confirmations (typically 1-6 blocks). For instant swaps, consider using Lightning to Arkade instead.
+</Info>
+
+---
+
+## Create Swap
+
+```ts
+const result = await client.createSwap({
+  source: Asset.BTC_ONCHAIN,
+  target: Asset.BTC_ARKADE,
+  targetAddress: arkadeAddress,
+  targetAmount: amountSats,
+});
+
+const { response } = result;
+```
+
+---
+
+## Send BTC
+
+Send on-chain Bitcoin to the HTLC address returned in the response:
+
+```ts
+console.log("Swap ID:", response.id);
+// ... "550e8400-e29b-41d4-a716-446655440000"
+console.log("Send BTC to:", response.btc_htlc_address);
+// ... "bc1p..."
+console.log("Amount to send:", response.source_amount, "sats");
+// ... "101250 sats" (includes fees)
+```
+
+---
+
+## Monitor Swap Status
+
+After sending on-chain BTC, wait for confirmation and the server to fund the Arkade VHTLC:
+
+<Tabs>
+  <Tab title="WebSocket (recommended)">
+    ```ts
+    const unsubscribe = client.subscribeToSwaps([response.id], (swapId, status) => {
+      console.log("Status:", status);
+      if (status === "serverfunded") {
+        // Ready to claim VTXOs
+        unsubscribe();
+      }
+    });
+    ```
+  </Tab>
+  <Tab title="Polling">
+    ```ts
+    let swap = await client.getSwap(response.id);
+    while (swap.status !== "serverfunded" && swap.status !== "expired") {
+      await new Promise((r) => setTimeout(r, 10_000)); // on-chain, poll less frequently
+      swap = await client.getSwap(response.id);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Claim VTXOs
+
+Once the status is `serverfunded`, claim your Arkade VTXOs:
+
+```ts
+// Claim the Arkade VHTLC to receive VTXOs
+const claimResult = await client.claim(response.id);
+if (!claimResult.success) {
+  throw new Error(`Claim failed: ${claimResult.message}`);
+}
+console.log("Claimed! TX:", claimResult.txHash);
+// ... "ark:abc123..."
+```
+
+---
+
+## Verify Completion
+
+```ts
+const finalSwap = await client.getSwap(response.id);
+console.log("Final status:", finalSwap.status);
+// ... "clientredeemed"
+console.log("Source:", finalSwap.source_amount, "sats (on-chain)");
+console.log("Target:", finalSwap.target_amount, "sats (Arkade)");
+// ... "Target: 100000 sats (Arkade)"
+```

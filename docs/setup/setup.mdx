@@ -1,0 +1,63 @@
+---
+title: Setup
+description: Initialize the SDK and verify API connectivity
+icon: "gear"
+---
+
+## Installation
+
+```bash
+npm install @lendasat/lendaswap-sdk-pure
+# or
+pnpm add @lendasat/lendaswap-sdk-pure
+```
+
+<Info>
+The SDK is pure TypeScript - no WASM, no native dependencies.
+It works in browsers, React Native, and Node.js without any bundler configuration.
+</Info>
+
+<Warning>
+**React Native:** These examples use browser storage (`IdbWalletStorage`).
+For React Native, replace with MMKV-based storage adapters - see
+[React Native Setup](/setup/react-native) for the full implementations.
+</Warning>
+
+---
+
+## Initialize Client
+
+```ts
+import {
+  Client,
+  IdbSwapStorage,
+  IdbWalletStorage,
+} from "@lendasat/lendaswap-sdk-pure";
+
+const client = await Client.builder()
+  .withSignerStorage(new IdbWalletStorage())
+  .withSwapStorage(new IdbSwapStorage())
+  .build();
+```
+
+**Authentication:** The public API endpoints are open and don't require authentication. For tracking, attribution, or referral programs, configure an organization code via `withOrgCode("your-org-code")` on the `ClientBuilder` — it's sent as the `X-Org-Code` header on every request and is optional.
+
+---
+
+## Get Version
+
+Verify the API is running before making swap requests.
+
+```ts
+const version = await client.getVersion();
+console.log(`${JSON.stringify(version)}`);
+```
+
+---
+
+## Best Practices
+
+1. **Initialize Once** - Create the client once using the builder, then reuse it for all operations
+2. **Check Version First** - Use `getVersion()` to verify API connectivity before critical operations
+3. **Handle Errors** - Wrap SDK calls in try/catch for proper error handling
+4. **Use SDK** - The TypeScript SDK handles complexity like key management, state tracking, and storage automatically

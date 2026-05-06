@@ -1,0 +1,158 @@
+---
+title: React Native Setup
+description: Configure the Satora Swaps SDK for React Native with persistent storage using MMKV.
+icon: "mobile"
+---
+
+<Info>
+The Satora Swaps SDK is pure TypeScript with no WASM or native dependencies. It works in React Native out of the box - you just need to provide storage adapters since IndexedDB is not available.
+</Info>
+
+## Installation
+
+```bash
+npm install @lendasat/lendaswap-sdk-pure react-native-mmkv
+```
+
+---
+
+## Storage Adapters
+
+The SDK requires two storage interfaces: `WalletStorage` (for your mnemonic and key index) and `SwapStorage` (for swap state). On the web, the SDK ships `IdbWalletStorage` and `IdbSwapStorage` backed by IndexedDB. In React Native, you need to implement these interfaces using a native storage solution.
+
+Below is a complete implementation using [react-native-mmkv](https://github.com/mrousavy/react-native-mmkv), a fast key-value storage library for React Native.
+
+### Key Storage
+
+```ts
+import type { WalletStorage } from "@lendasat/lendaswap-sdk-pure";
+import { MMKV } from "react-native-mmkv";
+
+const mmkv = new MMKV({ id: "satora-keys" });
+
+export class MmkvWalletStorage implements WalletStorage {
+  async getMnemonic(): Promise<string | null> {
+    return mmkv.getString("mnemonic") ?? null;
+  }
+
+  async setMnemonic(mnemonic: string): Promise<void> {
+    mmkv.set("mnemonic", mnemonic);
+  }
+
+  async getKeyIndex(): Promise<number> {
+    return mmkv.getNumber("keyIndex") ?? 0;
+  }
+
+  async setKeyIndex(index: number): Promise<void> {
+    mmkv.set("keyIndex", index);
+  }
+
+  async incrementKeyIndex(): Promise<number> {
+    const current = await this.getKeyIndex();
+    await this.setKeyIndex(current + 1);
+    return current;
+  }
+
+  async clear(): Promise<void> {
+    mmkv.delete("mnemonic");
+    mmkv.delete("keyIndex");
+  }
+}
+```
+
+### Swap Storage
+
+```ts
+import type { StoredSwap, SwapStorage } from "@lendasat/lendaswap-sdk-pure";
+import type { GetSwapResponse } from "@lendasat/lendaswap-sdk-pure";
+import { MMKV } from "react-native-mmkv";
+
+const mmkv = new MMKV({ id: "lendaswap-swaps" });
+
+export class MmkvSwapStorage implements SwapStorage {
+  private key(swapId: string): string {
+    return `swap:${swapId}`;
+  }
+
+  async get(swapId: string): Promise<StoredSwap | null> {
+    const data = mmkv.getString(this.key(swapId));
+    return data ? JSON.parse(data) : null;
+  }
+
+  async store(swap: StoredSwap): Promise<void> {
+    mmkv.set(this.key(swap.swapId), JSON.stringify(swap));
+  }
+
+  async update(swapId: string, response: GetSwapResponse): Promise<void> {
+    const swap = await this.get(swapId);
+    if (!swap) throw new Error(`Swap ${swapId} not found`);
+    swap.response = response;
+    swap.updatedAt = Date.now();
+    await this.store(swap);
+  }
+
+  async delete(swapId: string): Promise<void> {
+    mmkv.delete(this.key(swapId));
+  }
+
+  async list(): Promise<string[]> {
+    return mmkv
+      .getAllKeys()
+      .filter((k) => k.startsWith("swap:"))
+      .map((k) => k.replace("swap:", ""));
+  }
+
+  async getAll(): Promise<StoredSwap[]> {
+    const ids = await this.list();
+    const swaps = await Promise.all(ids.map((id) => this.get(id)));
+    return swaps.filter(Boolean) as StoredSwap[];
+  }
+
+  async clear(): Promise<void> {
+    mmkv
+      .getAllKeys()
+      .filter((k) => k.startsWith("swap:"))
+      .forEach((k) => mmkv.delete(k));
+  }
+}
+```
+
+---
+
+## Initialize Client
+
+```ts
+import { Client } from "@lendasat/lendaswap-sdk-pure";
+import { MmkvSwapStorage, MmkvWalletStorage } from "./storage";
+
+const client = await Client.builder()
+  .withSignerStorage(new MmkvWalletStorage())
+  .withSwapStorage(new MmkvSwapStorage())
+  .build();
+```
+
+From here, all SDK methods (`createLightningToEvmSwapGeneric`, `createArkadeToEvmSwapGeneric`, `claim`, `getSwap`, `listAllSwaps`, etc.) work identically to the web version.
+
+---
+
+## EVM Transactions
+
+React Native does not have `window.ethereum` or `BrowserProvider`. For EVM interactions (depositing stablecoins, manual claiming on Ethereum), use ethers.js with a direct provider:
+
+```ts
+import { JsonRpcProvider, Wallet } from "ethers";
+
+const provider = new JsonRpcProvider("https://polygon-rpc.com");
+const signer = new Wallet(YOUR_PRIVATE_KEY, provider);
+```
+
+See the [EVM to BTC](/create-swaps/evm-to-btc) page for complete examples with React Native tabs.
+
+---
+
+## Notes
+
+1. **Secure storage** - MMKV stores data unencrypted by default. For production apps, enable MMKV encryption or use a secure enclave for the mnemonic.
+2. **Alternative storage** - You can use any storage backend (`AsyncStorage`, `expo-sqlite`, etc.) by implementing the `WalletStorage` and `SwapStorage` interfaces.
+3. **WebSocket support** - React Native has built-in WebSocket support, so the SDK's `SwapStatusWatcher` (used internally by `subscribeToSwaps(...)` for real-time swap status updates) works without changes.
+4. **No polyfills needed** - The SDK uses only standard JavaScript APIs available in React Native.

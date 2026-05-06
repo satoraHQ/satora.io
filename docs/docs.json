@@ -1,0 +1,233 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "Satora Swaps Docs",
+  "theme": "mint",
+  "logo": {
+    "dark": "/assets/logo/satora_logo_darkmode.svg",
+    "light": "/assets/logo/satora_logo_lightmode.svg",
+    "href": "/"
+  },
+  "favicon": "/logo/dot.svg",
+  "colors": {
+    "primary": "#a3c410",
+    "light": "#a3c410",
+    "dark": "#c2e821"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "Website",
+        "href": "https://satora.io"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Try Satora Swaps",
+      "href": "https://lendaswap.com"
+    }
+  },
+  "icons": {
+    "library": "fontawesome",
+    "style": "solid"
+  },
+  "css": "custom.css",
+  "openapi": "openapi.json",
+  "api": {
+    "playground": {
+      "mode": "simple"
+    },
+    "baseUrl": "https://apilendaswap.satora.io"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Satora Swaps",
+        "groups": [
+          {
+            "group": "Introduction",
+            "icon": "book-open",
+            "pages": ["index", "getting-started", "api-sdk"]
+          },
+          {
+            "group": "Integration",
+            "icon": "code",
+            "pages": [
+              {
+                "group": "Setup & Initialization",
+                "icon": "wrench",
+                "pages": [
+                  "setup/setup",
+                  "setup/wallet-mnemonic"
+                ]
+              },
+              {
+                "group": "Create Swaps",
+                "icon": "plus",
+                "pages": [
+                  "quotes-rates/supported-tokens",
+                  "quotes-rates/exchange-rate",
+                  "create-swaps/btc-to-evm",
+                  "create-swaps/evm-to-btc",
+                  "create-swaps/onchain-to-arkade"
+                ]
+              },
+              {
+                "group": "Handle Failures & Recovery",
+                "icon": "life-ring",
+                "pages": [
+                  "handle-failures/refund-onchain-htlc",
+                  "handle-failures/refund-evm-htlc",
+                  "handle-failures/recover-swaps-from-seed",
+                  "handle-failures/error-codes"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Advanced",
+            "icon": "flask",
+            "pages": ["setup/react-native", "advanced/htlc", "advanced/state-machine"]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "General",
+            "icon": "heart-pulse",
+            "pages": [
+              "api-reference/health",
+              "api-reference/version",
+              "api-reference/mtp"
+            ]
+          },
+          {
+            "group": "Quotes & Tokens",
+            "icon": "coins",
+            "pages": [
+              "api-reference/quote",
+              "api-reference/swap-pairs",
+              "api-reference/tokens",
+              "api-reference/evm-tokens/chains",
+              "api-reference/evm-tokens"
+            ]
+          },
+          {
+            "group": "BTC → EVM Swaps",
+            "icon": "arrow-right",
+            "pages": [
+              "api-reference/swap/lightning/evm",
+              "api-reference/swap/bitcoin/evm",
+              "api-reference/swap/arkade/evm",
+              "api-reference/swap/id/claim-gasless",
+              "api-reference/swap/id/redeem-and-swap-calldata"
+            ]
+          },
+          {
+            "group": "EVM → BTC Swaps",
+            "icon": "arrow-left",
+            "pages": [
+              "api-reference/swap/evm/lightning",
+              "api-reference/swap/evm/bitcoin",
+              "api-reference/swap/evm/arkade",
+              "api-reference/swap/id/fund-gasless",
+              "api-reference/swap/id/swap-and-lock-calldata-permit2"
+            ]
+          },
+          {
+            "group": "BTC ↔ Arkade",
+            "icon": "arrows-left-right",
+            "pages": [
+              "api-reference/swap/lightning/arkade",
+              "api-reference/swap/arkade/lightning",
+              "api-reference/swap/bitcoin/arkade"
+            ]
+          },
+          {
+            "group": "VTXO Swaps",
+            "icon": "bolt",
+            "pages": [
+              "api-reference/vtxo-swap",
+              "api-reference/vtxo-swap/estimate",
+              "api-reference/vtxo-swap/id"
+            ]
+          },
+          {
+            "group": "Swap Management",
+            "icon": "list-check",
+            "pages": [
+              "api-reference/swap/id",
+              "api-reference/swap/recover"
+            ]
+          },
+          {
+            "group": "Refunds",
+            "icon": "rotate-left",
+            "pages": [
+              "api-reference/swap/id/collab-refund-evm",
+              "api-reference/swap/id/collab-refund-evm/params",
+              "api-reference/swap/id/refund-and-swap-calldata",
+              "api-reference/swap/arkade-evm/id/collab-refund",
+              "api-reference/swap/arkade-evm/id/collab-refund-delegate"
+            ]
+          },
+          {
+            "group": "Delegate",
+            "icon": "handshake",
+            "pages": [
+              "api-reference/delegate/cosigner-pk",
+              "api-reference/delegate/settle"
+            ]
+          },
+          {
+            "group": "Support",
+            "icon": "headset",
+            "pages": [
+              "api-reference/support-agents"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Design & Media",
+        "groups": [
+          {
+            "group": "Brand",
+            "icon": "palette",
+            "pages": [
+              "design/logo-colors",
+              "design/typography",
+              "design/buttons",
+              "design/textfields-inputs",
+              "design/media"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "FAQ",
+        "groups": [
+          {
+            "group": "Frequently Asked Questions",
+            "icon": "circle-question",
+            "pages": [
+              "faq/general",
+              "faq/integration",
+              "faq/gasless-and-fees",
+              "faq/security",
+              "faq/troubleshooting"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/lendasat",
+      "github": "https://github.com/satora",
+      "telegram": "https://t.me/lendasatora"
+    }
+  }
+}

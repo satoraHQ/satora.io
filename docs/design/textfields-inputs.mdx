@@ -1,0 +1,129 @@
+---
+title: "Textfields & Inputs"
+description: "Input styles, focus states, and field patterns"
+---
+
+## Input States
+
+All inputs follow the same interaction pattern:
+
+| State        | Effect                                | Timing       |
+| ------------ | ------------------------------------- | ------------ |
+| **Default**  | Subtle border, neutral background     | -            |
+| **Hover**    | Border lightens slightly              | `150ms` ease |
+| **Focus**    | Lime border + ring glow               | `150ms` ease |
+| **Invalid**  | Red border + ring                     | `150ms` ease |
+| **Disabled** | `opacity(0.5)`, `cursor: not-allowed` | -            |
+
+```
+/* Tailwind classes for all inputs */
+border border-gray-200 dark:border-white/10
+bg-white dark:bg-white/5
+rounded-xl outline-none transition-colors duration-150
+focus:border-lime dark:focus:border-lime-light focus:ring-2 focus:ring-lime/20
+```
+
+---
+
+## Standard Input
+
+<video width="280" style={{ display: "block" }} autoPlay loop muted playsInline>
+
+<source src="/assets/videos/textfield_simple.mp4" type="video/mp4" />
+</video>
+
+Three sizes available:
+
+| Size   | Height        | Font Size        |
+| ------ | ------------- | ---------------- |
+| **sm** | `h-9` (36px)  | `text-[13px]`    |
+| **md** | `h-11` (44px) | `text-sm` (14px) |
+| **lg** | `h-12` (48px) | `text-[15px]`    |
+
+```
+/* Standard input */
+h-11 px-4 rounded-xl border border-gray-200 dark:border-white/10
+bg-white dark:bg-white/5
+text-sm text-black dark:text-white
+placeholder:text-gray-400 dark:placeholder:text-white/40
+focus:border-lime dark:focus:border-lime-light focus:ring-2 focus:ring-lime/20
+outline-none transition-colors duration-150
+disabled:cursor-not-allowed disabled:opacity-50
+```
+
+---
+
+## Focus State - Lime Glow
+
+<video width="600" style={{ display: "block" }} autoPlay loop muted playsInline>
+
+<source src="/assets/videos/textfield_large.mp4" type="video/mp4" />
+</video>
+
+```
+/* Focus ring */
+focus:border-lime dark:focus:border-lime-light
+focus:ring-2 focus:ring-lime/20
+```
+
+---
+
+## Invalid State
+
+<div style={{ margin: "1rem 0" }}>
+  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: "360px" }}>
+    <label style={{ fontSize: "13px", fontWeight: 500, color: "#ef4444", fontFamily: "Poppins, sans-serif" }}>Invalid Input</label>
+    <div style={{ display: "flex", alignItems: "center", height: "44px", padding: "0 1rem", background: "#fff", border: "1px solid rgba(239, 68, 68, 0.4)", borderRadius: "12px", fontSize: "14px", color: "#000", fontFamily: "Poppins, sans-serif", boxShadow: "0 0 0 3px rgba(239, 68, 68, 0.1)" }}>
+      Invalid value
+    </div>
+  </div>
+</div>
+
+```
+/* Invalid state */
+border-red-500/40 focus:border-red-500/60
+focus:ring-2 focus:ring-red-500/20
+```
+
+---
+
+## Monospace Input (Addresses / Seeds)
+
+Used for crypto addresses, seed phrases, and other technical values.
+
+<div style={{ margin: "1rem 0" }}>
+  <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", maxWidth: "360px" }}>
+    <label style={{ fontSize: "13px", fontWeight: 500, color: "#555", fontFamily: "Poppins, sans-serif" }}>Bitcoin Address</label>
+    <div style={{ display: "flex", alignItems: "center", height: "44px", padding: "0 1rem", background: "#fff", border: "1px solid #e5e5e5", borderRadius: "12px", fontSize: "13px", color: "#000", fontFamily: "ui-monospace, monospace" }}>
+      bc1q...xyzw
+    </div>
+  </div>
+</div>
+
+```
+/* Add font-mono for addresses & seeds */
+font-mono text-[13px]
+```
+
+---
+
+## Search Input
+
+Includes a search icon on the left and an optional clear button on the right.
+
+<video width="440" style={{ display: "block" }} autoPlay loop muted playsInline>
+
+<source src="/assets/videos/textfield_searchbar_light.mp4" type="video/mp4" />
+</video>
+
+```
+/* Search icon (left slot) */
+h-4 w-4 text-gray-400
+
+/* Clear button (right slot) */
+rounded p-0.5 text-gray-400 transition-colors
+hover:bg-gray-100 hover:text-gray-600
+dark:hover:bg-white/10 dark:hover:text-gray-300
+```
+
+---

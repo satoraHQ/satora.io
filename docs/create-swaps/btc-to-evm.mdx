@@ -1,0 +1,187 @@
+---
+title: BTC → EVM
+description: Swap any BTC variant (Lightning, on-chain, Arkade) to any ERC-20 token on supported EVM chains
+icon: "bolt"
+---
+
+Welcome to the Satora Swaps developer portal. This guide will help you verify your integration environment and complete your first swap.
+
+## Get the TS-SDK
+
+```bash
+npm install @lendasat/lendaswap-sdk-pure
+# or
+pnpm add @lendasat/lendaswap-sdk-pure
+```
+
+## Your First Swap
+
+Follow these steps to complete a test swap from Bitcoin (Lightning) to USDC (Polygon).
+
+First create a new client
+
+```ts
+const client = await Client.builder()
+  .withSignerStorage(new InMemoryWalletStorage())
+  .withSwapStorage(new InMemorySwapStorage())
+  .withOrgCode(process.env.ORG_CODE || "")
+  .build();
+```
+
+You can find all available tokens to swap like this. For this example, we look for the token details for USDC on Polygon.
+
+```ts
+// Target token is specified directly via Asset enum
+// e.g. Asset.USDC_POLYGON, Asset.USDT_POLYGON, etc.
+```
+
+Afterward we can create the swap request:
+
+```ts
+const result = await client.createSwap({
+  source: Asset.BTC_LIGHTNING,
+  target: Asset.USDC_POLYGON,
+  targetAddress: destinationAddress,
+  sourceAmount: amountSats,
+});
+
+const { response } = result;
+```
+
+Pay the Lightning invoice returned in the response with any Lightning wallet (e.g., Phoenix, Wallet of Satoshi).
+The SDK generates the secret and shares the hash - the service creates a Boltz reverse swap it can only settle after you reveal the secret.
+
+```ts
+console.log("Pay invoice:", response.bolt11_invoice);
+```
+
+Wait for the status to become `ServerFunded`, then claim your tokens. You can either poll or use real-time WebSocket updates:
+
+<Tabs>
+  <Tab title="WebSocket (recommended)">
+    ```ts
+    const unsubscribe = client.subscribeToSwaps([response.id], (swapId, status) => {
+      console.log("Status:", status);
+      if (status === "serverfunded") {
+        // Ready to claim
+        unsubscribe();
+      }
+    });
+    ```
+  </Tab>
+  <Tab title="Polling">
+    ```ts
+    let swap = await client.getSwap(response.id);
+    while (swap.status !== "serverfunded" && swap.status !== "expired") {
+      await new Promise((r) => setTimeout(r, 3000));
+      swap = await client.getSwap(response.id);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+    **Gasless on all chains:** Claiming is gasless on Polygon, Ethereum, and Arbitrum via EIP-712 signatures.
+    A small gas fee is deducted from the swap amount depending on network conditions.
+    Alternatively, you can claim manually with your own signer and pay gas yourself.
+</Info>
+
+```ts
+const claim = await client.claimViaGasless(response.id, destinationAddress);
+console.log("Claimed! TX:", claim.txHash);
+// ... "0xabc123..."
+```
+
+The swap will complete and you will receive your tokens.
+
+---
+
+## Build with AI
+
+We have generated a [llms-full.txt](/llms-full.txt) file that converts all our documentation into a single markdown document following the [llmstxt.org](https://llmstxt.org/) standard. Feed it to any AI coding agent (Claude, Cursor, Copilot, etc.) and it will have everything it needs to integrate the Satora Swaps SDK into your project.
+
+---
+
+<AccordionGroup>
+    <Accordion title="Full example">
+        ```ts
+/**
+ * Lightning → USDC on Polygon: end-to-end example.
+ */
+
+import {
+Asset,
+Client,
+InMemorySwapStorage,
+InMemoryWalletStorage,
+} from "../src";
+
+// #region lightning-to-evm-setup
+const client = await Client.builder()
+.withSignerStorage(new InMemoryWalletStorage())
+.withSwapStorage(new InMemorySwapStorage())
+.withOrgCode(process.env.ORG_CODE || "")
+.build();
+// #endregion lightning-to-evm-setup
+
+const destinationAddress = "0xYourPolygonAddress";
+const amountSats = 100_000;
+
+// #region create-swap
+const result = await client.createSwap({
+source: Asset.BTC_LIGHTNING,
+target: Asset.USDC_POLYGON,
+targetAddress: destinationAddress,
+sourceAmount: amountSats,
+});
+
+const { response } = result;
+// #endregion create-swap
+
+if (!("bolt11_invoice" in response)) {
+throw new Error("Expected Lightning swap response");
+}
+
+// #region pay-invoice
+console.log("Pay invoice:", response.bolt11_invoice);
+// #endregion pay-invoice
+
+// ... "lnbc1m1p..."
+console.log("Swap ID:", response.id);
+// ... "550e8400-e29b-41d4-a716-446655440000"
+
+// #region poll-status
+let swap = await client.getSwap(response.id);
+while (swap.status !== "serverfunded" && swap.status !== "expired") {
+await new Promise((r) => setTimeout(r, 3000));
+swap = await client.getSwap(response.id);
+console.log("Status:", swap.status);
+// ... "pending" → "clientfunded" → "serverfunded"
+}
+// #endregion poll-status
+
+if (swap.status === "expired") {
+throw new Error("Swap expired - invoice was not paid in time.");
+}
+
+// #region claim-gasless
+const claim = await client.claimViaGasless(response.id, destinationAddress);
+console.log("Claimed! TX:", claim.txHash);
+// ... "0xabc123..."
+// #endregion claim-gasless
+
+// #region verify-complete
+const final = await client.getSwap(response.id);
+console.log("Final status:", final.status);
+// ... "clientredeemed"
+console.log("Source:", final.source_amount, "sats");
+console.log("Target:", final.target_amount, final.target_token.symbol);
+// ... "Target: 48250000 USDC"
+// #endregion verify-complete
+
+```
+</Accordion>
+</AccordionGroup>
+
+---
+```

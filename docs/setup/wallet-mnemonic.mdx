@@ -1,0 +1,80 @@
+---
+title: Key Management & Mnemonic
+description: Self-custodial key setup and management
+icon: "key"
+---
+
+## Self-Custody Model
+
+Your mnemonic seed phrase is the master key to all your swap operations. Satora Swaps never has access to your private keys - all cryptographic operations happen locally.
+
+**Key principles:**
+
+- **Your keys, your coins** - Private keys never leave your device
+- **Deterministic derivation** - All swap parameters derived from your seed
+- **Recoverable** - Restore pending swaps anytime with your mnemonic
+- **Automatic storage** - The SDK stores your mnemonic securely via the configured storage provider
+
+---
+
+## Generate New Mnemonic
+
+Generate a new 12-word BIP39 mnemonic using the `Signer` class:
+
+```ts
+import { Client, InMemoryWalletStorage } from "@lendasat/lendaswap-sdk-pure";
+
+// The SDK generates a mnemonic automatically when none is provided
+const client = await Client.builder()
+  .withSignerStorage(new InMemoryWalletStorage())
+  .build();
+```
+
+---
+
+## Import Existing Mnemonic
+
+To restore from an existing mnemonic, pass it to the client builder:
+
+```ts
+import {
+  Client,
+  IdbSwapStorage,
+  IdbWalletStorage,
+} from "@lendasat/lendaswap-sdk-pure";
+
+const client = await Client.builder()
+  .withSignerStorage(new IdbWalletStorage())
+  .withSwapStorage(new IdbSwapStorage())
+  .withMnemonic("your twelve word mnemonic phrase goes here ...")
+  .build();
+```
+
+---
+
+## Get Xpub
+
+Retrieve the user ID xpub from the initialized client. Note: This is an identifier, not a wallet.
+
+```ts
+// Retrieve the xpub from the client for recovery purposes
+const xpub = client.getUserIdXpub();
+console.log("Xpub:", xpub);
+```
+
+---
+
+## Key Derivation
+
+The SDK uses BIP32/BIP39 standards for deterministic key derivation. Each swap gets unique cryptographic parameters derived from your mnemonic:
+
+- **Preimage** - Random secret for HTLC
+- **Preimage Hash** - SHA256 hash used as hash lock
+- **Own Public Key** - For VHTLC scripts
+- **User ID** - Derived identifier for swap recovery
+
+All derivation happens locally - your mnemonic never leaves your device.
+
+<Warning>
+**Critical:** Your mnemonic is the only way to recover pending swaps. If you lose it, you cannot recover funds locked in HTLCs.
+</Warning>

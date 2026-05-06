@@ -1,0 +1,41 @@
+---
+title: Integration
+description: Questions about integrating the Satora Swaps SDK
+icon: "plug"
+---
+
+<AccordionGroup>
+
+<Accordion title="Should I use the SDK or the REST API?">
+**Use the TypeScript SDK.** It handles key management, state tracking, error recovery, and gasless claiming out of the box. The REST API is available but not recommended for production use - it may change without notice. See [API & SDK](/api-sdk) for details.
+</Accordion>
+
+<Accordion title="Which platforms does the SDK support?">
+The SDK is pure TypeScript with zero native dependencies. It works in:
+- **Browsers** (any modern browser)
+- **React Native** (with custom storage adapters, see [React Native setup](/setup/react-native))
+- **Node.js** (server-side integrations)
+
+No WASM, no native modules.
+</Accordion>
+
+<Accordion title="Do I need an API key?">
+No authentication is required to use Satora Swaps. You can optionally pass an API key for tracking and analytics purposes, but it is not required for creating or completing swaps.
+</Accordion>
+
+<Accordion title="How do I handle errors and failed swaps?">
+The SDK has built-in error handling. For common error codes and recovery strategies, see [Error Codes](/handle-failures/error-codes). For refunding stuck swaps, see:
+- [Refund On-chain HTLC](/handle-failures/refund-onchain-htlc)
+- [Refund EVM HTLC](/handle-failures/refund-evm-htlc)
+- [Recover Swaps from Seed](/handle-failures/recover-swaps-from-seed)
+</Accordion>
+
+<Accordion title="What happens if a swap gets stuck?">
+Swaps have built-in timeouts. If a swap isn't completed within the timelock period (typically 24 hours for the client side), funds are automatically refundable. The SDK can detect stuck swaps and initiate refunds. You can also recover swaps using your mnemonic seed phrase.
+</Accordion>
+
+<Accordion title="Can I integrate Satora Swaps into my backend and manage swaps for my users?">
+Yes, but there are trust tradeoffs to consider. When your backend holds keys and manages swaps on behalf of users, your users are trusting you with custody. We can help you design a setup that minimizes or eliminates these tradeoffs - but it requires us to understand your architecture first. [Reach out to us](mailto:support@lendasat.com?subject=Backend%20Integration) and we'll work with you on a solution.
+</Accordion>
+
+</AccordionGroup>
