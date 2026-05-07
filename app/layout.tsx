@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     siteName: "Satora",
     images: [
       {
-        url: "https://satora.io/favicon/dot.svg",
+        url: "https://satora.io/thumbnail.jpg",
         width: 1200,
         height: 630,
       },
@@ -55,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Satora - Make Bitcoin Move",
     description: "Bitcoin loans without counterparty risk",
-    images: ["https://satora.io/favicon/dot.svg"],
+    images: ["https://satora.io/thumbnail.jpg"],
     creator: "@satora",
     site: "@satora",
   },

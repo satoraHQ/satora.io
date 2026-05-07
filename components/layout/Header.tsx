@@ -31,7 +31,7 @@ interface CommunityLink {
 }
 
 const COMMUNITY_LINKS: CommunityLink[] = [
-  { label: "X", href: "https://x.com/lendasat", Icon: FaXTwitter },
+  { label: "X", href: "https://x.com/satora_io", Icon: FaXTwitter },
   { label: "Telegram", href: "https://t.me/lendasatcommunity", Icon: FaTelegram },
   { label: "GitHub", href: "https://github.com/satora", Icon: FaGithub },
   { label: "LinkedIn", href: "https://linkedin.com/company/satora", Icon: FaLinkedin },

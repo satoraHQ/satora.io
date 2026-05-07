@@ -96,7 +96,7 @@ export default function Footer() {
             </p>
             <div className="space-y-2.5">
               <a
-                href="https://x.com/lendasat"
+                href="https://x.com/satora_io"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={linkClass + " flex items-center gap-2"}

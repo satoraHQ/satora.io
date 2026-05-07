@@ -40,13 +40,7 @@ const PARTNERS_DATA = [
     height: "h-4",
     url: "https://getalby.com",
   },
-  {
-    name: "BTCPay Server",
-    logo: "/assets/partners/btcpayserver_logo.svg",
-    height: "h-5",
-    url: "https://btcpayserver.org",
-  },
-  {
+{
     name: "Lendasat",
     logo: "/assets/partners/lendasat_logo.svg",
     height: "h-6",
