@@ -23,7 +23,7 @@
     "primary": {
       "type": "button",
       "label": "Try Satora Swaps",
-      "href": "https://lendaswap.com"
+      "href": "https://app.satora.io"
     }
   },
   "icons": {
@@ -225,7 +225,7 @@
   },
   "footer": {
     "socials": {
-      "x": "https://x.com/lendasat",
+      "x": "https://x.com/satora_io",
       "github": "https://github.com/satora",
       "telegram": "https://t.me/lendasatora"
     }
