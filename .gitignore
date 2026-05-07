@@ -55,7 +55,6 @@ content/docs/lendaswap/_examples/
 .factory/
 .gemini/
 .github/
-!.github/workflows/
 .goose/
 .junie/
 .kilocode/
