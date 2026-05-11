@@ -3,7 +3,7 @@
 > LendaSwap enables instant, trustless swaps between Bitcoin (via Lightning, Arkade, or on-chain) and EVM tokens on Polygon, Ethereum, and Arbitrum.
 
 - NPM: https://www.npmjs.com/package/@lendasat/lendaswap-sdk-pure
-- GitHub: https://github.com/lendasat/lendaswap-sdk/tree/main/ts-pure-sdk
+- GitHub: https://github.com/satoraHQ/lendaswap-sdk/tree/main/ts-pure-sdk
 - Docs: https://docs.satora.io
 
 ---
