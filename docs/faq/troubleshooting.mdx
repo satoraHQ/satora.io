@@ -11,11 +11,11 @@ The swap wasn't completed within the timelock period. This usually means the Lig
 </Accordion>
 
 <Accordion title="I lost my device - can I recover my swaps?">
-Yes, if you have your mnemonic seed phrase. Use `client.recoverSwaps()` to restore all swap data from the server. See [Recover Swaps from Seed](/handle-failures/recover-swaps-from-seed).
+Yes, if you have your mnemonic seed phrase. Use `client.recoverAllSwaps()` to restore all swap data from the server. See [Recover Swaps from Seed](/handle-failures/recover-swaps-from-seed).
 </Accordion>
 
 <Accordion title="The SDK throws 'Swap not found in local storage'">
-This means the swap exists on the server but not in your local storage (e.g., after clearing browser data). Call `client.recoverSwaps()` to re-sync. See [Error Codes](/handle-failures/error-codes) for all error types.
+This means the swap exists on the server but not in your local storage (e.g., after clearing browser data). Call `client.recoverAllSwaps()` to re-sync. See [Error Codes](/handle-failures/error-codes) for all error types.
 </Accordion>
 
 </AccordionGroup>

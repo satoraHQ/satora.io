@@ -258,7 +258,10 @@ ${
   .build();
 
 // On app startup, recover any swaps interrupted by browser close / app kill:
-await client.recoverSwaps();
+const recovery = await client.recoverAllSwaps();
+if (!recovery.complete) {
+  console.warn("Swap recovery stopped before completion:", recovery.errorMessage);
+}
 
 // Also on app startup: resume polling for any non-terminal swap in storage,
 // so users returning mid-swap don't need to re-trigger anything.
@@ -389,7 +392,10 @@ ${
   .build();
 
 // On app startup, recover any swaps interrupted by browser close / app kill:
-await client.recoverSwaps();
+const recovery = await client.recoverAllSwaps();
+if (!recovery.complete) {
+  console.warn("Swap recovery stopped before completion:", recovery.errorMessage);
+}
 
 // Also on app startup: resume polling for any non-terminal swap in storage.
 // CRITICAL for EVM→BTC: if the user reloads after fundSwap, their EVM tokens
@@ -576,7 +582,7 @@ Production-ready TypeScript code using the Satora Swaps SDK that:
    - **Build a \"Swaps\" / history view** backed by \`client.listAllSwaps()\`. Each row shows: swap ID, direction, amount, status, and per-row actions (inspect, claim, refund).
    - **Never rely on the user holding a reference to an in-flight swap**  - if they close the modal or reload mid-swap, they must be able to find it again from the history view.
 7. **Polling that survives navigation and reload.** On app mount, enumerate all stored swaps via \`listAllSwaps()\`, filter for non-terminal statuses, and resume polling for each one in the background. Do **not** tie polling to the send-modal's lifecycle  - polling must live in a store/provider/service that outlives any individual view. When a non-terminal swap reaches \`serverfunded\` (BTC→EVM) the claim should fire automatically (if gasless) or surface a prominent \"Claim\" CTA in the history view.
-8. **Recovers interrupted swaps** on app startup via \`client.recoverSwaps()\` (fire-and-forget alongside  - this repopulates storage from the server for any swap the client's local storage lost).
+8. **Recovers interrupted swaps** on app startup via \`client.recoverAllSwaps()\`  - this repopulates storage from the server for any swap the client's local storage lost and reports partial progress if recovery is interrupted.
 
 ## Complete working code examples
 
@@ -612,7 +618,7 @@ const client = await Client.builder()
 | \`client.refundSwap(swapId, {destinationAddress, feeRateSatPerVb})\` | Refund BTC (after 24h locktime expiry) |
 | \`client.collabRefundEvmSwap(swapId, "swap-back"\\|"direct")\` | Refund EVM (collaborative, faster) |
 | \`client.refundEvmWithSigner(swapId, evmSigner, "swap-back"\\|"direct")\` | Refund EVM (timeout, after 24h) |
-| \`client.recoverSwaps()\` | Resume in-progress swaps from storage |
+| \`client.recoverAllSwaps()\` | Restore all discoverable swaps from the server into local storage |
 | \`client.listAllSwaps()\` | List all stored swaps |
 | \`client.getTokens(chainId?)\` | Discover available tokens on a chain |
 
@@ -723,7 +729,7 @@ ${
       ? "MmkvWalletStorage persists the mnemonic in MMKV  - same keys across app sessions"
       : "The WalletStorage adapter persists the mnemonic  - same keys across sessions"
   }
-- **Critical**: Always call \`client.recoverSwaps()\` on app startup to resume any in-progress swaps
+- **Critical**: Always call \`client.recoverAllSwaps()\` on app startup to restore any swaps missing from local storage
 
 ### Developer portal & organization tracking
 If the user wants to track swaps, view analytics, and manage their organization's integration, direct them to the **Satora Developer Portal**: https://developer.lendaswap.com/

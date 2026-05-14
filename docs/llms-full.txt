@@ -155,9 +155,12 @@ for (const s of stored.filter(x => NON_TERMINAL.has(x.response.status))) {
   resumePoll(s.swapId); // your background poller
 }
 
-// Also fire-and-forget recoverSwaps() to repopulate storage from the server
-// for any swap the local storage lost (e.g. cleared browser data):
-await client.recoverSwaps();
+// Also recover all swaps from the server for any swap local storage lost
+// (e.g. cleared browser data):
+const recovery = await client.recoverAllSwaps();
+if (!recovery.complete) {
+  console.warn("Swap recovery stopped before completion:", recovery.errorMessage);
+}
 ```
 
 When a polled swap reaches `serverfunded` (BTC→EVM):
@@ -999,8 +1002,14 @@ const client = await Client.builder()
   .build();
 
 // Recover all swaps from the server
-const recovered = await client.recoverSwaps();
-console.log(`Recovered ${recovered.length} swaps`);
+const recovery = await client.recoverAllSwaps();
+console.log(`Recovered ${recovery.swaps.length} swaps`);
+
+if (!recovery.complete) {
+  console.warn("Recovery stopped before completion:", recovery.errorMessage);
+  console.warn("Successful scans:", recovery.scans);
+  console.warn("Scanned until:", recovery.scannedUntil);
+}
 ```
 
 Best practices:
@@ -1078,7 +1087,7 @@ Swap Operation Errors:
 
 | Error Message (contains)                  | Solution                                    |
 | ----------------------------------------- | ------------------------------------------- |
-| `"Swap not found in local storage"`       | Use `recoverSwaps()` to restore from server |
+| `"Swap not found in local storage"`       | Use `recoverAllSwaps()` to restore from server |
 | `"does not have an Arkade VHTLC address"` | Check swap direction                        |
 | `"Unsupported direction"`                 | Use correct method for this swap direction  |
 
@@ -1088,8 +1097,8 @@ Swap Operation Errors:
 | ----------------------------------- | -------------------------------------------- |
 | `"Min amount is ..."`               | Increase swap amount above the minimum       |
 | `"Invalid mnemonic phrase"`         | Check spelling, use 12 or 24 words           |
-| `"Swap not found"`                  | Use `recoverSwaps()` for xpub-based recovery |
-| `"Swap not found in local storage"` | Call `recoverSwaps()` to restore swap data   |
+| `"Swap not found"`                  | Use `recoverAllSwaps()` for xpub-based recovery |
+| `"Swap not found in local storage"` | Call `recoverAllSwaps()` to restore swap data   |
 | `"Server cannot fund this swap"`    | Wait and retry later                         |
 | `"Health check failed"`             | Check internet connection and server URL     |
 
@@ -1526,7 +1535,7 @@ LendaSwap's HTLC contracts use deterministic CREATE2 deployment across all chain
 The swap wasn't completed within the timelock period. This usually means the Lightning invoice wasn't paid in time, or the EVM funding transaction wasn't submitted. Your funds are safe - use the refund flow to reclaim them.
 
 **I lost my device - can I recover my swaps?**
-Yes, if you have your mnemonic seed phrase. Use `client.recoverSwaps()` to restore all swap data from the server.
+Yes, if you have your mnemonic seed phrase. Use `client.recoverAllSwaps()` to restore all swap data from the server.
 
 **The SDK throws 'Swap not found in local storage'**
-This means the swap exists on the server but not in your local storage (e.g., after clearing browser data). Call `client.recoverSwaps()` to re-sync.
+This means the swap exists on the server but not in your local storage (e.g., after clearing browser data). Call `client.recoverAllSwaps()` to re-sync.

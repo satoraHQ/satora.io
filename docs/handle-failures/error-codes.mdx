@@ -107,12 +107,12 @@ The SDK throws standard JavaScript `Error` objects. Match on the `message` prope
 
 ### Swap Operation Errors
 
-| Error Message (contains)                  | Description                            | Solution                                    |
-| ----------------------------------------- | -------------------------------------- | ------------------------------------------- |
-| `"Swap not found in local storage"`       | Swap not in local storage              | Use `recoverSwaps()` to restore from server |
-| `"Swap ... not found in local storage"`   | Specific swap missing                  | Recover or re-create swap                   |
-| `"does not have an Arkade VHTLC address"` | Swap type mismatch for operation       | Check swap direction                        |
-| `"Unsupported direction"`                 | Operation not valid for this swap type | Use correct method for this swap direction  |
+| Error Message (contains)                  | Description                            | Solution                                       |
+| ----------------------------------------- | -------------------------------------- | ---------------------------------------------- |
+| `"Swap not found in local storage"`       | Swap not in local storage              | Use `recoverAllSwaps()` to restore from server |
+| `"Swap ... not found in local storage"`   | Specific swap missing                  | Recover or re-create swap                      |
+| `"does not have an Arkade VHTLC address"` | Swap type mismatch for operation       | Check swap direction                           |
+| `"Unsupported direction"`                 | Operation not valid for this swap type | Use correct method for this swap direction     |
 
 ### API Call Errors
 
@@ -127,11 +127,11 @@ The SDK throws standard JavaScript `Error` objects. Match on the `message` prope
 
 ## Common Solutions
 
-| Error                               | Quick Fix                                    |
-| ----------------------------------- | -------------------------------------------- |
-| `"Min amount is ..."`               | Increase swap amount above the minimum       |
-| `"Invalid mnemonic phrase"`         | Check spelling, use 12 or 24 words           |
-| `"Swap not found"`                  | Use `recoverSwaps()` for xpub-based recovery |
-| `"Swap not found in local storage"` | Call `recoverSwaps()` to restore swap data   |
-| `"Server cannot fund this swap"`    | Wait and retry later                         |
-| `"Health check failed"`             | Check internet connection and server URL     |
+| Error                               | Quick Fix                                       |
+| ----------------------------------- | ----------------------------------------------- |
+| `"Min amount is ..."`               | Increase swap amount above the minimum          |
+| `"Invalid mnemonic phrase"`         | Check spelling, use 12 or 24 words              |
+| `"Swap not found"`                  | Use `recoverAllSwaps()` for xpub-based recovery |
+| `"Swap not found in local storage"` | Call `recoverAllSwaps()` to restore swap data   |
+| `"Server cannot fund this swap"`    | Wait and retry later                            |
+| `"Health check failed"`             | Check internet connection and server URL        |
