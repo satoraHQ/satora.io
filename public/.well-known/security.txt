@@ -1,0 +1,6 @@
+Contact: mailto:security@satora.io
+Encryption: https://satora.io/.well-known/security.asc
+Preferred-Languages: en
+Canonical: https://satora.io/.well-known/security.txt
+Policy: https://satora.io/security
+Expires: 2027-05-25T00:00:00Z
