@@ -26,6 +26,7 @@ A buyer wants to receive Bitcoin. A seller wants to receive fiat or another agre
 That is why escrow exists.
 
 In a non-custodial P2P marketplace, escrow is the mechanism that lets 2 strangers trade without turning the platform into a custodian. Instead of having HodlHodl hold user funds in a centralized account, funds are locked into a Bitcoin multi-sig contract where release depends on the trade outcome:
+
 - If everything goes well, the BTC is released to the buyer.
 - If there is a dispute, the escrow logic gives the platform a role in arbitration without giving it unilateral control over funds.
 
@@ -40,8 +41,9 @@ The Lightning Network is excellent for peer-to-peer payments, but it is not desi
 Arkade, the first implementation of the Ark protocol, brings off-chain Bitcoin contracts to the trade flow. Instead of forcing every escrow action onto the Bitcoin blockchain, HodlHodl can use Arkade to create a fast, low-cost escrow environment while preserving the self-custodial guarantees users expect. Under the hood, funds can be represented and controlled through Arkade’s off-chain Bitcoin model, while still retaining Bitcoin-native security assumptions and unilateral exit paths.
 
 ![Drawing of HodlHodl's Arkade contract flow](/assets/images/blog/escrow-drawing.jpg)
-  
+
 The result is a better architecture for P2P trading:
+
 - **Escrow remains non-custodial** - users are not simply depositing funds into a centralized exchange wallet.
 - **Settlement becomes faster** - the trade experience can move at Lightning speed.
 - **Small trades become viable** - limits of $5 to $50 are now practical instead of being priced out by on-chain fees.
@@ -56,6 +58,7 @@ This last point is essential, Arkade provides the escrow environment, but Lightn
 Satora’s role in this new feature is to make the Lightning ↔ Arkade transition happen without turning the trade into a custodial flow.
 
 From the user’s perspective, the experience is simple: fund or receive a trade through Lightning, but behind that simple interface, the escrow itself lives in Arkade. That means the system needs a reliable way to move value between 2 different Bitcoin environments:
+
 - Lightning, where the user sends or receives payment;
 - Arkade, where the non-custodial escrow logic is executed.
 
@@ -70,6 +73,7 @@ Satora swaps are built around atomic swap primitives such as HTLCs. In practical
 This is the core reason Satora exists: to make Bitcoin-native financial applications interoperable across the rails users actually use without ever introducing a third-party risk.
 
 For our partner HodlHodl, that means:
+
 - Lightning becomes the user-facing payment layer.
 - Arkade becomes the escrow execution layer.
 - Satora becomes the trustless swap layer connecting both.
