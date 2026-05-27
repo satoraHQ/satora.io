@@ -87,6 +87,12 @@ export default function Footer() {
               >
                 Brand Assets
               </Link>
+              <Link
+                href="/security"
+                className={linkClass + " block"}
+              >
+                Security
+              </Link>
             </div>
           </div>
 
