@@ -36,7 +36,8 @@ First create a client (see [Setup & Initialization](/setup/setup)), then create 
 
     const { response } = result;
     ```
-  </Tab>
+
+</Tab>
   <Tab title="Arbitrum">
     ```ts
     const result = await client.createSwap({
@@ -48,7 +49,8 @@ First create a client (see [Setup & Initialization](/setup/setup)), then create 
 
     const { response } = result;
     ```
-  </Tab>
+
+</Tab>
 </Tabs>
 
 ---
@@ -110,7 +112,6 @@ const claim = await client.claimViaGasless(response.id, destinationAddress);
 console.log("Claimed! TX:", claim.txHash);
 // ... "0xabc123..."
 ```
-
 
 ---
 
@@ -184,7 +185,8 @@ console.log("Target:", final.target_amount, final.target_token.symbol);
     console.log("Final status:", final.status);
     console.log("Target:", final.target_amount, final.target_token.symbol);
     ```
-  </Accordion>
+
+</Accordion>
 </AccordionGroup>
 
 ---
