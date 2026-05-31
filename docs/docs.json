@@ -67,6 +67,7 @@
                   "quotes-rates/supported-tokens",
                   "quotes-rates/exchange-rate",
                   "create-swaps/btc-to-evm",
+                  "create-swaps/onchain-to-tbtc",
                   "create-swaps/evm-to-btc",
                   "create-swaps/onchain-to-arkade"
                 ]

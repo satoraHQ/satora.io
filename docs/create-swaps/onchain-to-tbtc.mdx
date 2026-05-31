@@ -1,0 +1,194 @@
+---
+title: Onchain → tBTC
+description: Swap on-chain Bitcoin (L1) to tBTC on Ethereum or Arbitrum.
+icon: "bitcoin"
+---
+
+## Overview
+
+This guide walks through swapping native on-chain Bitcoin to [tBTC](https://threshold.network) on Ethereum or Arbitrum. The flow is:
+
+1. **Create swap**: get a Taproot (P2TR) HTLC address to send BTC to
+2. **Send BTC**: fund the HTLC with an on-chain transaction
+3. **Claim tBTC**: receive tBTC on the EVM chain once the BTC confirms
+
+<Info>
+On-chain swaps require waiting for Bitcoin confirmations (typically 1–6 blocks) before the server funds the EVM side. For instant swaps, consider using Lightning or Arkade as the source instead.
+</Info>
+
+tBTC is a 1:1 Bitcoin-backed ERC-20 with **18 decimals**, so target amounts are denominated in `wei`-style units rather than sats.
+
+---
+
+## Create Swap
+
+First create a client (see [Setup & Initialization](/setup/setup)), then create the swap. Use `Asset.TBTC_ETHEREUM` or `Asset.TBTC_ARBITRUM` as the target:
+
+<Tabs>
+  <Tab title="Ethereum">
+    ```ts
+    const result = await client.createSwap({
+      source: Asset.BTC_ONCHAIN,
+      target: Asset.TBTC_ETHEREUM,
+      targetAddress: destinationAddress, // "0x..."
+      sourceAmount: amountSats,
+    });
+
+    const { response } = result;
+    ```
+  </Tab>
+  <Tab title="Arbitrum">
+    ```ts
+    const result = await client.createSwap({
+      source: Asset.BTC_ONCHAIN,
+      target: Asset.TBTC_ARBITRUM,
+      targetAddress: destinationAddress, // "0x..."
+      sourceAmount: amountSats,
+    });
+
+    const { response } = result;
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Send BTC
+
+Send on-chain Bitcoin to the HTLC address returned in the response:
+
+```ts
+console.log("Swap ID:", response.id);
+// ... "550e8400-e29b-41d4-a716-446655440000"
+console.log("Send BTC to:", response.btc_htlc_address);
+// ... "bc1p..."
+console.log("Amount to send:", response.source_amount, "sats");
+// ... "101250 sats" (includes fees)
+```
+
+<Warning>
+Send the exact `source_amount` to the exact `btc_htlc_address` or the swap will fail and you will have to refund.
+</Warning>
+
+---
+
+## Monitor Swap Status
+
+After broadcasting the BTC transaction, wait for it to confirm and for the server to fund the EVM HTLC. You can either subscribe to real-time updates or poll:
+
+<Tabs>
+  <Tab title="WebSocket (recommended)">
+    ```ts
+    const unsubscribe = client.subscribeToSwaps([response.id], (swapId, status) => {
+      console.log("Status:", status);
+      if (status === "serverfunded") {
+        // Ready to claim tBTC
+        unsubscribe();
+      }
+    });
+    ```
+  </Tab>
+  <Tab title="Polling">
+    ```ts
+    let swap = await client.getSwap(response.id);
+    while (swap.status !== "serverfunded" && swap.status !== "expired") {
+      await new Promise((r) => setTimeout(r, 10_000)); // on-chain, poll less frequently
+      swap = await client.getSwap(response.id);
+    }
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## Claim tBTC
+
+Once the status is `serverfunded`, claim your tBTC. Claiming is **gasless** on both Ethereum and Arbitrum via EIP-712 signatures.
+
+```ts
+const claim = await client.claimViaGasless(response.id, destinationAddress);
+console.log("Claimed! TX:", claim.txHash);
+// ... "0xabc123..."
+```
+
+
+---
+
+## Verify Completion
+
+```ts
+const final = await client.getSwap(response.id);
+console.log("Final status:", final.status);
+// ... "clientredeemed"
+console.log("Source:", final.source_amount, "sats (on-chain)");
+console.log("Target:", final.target_amount, final.target_token.symbol);
+// ... "Target: 99800000000000000 tBTC" (18 decimals)
+```
+
+---
+
+<AccordionGroup>
+  <Accordion title="Full example">
+    ```ts
+    /**
+     * On-chain BTC → tBTC on Arbitrum: end-to-end example.
+     */
+
+    import {
+      Asset,
+      Client,
+      InMemorySwapStorage,
+      InMemoryWalletStorage,
+    } from "@lendasat/lendaswap-sdk-pure";
+
+    const client = await Client.builder()
+      .withSignerStorage(new InMemoryWalletStorage())
+      .withSwapStorage(new InMemorySwapStorage())
+      .withOrgCode(process.env.ORG_CODE || "")
+      .build();
+
+    const destinationAddress = "0xYourArbitrumAddress";
+    const amountSats = 100_000;
+
+    const result = await client.createSwap({
+      source: Asset.BTC_ONCHAIN,
+      target: Asset.TBTC_ARBITRUM,
+      targetAddress: destinationAddress,
+      sourceAmount: amountSats,
+    });
+
+    const { response } = result;
+
+    console.log("Swap ID:", response.id);
+    console.log("Send BTC to:", response.btc_htlc_address);
+    console.log("Amount to send:", response.source_amount, "sats");
+
+    // Wait for the BTC to confirm and the server to fund the EVM HTLC.
+    let swap = await client.getSwap(response.id);
+    while (swap.status !== "serverfunded" && swap.status !== "expired") {
+      await new Promise((r) => setTimeout(r, 10_000));
+      swap = await client.getSwap(response.id);
+      console.log("Status:", swap.status);
+      // ... "pending" → "clientfunded" → "serverfunded"
+    }
+
+    if (swap.status === "expired") {
+      throw new Error("Swap expired - BTC was not sent in time.");
+    }
+
+    const claim = await client.claimViaGasless(response.id, destinationAddress);
+    console.log("Claimed! TX:", claim.txHash);
+    // ... "0xabc123..."
+
+    const final = await client.getSwap(response.id);
+    console.log("Final status:", final.status);
+    console.log("Target:", final.target_amount, final.target_token.symbol);
+    ```
+  </Accordion>
+</AccordionGroup>
+
+---
+
+## Recovering Failed Swaps
+
+If you send BTC but the server never funds the EVM side (or the swap expires), you can reclaim your Bitcoin once the HTLC timelock passes. See [Refund an on-chain HTLC](/handle-failures/refund-onchain-htlc).

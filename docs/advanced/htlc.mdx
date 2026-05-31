@@ -106,7 +106,8 @@ Client reveals the preimage S to claim their tokens:
 
 - **Gasless (recommended):** Client signs an EIP-712 message. Server calls `redeemAndExecute` on the coordinator, which redeems the HTLC, optionally swaps tokens via DEX routing, and sweeps to the client's destination.
 - **Manual:** Client calls `redeem` directly on HTLCErc20 with the preimage (requires signer + gas).
-  </Step>
+
+</Step>
 
 <Step title="Service Settles BTC">
 Service extracts S from the EVM chain and claims the Arkade VHTLC via Boltz (or spends the on-chain P2TR HTLC by revealing the hashlock script path with S).
