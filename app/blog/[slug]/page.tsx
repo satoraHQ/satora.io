@@ -2,12 +2,27 @@ import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import { blogSource } from "@/config/blog-source";
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import Image from "next/image";
+import Image, { type ImageProps } from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { cache } from "react";
+import { cache, type ComponentProps } from "react";
 
 const getPage = cache((slug: string) => blogSource.getPage([slug]));
+
+// fumadocs-mdx's remarkImage turns markdown images into static imports, so `src`
+// is a StaticImageData object. fumadocs only renders these via next/image when a
+// FrameworkProvider is present (we don't use one), otherwise it falls back to a
+// plain <img> and stringifies the object to "[object Object]". Render next/image
+// directly to avoid that.
+const mdxComponents = {
+  ...defaultMdxComponents,
+  img: (props: ComponentProps<"img">) => (
+    <Image
+      {...(props as ImageProps)}
+      sizes="(max-width: 768px) 100vw, 720px"
+    />
+  ),
+};
 
 export default async function BlogPost(props: {
   params: Promise<{ slug: string }>;
@@ -124,7 +139,7 @@ export default async function BlogPost(props: {
             prose-td:border prose-td:border-gray-100 dark:prose-td:border-white/[0.06] prose-td:px-4 prose-td:py-2 prose-td:text-sm
             prose-code:bg-gray-50 dark:prose-code:bg-white/[0.04] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-md prose-code:text-[13px]
             prose-img:rounded-2xl prose-img:border prose-img:border-gray-100 dark:prose-img:border-white/[0.06]">
-            <MDX components={defaultMdxComponents} />
+            <MDX components={mdxComponents} />
           </article>
 
           {/* Footer — prev/next navigation */}
