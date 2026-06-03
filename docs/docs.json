@@ -69,7 +69,8 @@
                   "create-swaps/btc-to-evm",
                   "create-swaps/onchain-to-tbtc",
                   "create-swaps/evm-to-btc",
-                  "create-swaps/onchain-to-arkade"
+                  "create-swaps/onchain-to-arkade",
+                  "create-swaps/lightning-arkade"
                 ]
               },
               {
