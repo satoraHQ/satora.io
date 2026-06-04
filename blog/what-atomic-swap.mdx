@@ -46,6 +46,8 @@ If Alice claims the USDC, the secret becomes available, or is transmitted throug
 
 The user gets the economic result of moving between BTC and USDC, but the settlement model is different. The swap still needs liquidity, quotes, monitoring, fee handling, and good UX. But the mechanism is not "deposit into a platform and hope the platform settles later." It is conditional settlement.
 
+[Try our atomic swap platform now](https://app.satora.io/)
+
 ## How atomic swaps work: hash locks and time locks
 
 Many atomic swaps use an HTLC: a Hash Time-Locked Contract.
@@ -64,7 +66,7 @@ That last point matters. Timeouts cannot be chosen casually. The system has to a
 
 ![Two users locking funds under a shared secret](/assets/images/blog/drawing-atomic-swap-concept.jpeg)
 
-## What atomic swaps remove — and what they do not
+## What atomic swaps remove and what they do not
 
 Atomic swaps reduce custody and one-sided settlement risk. They do not remove every risk.
 
@@ -79,6 +81,8 @@ They do not remove implementation risk. Bitcoin scripts, smart contracts, signat
 This is why "trustless" can be a misleading shortcut. Atomic swaps are not magic. They reduce the need to trust a custodian with both sides of the trade, but users and developers still depend on the quality of the protocol, the software, the liquidity, and the recovery experience.
 
 The right way to describe them is more precise: atomic swaps reduce custody and one-sided settlement risk, but they do not eliminate execution risk, liquidity risk, fee risk, timeout risk, or implementation risk.
+
+[Integrate Satora Swaps through our TypeScript SDK, REST API, or iframe](https://docs.satora.io/api-sdk)
 
 ## Atomic swaps vs custodians, bridges, and liquidity pools
 
