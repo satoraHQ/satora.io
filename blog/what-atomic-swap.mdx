@@ -22,7 +22,7 @@ The core idea is simple: claiming one side reveals, or transmits through the pro
 
 This is what makes atomic swaps different from the most common exchange models. A centralized exchange takes custody of user funds and updates balances internally. A bridge may lock an asset and create a representation somewhere else. A liquidity pool lets users trade against pooled assets and automated pricing rules. Atomic swaps instead use conditional settlement: the trade is designed so that both sides can complete, or the protocol provides refund paths after timeout.
 
-It is called "atomic" because the exchange is meant to be indivisible. In practice, this does not mean the user experience is instant or perfectly clean like a database transaction. A failed swap may still lock funds temporarily, require someone to wait for expiry, and involve fees or recovery steps. The point is narrower and more important: the protocol is designed to avoid final one-sided settlement.
+It is called “atomic” because the exchange is meant to be indivisible. In practice, this does not mean the swap feels instant or perfectly seamless, as if both sides simply update at the same time. If a swap fails, funds may still be locked temporarily, someone may need to wait for expiry, and there may be fees or recovery steps. The point is narrower and more important: the protocol is designed to prevent a final one-sided settlement.
 
 Atomic swaps can be used across different environments. One side may be Bitcoin on-chain. Another may be an ERC-20 stablecoin. One side may be Lightning. Another may be a smart contract. One side may be Arkade, a programmable Bitcoin execution layer, while the other is Bitcoin on-chain.
 
