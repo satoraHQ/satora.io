@@ -1,0 +1,141 @@
+---
+title: "What Is an Atomic Swap? Bitcoin Swaps Without Custodians or Liquidity Pools"
+subtitle: "An atomic swap is a conditional exchange between two assets. Learn how Bitcoin atomic swaps work with hash locks, time locks, HTLCs, and refund paths."
+date: 2026-06-03
+author: "Marius"
+authorImage: "/favicon/dot.svg"
+titleImage: "/assets/images/blog/what-atomic-swap.jpg"
+excerpt: "An atomic swap is a way to exchange assets without asking a platform to hold both sides of the trade. Instead of custody, wrapped assets, or pooled liquidity being the core settlement mechanism, the swap is enforced by protocol conditions: one side can claim only if the right secret is revealed, and refund paths become available if the swap expires."
+tags:
+
+  - atomic-swaps
+  - bitcoin
+  - htlc
+  - satora
+---
+
+## What is an atomic swap?
+
+An atomic swap is a conditional exchange between two parties. One party wants to send asset A and receive asset B. The other party wants the opposite. Instead of depositing funds into a platform that promises to settle the trade internally, both sides lock funds under related protocol conditions.
+
+The core idea is simple: claiming one side reveals, or transmits through the protocol, the secret needed to claim the other side. If the swap does not complete in time, refund paths eventually allow funds to return according to the protocol rules.
+
+This is what makes atomic swaps different from the most common exchange models. A centralized exchange takes custody of user funds and updates balances internally. A bridge may lock an asset and create a representation somewhere else. A liquidity pool lets users trade against pooled assets and automated pricing rules. Atomic swaps instead use conditional settlement: the trade is designed so that both sides can complete, or the protocol provides refund paths after timeout.
+
+It is called “atomic” because the exchange is meant to be indivisible. In practice, this does not mean the swap feels instant or perfectly seamless, as if both sides simply update at the same time. If a swap fails, funds may still be locked temporarily, someone may need to wait for expiry, and there may be fees or recovery steps. The point is narrower and more important: the protocol is designed to prevent a final one-sided settlement.
+
+Atomic swaps can be used across different environments. One side may be Bitcoin on-chain. Another may be an ERC-20 stablecoin. One side may be Lightning. Another may be a smart contract. One side may be Arkade, a programmable Bitcoin execution layer, while the other is Bitcoin on-chain.
+
+The rails can change. The principle stays the same: the exchange is enforced by spending conditions, not by handing both sides to a custodian.
+
+## A simple example: swapping BTC for USDC
+
+Imagine Alice wants to swap BTC for USDC.
+
+The familiar route is a custodial exchange. Alice deposits BTC, waits for the exchange to credit her account, sells BTC for USDC inside the platform, and withdraws the USDC. The flow is simple, but Alice depends on the exchange while the trade is happening.
+
+An atomic swap structures the same economic exchange differently.
+
+![Diagram of an atomic swap between Bitcoin and USDC](/assets/images/blog/atomic-swap-bitcoin-usdc.jpeg)
+
+Alice wants to send BTC and receive USDC. A counterparty or liquidity provider is willing to send USDC and receive BTC. Instead of one platform holding everything, both sides lock funds under related cryptographic conditions.
+
+On the Bitcoin side, BTC can be locked with a condition based on a secret and a refund deadline. On the stablecoin side, USDC must be locked by a smart contract or protocol that can enforce equivalent hash-lock and timeout logic. A normal ERC-20 transfer cannot do this by itself.
+
+If Alice claims the USDC, the secret becomes available, or is transmitted through the relevant protocol, and the other side can use it to claim the BTC. If the swap expires before completion, the refund logic becomes available after the timeout.
+
+The user gets the economic result of moving between BTC and USDC, but the settlement model is different. The swap still needs liquidity, quotes, monitoring, fee handling, and good UX. But the mechanism is not "deposit into a platform and hope the platform settles later." It is conditional settlement.
+
+[Try our atomic swap platform now](https://app.satora.io/)
+
+## How atomic swaps work: hash locks and time locks
+
+Many atomic swaps use an HTLC: a Hash Time-Locked Contract.
+
+The name sounds more complicated than the concept. An HTLC combines two conditions.
+
+The first is a hash lock. A participant generates a secret value, often called a preimage. The protocol shares a hash of that secret. The hash can define the condition, but it does not reveal the secret itself. To claim funds, someone must reveal the correct preimage.
+
+This is what links the two sides of the swap. If both sides are tied to the same secret, then completing one side gives the other party the information needed to complete the other side. On public ledgers, that secret may become visible in a transaction. On Lightning, it may be revealed through the payment protocol instead of appearing publicly on-chain unless a channel closes or a transaction is published.
+
+The second condition is a time lock. A time lock defines what happens if the swap does not complete. Before the deadline, funds can be claimed with the correct secret. After the deadline, the original sender can recover funds through a refund path.
+
+For an HTLC-style atomic swap to work across two systems, both sides must support compatible conditional logic: a hash-lock claim path, a time-lock refund path, and enough time for each party to observe settlement and react.
+
+That last point matters. Timeouts cannot be chosen casually. The system has to account for confirmations, fee spikes, chain differences, routing delays, and the time needed to act after the secret is revealed. A good atomic swap implementation is not just cryptography. It is a state machine for the happy path and the failure path.
+
+![Two users locking funds under a shared secret](/assets/images/blog/drawing-atomic-swap-concept.jpeg)
+
+## What atomic swaps remove and what they do not
+
+Atomic swaps reduce custody and one-sided settlement risk. They do not remove every risk.
+
+They do not remove liquidity risk. Someone still has to provide the asset on the other side of the trade. That liquidity may come from a direct counterparty, a market maker, an aggregator, a coordinator, or another source.
+
+They do not remove execution risk. A quote can expire. A route can fail. A transaction can be delayed. A user can disappear in the middle of the flow.
+
+They do not remove fee risk. Bitcoin fees, EVM gas fees, Lightning routing fees, or refund costs can change while the swap is in progress.
+
+They do not remove implementation risk. Bitcoin scripts, smart contracts, signatures, monitoring, refund logic, and error handling all need to work correctly.
+
+This is why “trustless” can be a misleading shortcut. Atomic swaps reduce the need to trust a custodian with both sides of the trade, and they are designed to prevent final one-sided settlement. But they do not remove every risk: users still depend on the protocol design, the software implementation, available liquidity, fees, timeouts, and the recovery experience if something goes wrong.
+
+[Integrate Satora Swaps through our TypeScript SDK, REST API, or iframe](https://docs.satora.io/api-sdk)
+
+## Atomic swaps vs custodians, bridges, and liquidity pools
+
+Atomic swaps are often compared with exchanges, bridges, and liquidity pools because all of them can help users move between assets. But they are different models.
+
+A custodial exchange asks the user to trust the platform. The platform receives deposits, updates internal balances, performs the trade, and processes withdrawals. This can be convenient, but the user is exposed to the platform during the process.
+
+A bridge often locks an asset in one environment and creates a representation in another. Depending on the bridge, the trust model may involve validators, federations, contracts, or other mechanisms.
+
+A liquidity pool lets users trade against pooled assets. This can create a smooth experience, but it introduces pool design, smart contract, slippage, and liquidity-depth assumptions.
+
+An atomic swap is different because the core mechanism is conditional settlement. It does not necessarily require a custodian, a wrapped asset, or an AMM-style liquidity pool. It still requires liquidity. It may still use market makers, APIs, relayers, coordinators, or frontends. But those components are not supposed to take unilateral control over both sides of the settlement.
+
+The important distinction is not that one model is always good and the others are always bad. The important distinction is knowing which assumptions the product makes.
+
+## Where Satora fits
+
+Satora is built for Bitcoin applications that need to connect Bitcoin rails with stablecoin liquidity without making custody the default design choice.
+
+That matters because many products want the result of a swap without becoming an exchange. A wallet may want users to move between BTC and stablecoins. A payment app may want Lightning payment UX with stablecoin settlement. A fintech product may want Bitcoin liquidity without forcing users through a centralized exchange account.
+
+Satora uses atomic swap primitives to make these flows easier to integrate. In the Satora model, Bitcoin rails such as on-chain BTC, Lightning, or Arkade can be connected with EVM stablecoin rails through non-custodial swap flows. The exact route depends on the asset, the rail, and the integration, but the product goal is straightforward: make the custody assumptions explicit and give developers a cleaner settlement primitive.
+
+For developers, the value is not only the successful swap. It is the full lifecycle around it: quotes, locked funds, claim states, revealed secrets, confirmations, expiry, refunds, and recovery.
+
+That is where atomic swap infrastructure becomes product infrastructure. The primitive is conditional settlement. The product value is making it usable inside wallets, payment flows, and fintech apps.
+
+## FAQ
+
+### What is an atomic swap in simple terms?
+
+An atomic swap is a conditional exchange where two sides are designed to complete together or fail safely. If the swap succeeds, both parties receive what they agreed to receive. If it fails, refund paths allow funds to return according to the protocol rules.
+
+### Do atomic swaps require a custodian?
+
+No, not in the settlement mechanism. Atomic swaps are designed so that no custodian needs unilateral control over both sides of the trade. A product may still rely on coordinators, market makers, APIs, relayers, or liquidity providers.
+
+### Do atomic swaps require a liquidity pool?
+
+No. Atomic swaps require liquidity, but not necessarily an AMM or pooled-liquidity protocol. Liquidity can come from a direct counterparty, market maker, aggregator, coordinator, or another source.
+
+### Are atomic swaps the same as bridges?
+
+No. Bridges and atomic swaps can both connect different ecosystems, but they rely on different models. A bridge often involves representation, validators, contracts, or custody assumptions. An atomic swap uses conditional settlement between two sides of an exchange.
+
+### Are atomic swaps risk-free?
+
+No. Atomic swaps reduce some risks, especially custody and one-sided settlement risk, but they still depend on correct implementation, liquidity, fees, timeout design, monitoring, and recovery UX.
+
+## Conclusion
+
+Atomic swaps are a simple idea with difficult implementation details: two sides of a trade are linked by protocol conditions, so the swap can complete or eventually refund instead of relying on a custodian to settle later.
+
+For Bitcoin applications, that difference matters. Bitcoin on-chain remains the final settlement layer for native BTC, but real products increasingly need to move across rails: Lightning, off-chain Bitcoin environments, stablecoins, and smart contracts. Atomic swaps give builders a way to connect those environments while keeping the settlement assumptions visible.
+
+They are not a universal solution. They still need liquidity, careful timeouts, fee management, monitoring, and recovery UX. But they are one of the most important primitives for Bitcoin apps that want interoperability without quietly turning custody back into the default.
+
+For Satora, that is the point: make Bitcoin swaps usable for real products without forgetting why the settlement model matters.
