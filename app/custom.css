@@ -303,6 +303,28 @@ article {
 	padding-top: 1rem;
 }
 
+.blog-post-content p {
+	margin-top: 0;
+	margin-bottom: 1.25rem;
+	line-height: 1.75;
+}
+
+.blog-post-content p:last-child {
+	margin-bottom: 0;
+}
+
+.blog-post-content ul,
+.blog-post-content ol {
+	margin-top: 1.25rem;
+	margin-bottom: 1.25rem;
+}
+
+.blog-post-content img,
+.blog-post-content figure {
+	margin-top: 2rem;
+	margin-bottom: 2rem;
+}
+
 /* Blog list styles - override CSS reset */
 article ol {
 	list-style-type: decimal;

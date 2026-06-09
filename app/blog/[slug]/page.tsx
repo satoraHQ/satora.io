@@ -123,7 +123,7 @@ export default async function BlogPost(props: {
           </header>
 
           {/* MDX Content */}
-          <article className="prose prose-gray dark:prose-invert max-w-none
+          <article className="blog-post-content prose prose-gray dark:prose-invert max-w-none
             prose-headings:text-gray-900 dark:prose-headings:text-white prose-headings:no-underline prose-headings:tracking-tight
             prose-h1:text-xl prose-h1:font-semibold prose-h1:mb-4 prose-h1:mt-10
             prose-h2:text-lg prose-h2:font-semibold prose-h2:mb-3 prose-h2:mt-8
