@@ -78,9 +78,7 @@ They do not remove fee risk. Bitcoin fees, EVM gas fees, Lightning routing fees,
 
 They do not remove implementation risk. Bitcoin scripts, smart contracts, signatures, monitoring, refund logic, and error handling all need to work correctly.
 
-This is why "trustless" can be a misleading shortcut. Atomic swaps are not magic. They reduce the need to trust a custodian with both sides of the trade, but users and developers still depend on the quality of the protocol, the software, the liquidity, and the recovery experience.
-
-The right way to describe them is more precise: atomic swaps reduce custody and one-sided settlement risk, but they do not eliminate execution risk, liquidity risk, fee risk, timeout risk, or implementation risk.
+This is why “trustless” can be a misleading shortcut. Atomic swaps reduce the need to trust a custodian with both sides of the trade, and they are designed to prevent final one-sided settlement. But they do not remove every risk: users still depend on the protocol design, the software implementation, available liquidity, fees, timeouts, and the recovery experience if something goes wrong.
 
 [Integrate Satora Swaps through our TypeScript SDK, REST API, or iframe](https://docs.satora.io/api-sdk)
 
