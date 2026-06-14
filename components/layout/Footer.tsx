@@ -87,10 +87,7 @@ export default function Footer() {
               >
                 Brand Assets
               </Link>
-              <Link
-                href="/security"
-                className={linkClass + " block"}
-              >
+              <Link href="/security" className={linkClass + " block"}>
                 Security
               </Link>
             </div>
@@ -110,7 +107,7 @@ export default function Footer() {
                 <FaXTwitter className="w-3.5 h-3.5" /> X
               </a>
               <a
-                href="https://t.me/lendasatcommunity"
+                href="https://t.me/satora_io"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={linkClass + " flex items-center gap-2"}
@@ -118,7 +115,7 @@ export default function Footer() {
                 <FaTelegram className="w-3.5 h-3.5" /> Telegram
               </a>
               <a
-                href="https://github.com/satora"
+                href="https://github.com/satorahq"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={linkClass + " flex items-center gap-2"}
@@ -126,7 +123,7 @@ export default function Footer() {
                 <FaGithub className="w-3.5 h-3.5" /> GitHub
               </a>
               <a
-                href="https://linkedin.com/company/satora"
+                href="https://linkedin.com/company/satoraio"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={linkClass + " flex items-center gap-2"}

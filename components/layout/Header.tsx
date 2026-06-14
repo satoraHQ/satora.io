@@ -32,9 +32,13 @@ interface CommunityLink {
 
 const COMMUNITY_LINKS: CommunityLink[] = [
   { label: "X", href: "https://x.com/satora_io", Icon: FaXTwitter },
-  { label: "Telegram", href: "https://t.me/lendasatcommunity", Icon: FaTelegram },
-  { label: "GitHub", href: "https://github.com/satora", Icon: FaGithub },
-  { label: "LinkedIn", href: "https://linkedin.com/company/satora", Icon: FaLinkedin },
+  { label: "Telegram", href: "https://t.me/satora_io", Icon: FaTelegram },
+  { label: "GitHub", href: "https://github.com/satorahq", Icon: FaGithub },
+  {
+    label: "LinkedIn",
+    href: "https://linkedin.com/company/satoraio",
+    Icon: FaLinkedin,
+  },
   // TODO: replace with the actual Satora/Lendasat npub on njump.me
   { label: "Nostr", href: "https://nostr.com", Icon: SiNostr },
 ];
@@ -49,7 +53,10 @@ export default function Header() {
   useEffect(() => {
     if (!communityOpen) return;
     const onClick = (e: MouseEvent) => {
-      if (communityRef.current && !communityRef.current.contains(e.target as Node)) {
+      if (
+        communityRef.current
+        && !communityRef.current.contains(e.target as Node)
+      ) {
         setCommunityOpen(false);
       }
     };
