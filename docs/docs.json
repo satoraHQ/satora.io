@@ -220,6 +220,22 @@
               "faq/security",
               "faq/troubleshooting"
             ]
+          },
+          {
+            "group": "Legal",
+            "icon": "scale-balanced",
+            "pages": [
+              {
+                "group": "Lendasat",
+                "icon": "handshake-angle",
+                "pages": [
+                  "faq/legal/lendasat/terms",
+                  "faq/legal/lendasat/privacy",
+                  "faq/legal/lendasat/cookies",
+                  "faq/legal/lendasat/impressum"
+                ]
+              }
+            ]
           }
         ]
       }
