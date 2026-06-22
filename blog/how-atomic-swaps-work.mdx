@@ -100,13 +100,6 @@ This is the same underlying safety concern found in routed Lightning payments. H
 Longer timeouts provide more room to recover from congestion, confirmation delays, or temporary unavailability. They also keep capital locked for longer when something fails. Timeout design is therefore an operational trade-off, not a decorative protocol parameter.
 
 
-### A draining attack turns safe refunds into a recurring cost
-
-A refund path protects the principal, but it does not reimburse transaction fees or the cost of immobilized liquidity. This creates an economic attack described in atomic-swap research as a **draining attack**, closely related to lockup griefing.
-
-In the simplest version, a malicious taker convinces a service provider to publish the initial locking transaction and then abandons the swap. The provider can recover its funds after the timelock, so the attacker does not directly steal the principal. The provider still pays for the locking and refund transactions, however, and its liquidity remains unavailable until recovery. Repeating the process can drain the provider's fee balance and reduce the capital available for legitimate swaps.
-
-Satora remains exposed to malicious non-completion after both sides have been funded. A client can stop before revealing the secret, leaving the service to wait for its refund path and absorb the associated execution cost. The cryptographic guarantee protects the funds from theft, but it does not make this interruption free.
 
 
 ## What HTLCs guarantee
