@@ -137,15 +137,6 @@ In the simplest version, a malicious taker convinces a service provider to publi
 
 Satora remains exposed to malicious non-completion after both sides have been funded. A client can stop before revealing the secret, leaving the service to wait for its refund path and absorb the associated execution cost. The cryptographic guarantee protects the funds from theft, but it does not make this interruption free.
 
-### A Sybil attack can scale the disruption, but not for free
-
-A **Sybil attack** describes the identity strategy rather than the fee-draining mechanism. 1 attacker presents many pseudonymous clients, making 1 adversary look like many independent users. Those identities can be used to initiate abandoned swaps in parallel or to work around controls applied per account, address, or session. Combined with the previous mechanism, this becomes a **Sybil-amplified draining attack**.
-
-Satora's documented state machine changes the economics of this strategy because client funding must be detected and confirmed before the service funds its side. An attacker cannot make Satora lock funds merely by requesting thousands of quotes or creating empty identities. Each attempt that reaches the server-funded state first requires the malicious client to commit its own assets to the longer client-side HTLC.
-
-The attacker therefore also incurs a cost on every completed attempt. Depending on the rail, this can include a Bitcoin transaction fee, Lightning routing or swap costs, EVM gas, a later refund transaction, and the opportunity cost of locking capital for up to the client-side timeout. Multiplying identities multiplies those costs as well. The attack can still disrupt Satora, but it is not a profitable extraction mechanism. Its purpose would be sabotage, and its scale is limited by how much capital and transaction cost the attacker is willing to burn.
-
-In many routes, the attacker's total cost may be comparable to or greater than the cost imposed on Satora. That makes a large campaign economically unattractive for an ordinary user and narrows the plausible attacker set to an actor willing to accept a net loss simply to damage the service. This is an economic deterrent, not a formal guarantee. The exact cost ratio depends on the selected Bitcoin and EVM rails, current fee markets, refund mechanics, minimum swap sizes, concurrency limits, and any gas subsidies. Public documentation does not provide enough data to prove that the attacker always loses more on every route.
 
 ## What HTLCs guarantee
 
