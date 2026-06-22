@@ -84,20 +84,6 @@ The 2 transfers did not happen in 1 shared transaction. They became economically
 
 ![HTLC atomic swap diagram showing the shared secret, claim paths, timelocks, and refund paths](/assets/images/blog/drawing-swap-htlc.jpg)
 
-## The same secret can produce different hash locks
-
-“Both sides use the same hash” is a useful simplification, but it is not always technically exact.
-
-In Satora's current implementation, the same 32-byte secret is used across the swap, while the Bitcoin and EVM sides derive different hash formats from it. The EVM HTLC verifies `SHA256(S)`. Bitcoin on-chain and Arkade VHTLC paths use `HASH160(S)`, which combines SHA-256 and RIPEMD-160.
-
-```text
-EVM:              SHA256(S)
-Bitcoin / Arkade: RIPEMD160(SHA256(S))
-```
-
-This distinction does not break the link between the 2 sides. Both conditions still depend on knowledge of the same secret `S`. It does mean an implementation must derive and validate the right commitment for each execution environment instead of assuming that identical bytes will be used everywhere.
-
-The detail matters for developers. Atomicity comes from the full relationship between secrets, claim conditions, deadlines, and recovery paths, not from repeating the word “HTLC” on 2 unrelated contracts.
 
 ## Why atomic swap timeouts are asymmetrical
 
