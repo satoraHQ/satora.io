@@ -99,21 +99,6 @@ This is the same underlying safety concern found in routed Lightning payments. H
 
 Longer timeouts provide more room to recover from congestion, confirmation delays, or temporary unavailability. They also keep capital locked for longer when something fails. Timeout design is therefore an operational trade-off, not a decorative protocol parameter.
 
-## What happens when the swap does not complete
-
-The successful flow gets most of the attention, but a production atomic swap is largely a failure-handling system.
-
-Several interruptions are possible. A user may never fund the quoted swap. The wrong amount may arrive. Funding may be detected after the quote expires. The provider may fail to lock its side. A claim transaction may be delayed. Fees may rise. A Lightning route may fail. 1 participant may go offline.
-
-These cases should not all be reduced to “the swap failed.” They represent different states with different safe actions.
-
-If no funds were sent, the quote can simply expire. If the client funded but the provider has not yet committed its side, an implementation may offer an early exit. If both sides were funded but the secret was never revealed, the shorter HTLC expires first and its sender recovers those funds. The longer HTLC can then be refunded after its own deadline.
-
-This is why an atomic swap does not always fail instantly or painlessly. A refund path is a safety property, not a promise of immediate liquidity. Funds can remain unavailable until a timeout passes, and the user may still need monitoring, fee management, or a recovery transaction.
-
-Satora exposes these differences through a state machine. A successful BTC-to-EVM flow progresses from funding detection to confirmed client funding, server funding, client redemption, and finally server redemption. `ClientRedeemed` is not yet the final success state. The swap is complete only after the provider has also settled its side.
-
-That distinction prevents the interface from declaring victory too early. A good integration must represent the entire lifecycle, including expiry, invalid funding, late funding, refunds, and the rare races that can occur around claim and refund transactions.
 
 ### A draining attack turns safe refunds into a recurring cost
 
