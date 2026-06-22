@@ -13,7 +13,9 @@ tags:
   - satora
 ---
 
-An atomic swap does not move 2 assets in 1 universal transaction. Bitcoin and an EVM chain do not share a ledger, a clock, or a smart contract environment. Lightning and Arkade introduce different settlement mechanics again.
+An atomic swap coordinates 2 asset transfers across separate systems. Bitcoin, EVM chains, Lightning, and Arkade each follow different settlement rules.
+
+The swap links those transfers so that the action needed to claim 1 side also provides the information needed to claim the other. Time-based recovery paths protect participants when the expected sequence stops.
 
 The swap works by coordinating separate transfers so that the action needed to claim 1 side also provides the information needed to claim the other. Time-based recovery paths protect participants when the expected sequence stops.
 
@@ -145,15 +147,15 @@ The attacker therefore also incurs a cost on every completed attempt. Depending 
 
 In many routes, the attacker's total cost may be comparable to or greater than the cost imposed on Satora. That makes a large campaign economically unattractive for an ordinary user and narrows the plausible attacker set to an actor willing to accept a net loss simply to damage the service. This is an economic deterrent, not a formal guarantee. The exact cost ratio depends on the selected Bitcoin and EVM rails, current fee markets, refund mechanics, minimum swap sizes, concurrency limits, and any gas subsidies. Public documentation does not provide enough data to prove that the attacker always loses more on every route.
 
-## Atomic does not mean risk-free
+## What HTLCs guarantee
 
-Atomic swaps are often described as “trustless.” The word is useful only if its scope is clear.
+HTLCs give atomic swaps a clear settlement guarantee. Neither participant needs to give a custodian unilateral control over both sides of the trade. The hash lock connects the claims, while the time lock makes an interrupted swap recoverable.
 
-The settlement mechanism is designed so that a custodian does not need unilateral control over both sides of the trade. That reduces custody risk and the risk of a final 1-sided settlement. It does not remove every dependency or failure mode.
+This design reduces custody risk and the risk of final 1-sided settlement. It also makes the possible outcomes explicit. Funds can be claimed with the correct secret, or recovered through the refund path after the deadline.
 
-The swap still depends on correct scripts and smart contracts. It needs available liquidity and a valid quote. It depends on monitoring, chain access, fee estimation, confirmation assumptions, and reliable recovery logic. It can also remain vulnerable to griefing or draining attacks that impose fees and capital lockups without defeating the cryptographic refund guarantee. Coordinators, APIs, relayers, market makers, or routing services may still participate without becoming custodians.
+These guarantees remain specific. A reliable swap still depends on correct scripts and smart contracts, available liquidity, monitoring, fee estimation, chain access, and recovery logic. Coordinators, APIs, relayers, and market makers can support the flow without taking custody of both sides.
 
-The precise claim is therefore narrower than “no trust anywhere.” An HTLC changes who can control the funds and under which conditions. It does not make software bugs, poor timeout choices, illiquid markets, or broken user interfaces disappear.
+The result is not “no trust anywhere,” but a more precise property. Control over the funds remains constrained by transparent and verifiable protocol conditions.
 
 ## Where Satora fits in the flow
 
