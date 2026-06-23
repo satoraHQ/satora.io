@@ -84,7 +84,6 @@ The 2 transfers did not happen in 1 shared transaction. They became economically
 
 ![HTLC atomic swap diagram showing the shared secret, claim paths, timelocks, and refund paths](/assets/images/blog/drawing-swap-htlc.jpg)
 
-
 ## Why atomic swap timeouts are asymmetrical
 
 The 2 HTLCs should not normally expire at the same moment.
@@ -98,9 +97,6 @@ According to Satora's current documentation, its mainnet parameters assign 24 ho
 This is the same underlying safety concern found in routed Lightning payments. HTLC expiries are staggered across a route so that an intermediary that learns the preimage still has time to settle its incoming HTLC, including when an on-chain fallback becomes necessary.
 
 Longer timeouts provide more room to recover from congestion, confirmation delays, or temporary unavailability. They also keep capital locked for longer when something fails. Timeout design is therefore an operational trade-off, not a decorative protocol parameter.
-
-
-
 
 ## What HTLCs guarantee
 
