@@ -325,6 +325,29 @@ article {
 	margin-bottom: 2rem;
 }
 
+.blog-post-content a:not([href^="#"]):not(.blog-cta) {
+	color: var(--color-lime);
+	font-weight: 500;
+	text-decoration-line: underline;
+	text-decoration-color: currentColor;
+	text-decoration-thickness: 1.5px;
+	text-underline-offset: 3px;
+	text-decoration-skip-ink: auto;
+}
+
+html.dark .blog-post-content a:not([href^="#"]):not(.blog-cta) {
+	color: var(--color-lime-light);
+}
+
+.blog-post-content a:not([href^="#"]):not(.blog-cta):hover {
+	text-decoration-thickness: 2px;
+}
+
+.blog-post-content a:not([href^="#"]):not(.blog-cta):focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
 /* Blog list styles - override CSS reset */
 article ol {
 	list-style-type: decimal;
