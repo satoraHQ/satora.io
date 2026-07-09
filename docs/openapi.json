@@ -6,7 +6,7 @@
     "license": {
       "name": ""
     },
-    "version": "0.2.47"
+    "version": "0.2.49"
   },
   "servers": [
     {
@@ -1147,6 +1147,65 @@
         }
       }
     },
+    "/referral-fee": {
+      "get": {
+        "tags": [
+          "swap-pairs"
+        ],
+        "summary": "Resolve the referral/extra-fee delta for a referral code.",
+        "operationId": "get_referral_fee",
+        "parameters": [
+          {
+            "name": "ref",
+            "in": "query",
+            "description": "Referral code. When omitted/unknown/revoked the response is a zero\nextra fee (the base fee applies unchanged).",
+            "required": false,
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          {
+            "name": "extra_fees",
+            "in": "query",
+            "description": "Optional per-swap fee surcharge in basis points. Rejected with 400 if\nit exceeds the referral key's `max_extra_fee_bps`. When omitted the\nkey's `default_extra_fee_bps` applies.",
+            "required": false,
+            "schema": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "format": "int32",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The extra-fee delta (decimal fraction) for the referral code",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReferralFeeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "extra_fees exceeds the referral key's cap",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/status": {
       "get": {
         "tags": [
@@ -1446,6 +1505,58 @@
           },
           "409": {
             "description": "Conflict - a swap with this preimage hash exists already",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/swap/bulk-status": {
+      "post": {
+        "tags": [
+          "swaps"
+        ],
+        "summary": "Get the status of multiple swaps at once.",
+        "description": "Returns only the swap status (not the full per-direction details) so the\nwhole batch is served by a single database query. Use `GET /swap/{id}` when\nfull details are needed for a specific swap.",
+        "operationId": "get_bulk_status",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkStatusRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk lookup completed; see `not_found` for unresolved IDs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkStatusResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - too many IDs requested",
             "content": {
               "application/json": {
                 "schema": {
@@ -2348,6 +2459,9 @@
           }
         }
       },
+      "AmountU256": {
+        "type": "string"
+      },
       "ArkadeToEvmSwapRequest": {
         "type": "object",
         "description": "Chain-agnostic request for Arkade-to-EVM swaps.\n\nThe caller specifies the target chain via `evm_chain_id` and the token\nvia its ERC-20 contract `token_address`. This endpoint supports any token\nreachable through 1inch aggregation (which covers Uniswap, Curve, etc.).",
@@ -2899,7 +3013,7 @@
       },
       "BitcoinToEvmSwapRequest": {
         "type": "object",
-        "description": "Chain-agnostic request for Arkade-to-EVM swaps.\n\nThe caller specifies the target chain via `evm_chain_id` and the token\nvia its ERC-20 contract `token_address`. This endpoint supports any token\nreachable through 1inch aggregation (which covers Uniswap, Curve, etc.).",
+        "description": "Chain-agnostic request for Bitcoin-to-EVM swaps.\n\nThe caller specifies the target chain via `evm_chain_id` and the token\nvia its ERC-20 contract `token_address`. This endpoint supports any token\nreachable through 1inch aggregation (which covers Uniswap, Curve, etc.).",
         "required": [
           "claiming_address",
           "target_address",
@@ -2982,7 +3096,7 @@
           },
           "refund_pk": {
             "type": "string",
-            "description": "Refund public key used to generate the Arkade VHTLC."
+            "description": "Refund public key used to generate the Bitcoin HTLC."
           },
           "target_address": {
             "type": "string",
@@ -3174,6 +3288,110 @@
           }
         }
       },
+      "BridgeRate": {
+        "oneOf": [
+          {
+            "type": "object",
+            "description": "Circle CCTP (USDC). The Forwarding Service deducts a percentage\n(`proportional_fee_millionths`) plus a flat fee (`flat`, or `flat_with_setup` for\na fresh non-EVM recipient) from the bridged USDC.",
+            "required": [
+              "fee_token",
+              "proportional_fee_millionths",
+              "flat",
+              "flat_with_setup",
+              "router"
+            ],
+            "properties": {
+              "fee_token": {
+                "$ref": "#/components/schemas/Token",
+                "description": "The token every amount in this variant is denominated in (`flat`,\n`flat_with_setup`, and the `amount` the percentage applies to) —\nthe remote bridged USDC from the request (`to` for outbound, `from`\nfor inbound). The SDK must check this matches the token it's\ndeducting from rather than assuming, so a future asset-denominated\nfee can't be applied blindly."
+              },
+              "flat": {
+                "type": "string",
+                "description": "Flat USDC fee deducted from the bridged amount, recipient already\nprovisioned. Outbound: `forwardFee.high`; inbound: `0` (we call\n`receiveMessage` ourselves). Stringified `u64`."
+              },
+              "flat_with_setup": {
+                "type": "string",
+                "description": "Flat-fee variant including Circle's ATA-creation rent for a fresh\nnon-EVM recipient (Solana). Equals `flat` for EVM destinations.\nSame units as `flat`. Stringified `u64`."
+              },
+              "proportional_fee_millionths": {
+                "type": "string",
+                "description": "CCTP percentage fee rate expressed in **millionths** (parts per\nmillion): apply it as `floor(amount * proportional_fee_millionths / 1_000_000)`.\n\nIt's Circle's `minimumFee` (which the IRIS API gives in *basis\npoints*, e.g. `1.3`) pre-scaled by ×100 to a clean integer —\n`round(minimumFee_bps * 100)` — so the percentage math stays integer\non both sides. Worked example: `\"130\"` = 1.3 bps = 0.013% =\n`130 / 1_000_000` of the amount. Stringified `u128`."
+              },
+              "router": {
+                "type": "string",
+                "enum": [
+                  "cctp"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "LayerZero OFT (USDT0). No token-denominated deduction: the only cost is\nthe messaging `msg.value`, paid in native ETH on the source chain by\nthe user's own (Alchemy) publish — it never reduces the delivered\nUSDT0. So nothing to subtract today. When we want to *show* that ETH\ncost, it becomes a field on this variant (e.g. `native_fee_wei`).",
+            "required": [
+              "router"
+            ],
+            "properties": {
+              "router": {
+                "type": "string",
+                "enum": [
+                  "layerzero"
+                ]
+              }
+            }
+          }
+        ],
+        "description": "Fee model for the cross-chain bridge leg of a quote, tagged by protocol\n(`router`). Present only when `from`/`to` straddle a bridge; each protocol\nis a variant carrying exactly the fields its fee needs, so consumers\n`match`/`switch` on the tag rather than assuming one shape.\n\nThe bridge isn't a separate user op — Circle's Forwarding Service (CCTP)\nand LayerZero's OFT both settle inside the single Arbitrum `Call[]` the SDK\nalready submits. This just tells the SDK what (if anything) to subtract\nfrom the DEX-leg output to get the delivered amount."
+      },
+      "BridgeRecipient": {
+        "oneOf": [
+          {
+            "type": "object",
+            "description": "EVM destination — the recipient's address (hex).",
+            "required": [
+              "address",
+              "kind"
+            ],
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "evm"
+                ]
+              }
+            }
+          },
+          {
+            "type": "object",
+            "description": "Solana destination — the recipient's USDC associated token account\n(base58). `wallet` (the recipient's wallet pubkey) is supplied only when\nthe ATA doesn't exist yet; its presence selects Circle's higher\nATA-creation fee variant.",
+            "required": [
+              "address",
+              "kind"
+            ],
+            "properties": {
+              "address": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "solana"
+                ]
+              },
+              "wallet": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        ],
+        "description": "CCTP mint recipient, tagged by destination chain kind."
+      },
       "BtcToArkadeSwapResponse": {
         "type": "object",
         "description": "BTC → Arkade swap response",
@@ -3326,6 +3544,48 @@
             "type": "integer",
             "format": "int64",
             "description": "VHTLC refund locktime (unix timestamp)"
+          }
+        }
+      },
+      "BulkStatusRequest": {
+        "type": "object",
+        "description": "Request body for the bulk swap status endpoint.",
+        "required": [
+          "ids"
+        ],
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The swap IDs to look up."
+          }
+        }
+      },
+      "BulkStatusResponse": {
+        "type": "object",
+        "description": "Response for the bulk swap status endpoint.",
+        "required": [
+          "statuses",
+          "not_found"
+        ],
+        "properties": {
+          "not_found": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "IDs that did not resolve to a swap."
+          },
+          "statuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SwapStatusEntry"
+            },
+            "description": "Status for each ID that was found."
           }
         }
       },
@@ -3917,6 +4177,17 @@
             "$ref": "#/components/schemas/DexCalldataAmount",
             "description": "Either the input amount (exact-in) or the desired output amount\n(exact-out), both as stringified `u128` smallest-unit values."
           },
+          "bridge_recipient": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BridgeRecipient",
+                "description": "CCTP mint recipient on the destination chain. Required when `to` is a\ncross-chain / Solana CCTP target; the destination chain and bridge\nprotocol are read from `to` itself. The variant must match `to`'s chain\nkind (EVM ↔ `evm`, Solana ↔ `solana`)."
+              }
+            ]
+          },
           "from": {
             "$ref": "#/components/schemas/Token",
             "description": "Source asset the SDK will spend. Must be a [`Token::Evm`] variant —\nEOAs only delegate via EIP-7702 on EVM. `Solana` is rejected with\na 400."
@@ -4020,7 +4291,7 @@
                 ]
               },
               "value": {
-                "type": "string",
+                "$ref": "#/components/schemas/AmountU256",
                 "description": "Spend exactly this much `from_token`; the response's\n`estimated_amount_out` is the expected (mid-market) receive\namount that the requested slippage tolerance covers."
               }
             }
@@ -4040,52 +4311,13 @@
                 ]
               },
               "value": {
-                "type": "string",
+                "$ref": "#/components/schemas/AmountU256",
                 "description": "Receive exactly this much `to_token`; the response's\n`expected_amount_in` is the expected (mid-market) required input\nat the requested slippage tolerance."
               }
             }
           }
         ],
         "description": "Which side the caller is pinning on the requested quote.\n\nStringified `u128` rather than typed integer — matches the rest of the\nAPI (`net_source_amount`, `min_amount_out`, …) and dodges the JS\n`Number` precision cliff at 2^53 for 18-decimal tokens.\n\nMirrors `dex_calldata::DexAmount` on the wire but kept as a separate\nRust type so the two endpoints can evolve independently."
-      },
-      "DexQuoteHop": {
-        "type": "object",
-        "description": "A single hop in the route the server picked.\n\nOne hop == one user op the SDK will need to submit. Multi-hop routes\n(e.g. USDC@Optimism → USDC@Arbitrum via CCTP, then USDC@Arbitrum →\ntBTC@Arbitrum via Uniswap) are represented as multiple entries in\n[`DexQuoteResponse::hops`].",
-        "required": [
-          "from",
-          "to",
-          "expected_amount_in",
-          "estimated_amount_out",
-          "estimated_settlement_seconds",
-          "router"
-        ],
-        "properties": {
-          "estimated_amount_out": {
-            "$ref": "#/components/schemas/TokenAmount"
-          },
-          "estimated_settlement_seconds": {
-            "type": "integer",
-            "format": "int32",
-            "description": "Per-hop settlement time. Sum across `hops` ≈ end-to-end time.",
-            "minimum": 0
-          },
-          "expected_amount_in": {
-            "$ref": "#/components/schemas/TokenAmount",
-            "description": "Per-hop input/output (raw market estimates, no slippage). Useful\nfor showing the user a per-hop fee breakdown in the UI. Each side\ncarries the matching token's decimals for direct human-readable\nformatting."
-          },
-          "from": {
-            "$ref": "#/components/schemas/Token",
-            "description": "Source token for this hop. Carries chain id + address in the same\nshape as the request — round-trips cleanly through the SDK."
-          },
-          "router": {
-            "type": "string",
-            "description": "Per-hop router label (`\"cctp\"`, `\"layerzero\"`, `\"uniswap\"`, …)."
-          },
-          "to": {
-            "$ref": "#/components/schemas/Token",
-            "description": "Destination token for this hop. Equal-chain to `from` for\nsame-chain swaps, different for bridges."
-          }
-        }
       },
       "DexQuoteRequest": {
         "type": "object",
@@ -4100,6 +4332,10 @@
             "$ref": "#/components/schemas/DexQuoteAmount",
             "description": "Either the input amount (exact-in) or the desired output amount\n(exact-out), both as stringified `u128` smallest-unit values."
           },
+          "cctp_recipient_setup": {
+            "type": "boolean",
+            "description": "`true` when the CCTP recipient's USDC token account doesn't exist yet\nand Circle's forwarder must create it (only meaningful for non-EVM\ndestinations like Solana — it adds ~$0.14 of ATA rent to the flat fee).\nSelects `forwardFee` with the setup surcharge for the fold + the\nreported `bridge_fee`. Ignored (no surcharge) for EVM destinations."
+          },
           "from": {
             "$ref": "#/components/schemas/Token",
             "description": "Source asset. Must be a [`Token::Evm`] variant — price discovery\nis rooted in an EVM settlement hub; `Solana` is rejected with a\n400."
@@ -4112,7 +4348,7 @@
           },
           "to": {
             "$ref": "#/components/schemas/Token",
-            "description": "Target asset. Same-chain quotes use the same chain id as `from`;\ncross-chain quotes use a different EVM chain id (Solana\ndestinations are reserved for future work)."
+            "description": "Target asset. Same-chain quotes use the same chain id as `from`;\ncross-chain quotes bridge (a different EVM chain id, or a\n`Token::Solana` base58 SPL address for CCTP-to-Solana)."
           }
         }
       },
@@ -4122,12 +4358,28 @@
           "expected_amount_in",
           "estimated_amount_out",
           "estimated_settlement_seconds",
-          "hops",
-          "requires_multiple_user_ops",
           "router",
           "cache_ttl_seconds"
         ],
         "properties": {
+          "bridge_fee": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The bridge fee **actually deducted** for this quote, in the bridged\ntoken's smallest units (USDC for CCTP), stringified. This is the amount\nthe fold already took out of the end-to-end amounts above — surfaced so\nthe SDK can report it as a line item without re-deriving it from\n`bridge_rate`. Present only for a CCTP bridge leg with a fee; absent for\nsame-chain and OFT (which deduct nothing)."
+          },
+          "bridge_rate": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BridgeRate",
+                "description": "Cross-chain bridge fee model, tagged by protocol. Present for any\nbridged quote — `Cctp { … }` (a USDC deduction) or `LayerZero {}` (no\ndeduction) — and absent (`None`) only for plain same-chain quotes. The\nSDK folds it into the end-to-end quote; see [`BridgeRate`]."
+              }
+            ]
+          },
           "cache_ttl_seconds": {
             "type": "integer",
             "format": "int32",
@@ -4136,32 +4388,21 @@
           },
           "estimated_amount_out": {
             "$ref": "#/components/schemas/TokenAmount",
-            "description": "End-to-end output amount across all hops.\n\n- `ExactIn`: the expected (mid-market) output for the pinned input, with the caller's\n  `slippage_bps` already factored into route selection.\n- `ExactOut`: echoes the pinned output amount from the request."
+            "description": "End-to-end output amount the user receives.\n\n- `ExactIn`: the expected (mid-market) output for the pinned input (net of any bridge fee),\n  with the caller's `slippage_bps` already factored into route selection.\n- `ExactOut`: echoes the pinned output amount from the request."
           },
           "estimated_settlement_seconds": {
             "type": "integer",
             "format": "int32",
-            "description": "Sum of all hops' settlement times. Useful for showing the user a\nrough end-to-end ETA alongside the price.",
+            "description": "Rough end-to-end settlement ETA in seconds, for display alongside the\nprice. `0` for a same-chain on-chain swap.",
             "minimum": 0
           },
           "expected_amount_in": {
             "$ref": "#/components/schemas/TokenAmount",
-            "description": "End-to-end input amount across all hops.\n\n- `ExactIn`: echoes the pinned input amount from the request.\n- `ExactOut`: the expected (mid-market) input required to receive the pinned output, with\n  the caller's `slippage_bps` already factored into route selection."
-          },
-          "hops": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DexQuoteHop"
-            },
-            "description": "Per-hop breakdown of the route. Always at least one entry.\n\n`hops.len() == 1`: single-hop route, one user op.\n`hops.len() > 1`:  multi-hop route, one user op per hop, submitted\nin order and waiting for settlement between each. The SDK iterates\n`hops` and calls [`/dex-calldata`] once per hop, deriving each\n`/dex-calldata` request from the corresponding `DexQuoteHop`."
-          },
-          "requires_multiple_user_ops": {
-            "type": "boolean",
-            "description": "`true` iff `hops.len() > 1`. Surfaced explicitly so the SDK can\nshow the user a step counter (\"Step 1 of 2\") without iterating."
+            "description": "End-to-end input amount the user sends.\n\n- `ExactIn`: echoes the pinned input amount from the request.\n- `ExactOut`: the expected (mid-market) input required to receive the pinned output (incl.\n  any bridge gross-up), with the caller's `slippage_bps` already factored into route\n  selection."
           },
           "router": {
             "type": "string",
-            "description": "Top-level router label. Usually equals the only hop's router for\nsingle-hop routes (`\"lifi\"`, `\"uniswap\"`, …), or a `+`-joined\ncomposite for multi-hop (`\"cctp+uniswap\"`). Informational only —\nSDK behaviour is driven by `hops`, not this string."
+            "description": "Router that priced the DEX leg (`\"uniswap_v3\"`, `\"lifi\"`, …).\nInformational only."
           }
         }
       },
@@ -6120,6 +6361,47 @@
           }
         }
       },
+      "ReferralFeeRequest": {
+        "type": "object",
+        "properties": {
+          "extra_fees": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Optional per-swap fee surcharge in basis points. Rejected with 400 if\nit exceeds the referral key's `max_extra_fee_bps`. When omitted the\nkey's `default_extra_fee_bps` applies.",
+            "minimum": 0
+          },
+          "ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Referral code. When omitted/unknown/revoked the response is a zero\nextra fee (the base fee applies unchanged)."
+          }
+        }
+      },
+      "ReferralFeeResponse": {
+        "type": "object",
+        "required": [
+          "extra_fee_rate"
+        ],
+        "properties": {
+          "extra_fee_rate": {
+            "type": "number",
+            "format": "double",
+            "description": "Extra fee as a **decimal fraction** (e.g. `0.005` = 0.5% = 50 bps), to be\n**added on top of** the per-pair `fee_percentage` from `/swap-pairs`\n(also a fraction) — so a client composes `fee_percentage + extra_fee_rate`\nwith no conversion. `0` when there's no/unknown referral and no\n`extra_fees`.\n\nNote the asymmetry: the *input* (`extra_fees`, the key's\n`max_extra_fee_bps`) is in **basis points** (the key-config convention);\nthis *output* is a fraction (the composition convention). The endpoint\nconverts once so the client never handles bps."
+          },
+          "referral_label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Human-readable partner label for the referral code, when registered.\nInformational (attribution / display) only."
+          }
+        }
+      },
       "RefundCalldataResponse": {
         "type": "object",
         "description": "Response containing refund calldata for an EVM-to-Arkade swap.",
@@ -6383,6 +6665,22 @@
           "serverwontfund",
           "clientredeemedandclientrefunded"
         ]
+      },
+      "SwapStatusEntry": {
+        "type": "object",
+        "description": "Status of a single swap.",
+        "required": [
+          "id",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SwapStatus"
+          }
+        }
       },
       "Token": {
         "oneOf": [
