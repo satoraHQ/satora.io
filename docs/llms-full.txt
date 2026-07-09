@@ -2,7 +2,7 @@
 
 > LendaSwap enables instant, trustless swaps between Bitcoin (via Lightning, Arkade, or on-chain) and EVM tokens on Polygon, Ethereum, and Arbitrum.
 
-- NPM: https://www.npmjs.com/package/@lendasat/lendaswap-sdk-pure
+- NPM: https://www.npmjs.com/package/@satora/swap
 - GitHub: https://github.com/satoraHQ/lendaswap-sdk/tree/main/ts-pure-sdk
 - Docs: https://docs.satora.io
 
@@ -37,9 +37,9 @@ If the TypeScript SDK doesn't work for your use case, contact support@lendasat.c
 ### Installation
 
 ```bash
-npm install @lendasat/lendaswap-sdk-pure
+npm install @satora/swap
 # or
-pnpm add @lendasat/lendaswap-sdk-pure
+pnpm add @satora/swap
 ```
 
 The SDK is pure TypeScript - no WASM, no native dependencies. It works in browsers, React Native, and Node.js without any bundler configuration.
@@ -53,7 +53,7 @@ import {
   Client,
   IdbSwapStorage,
   IdbWalletStorage,
-} from "@lendasat/lendaswap-sdk-pure";
+} from "@satora/swap";
 
 const client = await Client.builder()
   .withSignerStorage(new IdbWalletStorage())
@@ -196,7 +196,7 @@ Key principles:
 Generate a new 12-word BIP39 mnemonic using the `Signer` class:
 
 ```ts
-import { Client, InMemoryWalletStorage } from "@lendasat/lendaswap-sdk-pure";
+import { Client, InMemoryWalletStorage } from "@satora/swap";
 
 // The SDK generates a mnemonic automatically when none is provided
 const client = await Client.builder()
@@ -213,7 +213,7 @@ import {
   Client,
   IdbSwapStorage,
   IdbWalletStorage,
-} from "@lendasat/lendaswap-sdk-pure";
+} from "@satora/swap";
 
 const client = await Client.builder()
   .withSignerStorage(new IdbWalletStorage())
@@ -253,7 +253,7 @@ The LendaSwap SDK is pure TypeScript with no WASM or native dependencies. It wor
 ### Installation
 
 ```bash
-npm install @lendasat/lendaswap-sdk-pure react-native-mmkv
+npm install @satora/swap react-native-mmkv
 ```
 
 ### Storage Adapters
@@ -265,7 +265,7 @@ Below is a complete implementation using react-native-mmkv, a fast key-value sto
 #### Wallet Storage
 
 ```ts
-import type { WalletStorage } from "@lendasat/lendaswap-sdk-pure";
+import type { WalletStorage } from "@satora/swap";
 import { MMKV } from "react-native-mmkv";
 
 const mmkv = new MMKV({ id: "lendaswap-wallet" });
@@ -303,8 +303,8 @@ export class MmkvWalletStorage implements WalletStorage {
 #### Swap Storage
 
 ```ts
-import type { StoredSwap, SwapStorage } from "@lendasat/lendaswap-sdk-pure";
-import type { GetSwapResponse } from "@lendasat/lendaswap-sdk-pure";
+import type { StoredSwap, SwapStorage } from "@satora/swap";
+import type { GetSwapResponse } from "@satora/swap";
 import { MMKV } from "react-native-mmkv";
 
 const mmkv = new MMKV({ id: "lendaswap-swaps" });
@@ -360,7 +360,7 @@ export class MmkvSwapStorage implements SwapStorage {
 ### Initialize Client (React Native)
 
 ```ts
-import { Client } from "@lendasat/lendaswap-sdk-pure";
+import { Client } from "@satora/swap";
 import { MmkvSwapStorage, MmkvWalletStorage } from "./storage";
 
 const client = await Client.builder()
@@ -640,7 +640,7 @@ import {
   Client,
   InMemorySwapStorage,
   InMemoryWalletStorage,
-} from "@lendasat/lendaswap-sdk-pure";
+} from "@satora/swap";
 
 const client = await Client.builder()
   .withSignerStorage(new InMemoryWalletStorage())
@@ -763,7 +763,7 @@ import {
   type EvmSigner,
   InMemorySwapStorage,
   InMemoryWalletStorage,
-} from "@lendasat/lendaswap-sdk-pure";
+} from "@satora/swap";
 
 const client = await Client.builder()
   .withSignerStorage(new InMemoryWalletStorage())
@@ -992,7 +992,7 @@ import {
   Client,
   IdbSwapStorage,
   IdbWalletStorage,
-} from "@lendasat/lendaswap-sdk-pure";
+} from "@satora/swap";
 
 // Initialize client with your mnemonic
 const client = await Client.builder()

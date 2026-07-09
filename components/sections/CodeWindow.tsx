@@ -46,7 +46,7 @@ export const CODE_LINES: Token[][] = [
     { text: "  ", type: "text" },
     { text: "from", type: "keyword" },
     { text: " ", type: "text" },
-    { text: "\"@lendasat/lendaswap-sdk-pure\"", type: "string" },
+    { text: "\"@satora/swap\"", type: "string" },
     { text: ";", type: "punct" },
   ],
   [],
@@ -149,7 +149,7 @@ export const CODE_LINES: Token[][] = [
 
 const PLAIN_CODE = `// Import LendaSwap SDK and packages
 import { Client, Asset, InMemoryWalletStorage, InMemorySwapStorage }
-  from "@lendasat/lendaswap-sdk-pure";
+  from "@satora/swap";
 
 // Initialize client
 const client = await Client.builder()
@@ -241,13 +241,13 @@ ${
     config.platform === "nextjs"
       ? `"use client"; // REQUIRED in Next.js  - SDK uses IndexedDB which is browser-only\n`
       : ""
-  }import { Client, Asset, ${storageImport} } from "@lendasat/lendaswap-sdk-pure";
+  }import { Client, Asset, ${storageImport} } from "@satora/swap";
 
 // 1. Initialize client (singleton  - reuse across your app)
 ${
     config.platform === "nextjs"
       ? `// In Next.js, dynamically import the SDK to avoid SSR issues (IndexedDB is browser-only):
-// const { Client, Asset, ${storageImport} } = await import("@lendasat/lendaswap-sdk-pure");
+// const { Client, Asset, ${storageImport} } = await import("@satora/swap");
 `
       : ""
   }const client = await Client.builder()
@@ -370,8 +370,8 @@ ${
     config.platform === "nextjs"
       ? `"use client"; // REQUIRED in Next.js  - SDK uses IndexedDB which is browser-only\n`
       : ""
-  }import { Client, Asset, ${storageImport} } from "@lendasat/lendaswap-sdk-pure";
-import type { EvmSigner } from "@lendasat/lendaswap-sdk-pure";
+  }import { Client, Asset, ${storageImport} } from "@satora/swap";
+import type { EvmSigner } from "@satora/swap";
 ${
     config.platform === "nextjs"
       ? `import { createPublicClient, http } from "viem";
@@ -383,7 +383,7 @@ import { polygon } from "viem/chains";`
 ${
     config.platform === "nextjs"
       ? `// In Next.js, dynamically import the SDK to avoid SSR issues (IndexedDB is browser-only):
-// const { Client, Asset, ${storageImport} } = await import("@lendasat/lendaswap-sdk-pure");
+// const { Client, Asset, ${storageImport} } = await import("@satora/swap");
 `
       : ""
   }const client = await Client.builder()
@@ -554,7 +554,7 @@ Satora Swaps is non-custodial atomic swap infrastructure for Bitcoin. It lets de
 
 - Documentation: https://docs.satora.io
 - Full docs for AI context: https://docs.satora.io/llms-full.txt
-- Package: \`npm install @lendasat/lendaswap-sdk-pure\`
+- Package: \`npm install @satora/swap\`
 
 ## My setup
 - **Swap direction**: ${dir}
@@ -592,7 +592,7 @@ Use these as your reference implementation. They show the exact SDK methods, par
 
 ### Client initialization
 \`\`\`ts
-import { Client, Asset, ${storageImport} } from "@lendasat/lendaswap-sdk-pure";
+import { Client, Asset, ${storageImport} } from "@satora/swap";
 
 const client = await Client.builder()
   .withSignerStorage(${walletStorageInit})   // persists mnemonic & key index
@@ -713,7 +713,7 @@ ${
       ? `
 ### Next.js / SSR important notes
 - The SDK uses IndexedDB (via IdbWalletStorage/IdbSwapStorage) which is **browser-only**. Mark all components that use the SDK with \`"use client"\`.
-- Consider using dynamic imports to avoid SSR bundling issues: \`const { Client, Asset } = await import("@lendasat/lendaswap-sdk-pure")\`
+- Consider using dynamic imports to avoid SSR bundling issues: \`const { Client, Asset } = await import("@satora/swap")\`
 - Initialize the client lazily (e.g. in a useEffect or on user action), not at module scope
 - Use a singleton pattern  - build the client once, reuse across the app
 `

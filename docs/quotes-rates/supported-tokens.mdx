@@ -14,7 +14,7 @@ A token in the API is **always identified by two fields together**: a `chain` an
 The SDK provides convenience constants under `Asset` that bundle both fields:
 
 ```ts
-import { Asset } from "@lendasat/lendaswap-sdk-pure";
+import { Asset } from "@satora/swap";
 
 Asset.BTC_LIGHTNING; // { chain: "Lightning", tokenId: "btc" }
 Asset.BTC_ARKADE; // { chain: "Arkade",    tokenId: "btc" }
@@ -80,7 +80,7 @@ const quote = await client.getQuote({
 Create swap (idiomatic with `Asset`):
 
 ```ts
-import { Asset } from "@lendasat/lendaswap-sdk-pure";
+import { Asset } from "@satora/swap";
 
 const swap = await client.createSwap({
   source: Asset.BTC_LIGHTNING,

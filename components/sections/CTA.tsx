@@ -4,7 +4,7 @@ import { GoArrowUpRight, HiOutlineCheckCircle, HiOutlineClipboard } from "@/comp
 import Link from "next/link";
 import { useState } from "react";
 
-const NPM_COMMAND = "npm i @lendasat/lendaswap-sdk-pure";
+const NPM_COMMAND = "npm i @satora/swap";
 
 export default function CTA() {
   const [copied, setCopied] = useState(false);

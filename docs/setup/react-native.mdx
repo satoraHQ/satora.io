@@ -11,7 +11,7 @@ The Satora Swaps SDK is pure TypeScript with no WASM or native dependencies. It 
 ## Installation
 
 ```bash
-npm install @lendasat/lendaswap-sdk-pure react-native-mmkv
+npm install @satora/swap react-native-mmkv
 ```
 
 ---
@@ -25,7 +25,7 @@ Below is a complete implementation using [react-native-mmkv](https://github.com/
 ### Key Storage
 
 ```ts
-import type { WalletStorage } from "@lendasat/lendaswap-sdk-pure";
+import type { WalletStorage } from "@satora/swap";
 import { MMKV } from "react-native-mmkv";
 
 const mmkv = new MMKV({ id: "satora-keys" });
@@ -63,8 +63,8 @@ export class MmkvWalletStorage implements WalletStorage {
 ### Swap Storage
 
 ```ts
-import type { StoredSwap, SwapStorage } from "@lendasat/lendaswap-sdk-pure";
-import type { GetSwapResponse } from "@lendasat/lendaswap-sdk-pure";
+import type { StoredSwap, SwapStorage } from "@satora/swap";
+import type { GetSwapResponse } from "@satora/swap";
 import { MMKV } from "react-native-mmkv";
 
 const mmkv = new MMKV({ id: "lendaswap-swaps" });
@@ -122,7 +122,7 @@ export class MmkvSwapStorage implements SwapStorage {
 ## Initialize Client
 
 ```ts
-import { Client } from "@lendasat/lendaswap-sdk-pure";
+import { Client } from "@satora/swap";
 import { MmkvSwapStorage, MmkvWalletStorage } from "./storage";
 
 const client = await Client.builder()

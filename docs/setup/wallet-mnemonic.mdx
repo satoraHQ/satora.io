@@ -22,7 +22,7 @@ Your mnemonic seed phrase is the master key to all your swap operations. Satora 
 Generate a new 12-word BIP39 mnemonic using the `Signer` class:
 
 ```ts
-import { Client, InMemoryWalletStorage } from "@lendasat/lendaswap-sdk-pure";
+import { Client, InMemoryWalletStorage } from "@satora/swap";
 
 // The SDK generates a mnemonic automatically when none is provided
 const client = await Client.builder()
@@ -41,7 +41,7 @@ import {
   Client,
   IdbSwapStorage,
   IdbWalletStorage,
-} from "@lendasat/lendaswap-sdk-pure";
+} from "@satora/swap";
 
 const client = await Client.builder()
   .withSignerStorage(new IdbWalletStorage())

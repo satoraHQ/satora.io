@@ -7,10 +7,17 @@ icon: "gear"
 ## Installation
 
 ```bash
-npm install @lendasat/lendaswap-sdk-pure
+npm install @satora/swap
 # or
-pnpm add @lendasat/lendaswap-sdk-pure
+pnpm add @satora/swap
 ```
+
+<Info>
+**Migrating from `@lendasat/lendaswap-sdk-pure`?** `@satora/swap` is a drop-in
+replacement — change the package name in your imports and nothing else changes.
+The legacy package keeps working and stays supported; new features land in
+`@satora/swap`.
+</Info>
 
 <Info>
 The SDK is pure TypeScript - no WASM, no native dependencies.
@@ -32,7 +39,7 @@ import {
   Client,
   IdbSwapStorage,
   IdbWalletStorage,
-} from "@lendasat/lendaswap-sdk-pure";
+} from "@satora/swap";
 
 const client = await Client.builder()
   .withSignerStorage(new IdbWalletStorage())
