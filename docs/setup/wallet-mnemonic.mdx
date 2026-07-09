@@ -37,11 +37,7 @@ const client = await Client.builder()
 To restore from an existing mnemonic, pass it to the client builder:
 
 ```ts
-import {
-  Client,
-  IdbSwapStorage,
-  IdbWalletStorage,
-} from "@satora/swap";
+import { Client, IdbSwapStorage, IdbWalletStorage } from "@satora/swap";
 
 const client = await Client.builder()
   .withSignerStorage(new IdbWalletStorage())

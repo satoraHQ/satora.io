@@ -35,11 +35,7 @@ For React Native, replace with MMKV-based storage adapters - see
 ## Initialize Client
 
 ```ts
-import {
-  Client,
-  IdbSwapStorage,
-  IdbWalletStorage,
-} from "@satora/swap";
+import { Client, IdbSwapStorage, IdbWalletStorage } from "@satora/swap";
 
 const client = await Client.builder()
   .withSignerStorage(new IdbWalletStorage())

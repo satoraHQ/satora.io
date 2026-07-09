@@ -26,11 +26,7 @@ Recovery is needed when:
 Use the xpub derived from your mnemonic to query the API for associated swaps:
 
 ```ts
-import {
-  Client,
-  IdbSwapStorage,
-  IdbWalletStorage,
-} from "@satora/swap";
+import { Client, IdbSwapStorage, IdbWalletStorage } from "@satora/swap";
 
 // Initialize client with your mnemonic
 const client = await Client.builder()
