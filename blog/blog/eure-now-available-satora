@@ -1,0 +1,45 @@
+---
+title: "EURe is now available on Satora"
+subtitle: "Swap Monerium's euro stablecoin for BTC on-chain or on Lightning"
+date: "2026-07-12"
+author: "Marius"
+authorImage: "/favicon/dot.svg"
+titleImage: "/assets/images/blog/Satora-x-monerium.webp"
+excerpt: "Satora now supports EURe, letting users atomically swap Monerium's MiCA-compliant euro stablecoin for BTC on-chain or on Lightning."
+tags: ["satora", "monerium", "eure", "stablecoins"]
+---
+
+# EURe Is Now Available on Satora
+
+Satora now supports EURe, Monerium's euro stablecoin.
+
+This means users can now atomically swap EURe for BTC on-chain or BTC on Lightning through Satora, without relying on a custodial exchange to sit in the middle of the trade.
+
+Supporting a EURe is not about putting a euro stablecoin "on Lightning", but about giving users a way to move from euro stablecoin liquidity into Bitcoin, either on-chain, through Lightning or Arkade, via a swap flow built around atomic execution rather than platform custody.
+
+## What this means for users
+
+If you hold EURe, you can now use Satora to move into Bitcoin in the format that fits your needs:
+
+- BTC on-chain for native Bitcoin settlement
+- BTC on Lightning for faster payment flows
+
+The goal is not just to add another asset. The goal is to make euro-denominated liquidity more useful inside Bitcoin-native flows.
+
+On the other side, if you hold BTC, you can now use Satora to get a euro-denominated stablecoin without relying on a trusted third party.
+
+![EURe is now live on Satora](/assets/images/blog/swap-eure.jpeg)
+
+Try it now on [app.satora.io](https://app.satora.io).
+
+## Why EURe matters
+
+EURe is issued by Monerium and positioned as a MiCA-compliant euro stablecoin, the new European Union crypto-regulation. That makes it a relevant asset for European users and builders who want euro-denominated on-chain liquidity with a more credible regulatory and banking connection than other euro token.
+
+Monerium's broader model also matters here. EURe is tied to real euro payment rails, not only crypto-native circulation. That gives it a stronger fit for users who want to move between bank-connected euro liquidity and Bitcoin rails without defaulting to a centralized exchange workflow.
+
+## Why this is different
+
+This launch is also the result of a protocol change inside Satora. Previously, parts of the swap flow depended on Uniswap. With the new design, Satora is no longer tightly coupled to a single swap provider. That makes the system more flexible as new assets and routes are added, and it opens the door to using different swap providers depending on the route and execution needs.
+
+In practical terms, this makes Satora more adaptable than before. EURe support is not just a new listing. It reflects a more modular architecture for Bitcoin-to-stablecoin swaps.
