@@ -41,6 +41,12 @@ const PARTNERS_DATA = [
     url: "https://getalby.com",
   },
   {
+    name: "Hodl Hodl",
+    logo: "/assets/partners/hodlhodl_logo.svg",
+    height: "h-6",
+    url: "https://hodlhodl.com",
+  },
+  {
     name: "Lendasat",
     logo: "/assets/partners/lendasat_logo.svg",
     height: "h-6",

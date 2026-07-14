@@ -47,6 +47,16 @@ const STORIES: Story[] = [
     video: "/assets/videos/arkade_iframe_demo.mov",
   },
   {
+    name: "Hodl Hodl",
+    logo: "/assets/partners/hodlhodl_logo.svg",
+    logoHeight: "h-6",
+    url: "https://hodlhodl.com",
+    useCase: "P2P Marketplace",
+    description:
+      "Hodl Hodl integrates Satora so traders on its non-custodial P2P marketplace can swap between Lightning and Arkade in both directions, moving liquidity in and out of trades instantly.",
+    tag: "Lightning ↔ Arkade · SDK",
+  },
+  {
     name: "Freedomia",
     logo: "/assets/partners/freedomia_logo.png",
     logoHeight: "h-5",

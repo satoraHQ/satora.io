@@ -20,8 +20,7 @@ export default function Hero() {
           </h1>
 
           <p className="mt-8 text-[15px] text-gray-500 dark:text-gray-400 leading-relaxed max-w-sm">
-            Satora is the developer SDK for non-custodial atomic swaps between Bitcoin and stablecoins. Ship in
-            minutes.
+            Satora is the developer SDK for non-custodial atomic swaps between Bitcoin and stablecoins. Ship in minutes.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
