@@ -1,6 +1,6 @@
-# LendaSwap Documentation
+# Satora Documentation
 
-> LendaSwap enables instant, trustless swaps between Bitcoin (via Lightning, Arkade, or on-chain) and EVM tokens on Polygon, Ethereum, and Arbitrum.
+> Satora enables instant, trustless swaps between Bitcoin (via Lightning, Arkade, or on-chain) and EVM tokens on Polygon, Ethereum, and Arbitrum.
 
 - NPM: https://www.npmjs.com/package/@satora/swap
 - GitHub: https://github.com/satoraHQ/lendaswap-sdk/tree/main/ts-pure-sdk
@@ -10,11 +10,11 @@
 
 ## Overview
 
-LendaSwap is designed for developers and power users who need a seamless, non-custodial bridge between Bitcoin and stablecoins.
+Satora is designed for developers and power users who need a seamless, non-custodial bridge between Bitcoin and stablecoins.
 
 - **Non-Custodial**: You retain control through atomic swaps (HTLCs).
 - **Fast**: Swaps complete in minutes via Lightning/Arkade/On-chain.
-- **Gasless**: LendaSwap covers gas fees on all EVM chains (Polygon, Ethereum, Arbitrum) for token claims. A small gas fee is deducted from the swap amount.
+- **Gasless**: Satora covers gas fees on all EVM chains (Polygon, Ethereum, Arbitrum) for token claims. A small gas fee is deducted from the swap amount.
 - **Multi-Token**: Swap to supported ERC-20 tokens via Uniswap V3 DEX routing.
 - **Developer First**: Clean REST API and idiomatic TypeScript SDK.
 
@@ -182,7 +182,7 @@ When a polled swap reaches `serverfunded` (BTC→EVM):
 
 ### Self-Custody Model
 
-Your mnemonic seed phrase is the master key to all your swap operations. LendaSwap never has access to your private keys - all cryptographic operations happen locally.
+Your mnemonic seed phrase is the master key to all your swap operations. Satora never has access to your private keys - all cryptographic operations happen locally.
 
 Key principles:
 
@@ -248,7 +248,7 @@ All derivation happens locally - your mnemonic never leaves your device.
 
 ## React Native Setup
 
-The LendaSwap SDK is pure TypeScript with no WASM or native dependencies. It works in React Native out of the box - you just need to provide storage adapters since IndexedDB is not available.
+The Satora SDK is pure TypeScript with no WASM or native dependencies. It works in React Native out of the box - you just need to provide storage adapters since IndexedDB is not available.
 
 ### Installation
 
@@ -429,7 +429,7 @@ Swap BTC to USDC on any of these chains. The SDK swaps to USDC on a source chain
 
 ### Dynamic EVM Tokens
 
-LendaSwap supports a changing list of tokens on Polygon, Ethereum, and Arbitrum via DEX aggregation. Any ERC-20 token available on a DEX will be usable as a source or target for swaps.
+Satora supports a changing list of tokens on Polygon, Ethereum, and Arbitrum via DEX aggregation. Any ERC-20 token available on a DEX will be usable as a source or target for swaps.
 
 Retrieve all available tokens, optionally filtered by chain:
 
@@ -473,7 +473,7 @@ for (const t of tokens.evm_tokens) {
 | On-chain  | Arbitrum | Yes              |
 | On-chain  | Ethereum | Yes              |
 
-**Gasless claiming on all EVM chains** - LendaSwap covers gas fees on Polygon, Ethereum, and Arbitrum via EIP-712 signature-based claiming. A small gas fee is deducted from the swap amount depending on network conditions. Alternatively, you can claim manually with your own wallet and pay gas yourself.
+**Gasless claiming on all EVM chains** - Satora covers gas fees on Polygon, Ethereum, and Arbitrum via EIP-712 signature-based claiming. A small gas fee is deducted from the swap amount depending on network conditions. Alternatively, you can claim manually with your own wallet and pay gas yourself.
 
 ---
 
@@ -1106,7 +1106,7 @@ Swap Operation Errors:
 
 ## Advanced: Hash Time-Locked Contracts (HTLC)
 
-Hash Time-Locked Contracts (HTLCs) are the foundation of LendaSwap's atomic swap protocol. They enable trustless, conditional payments across blockchains.
+Hash Time-Locked Contracts (HTLCs) are the foundation of Satora's atomic swap protocol. They enable trustless, conditional payments across blockchains.
 
 ### What is an HTLC?
 
@@ -1140,7 +1140,7 @@ timelock_server = current_time + 12 hours  // server's HTLC
 
 ### Contract Architecture
 
-LendaSwap uses a two-contract architecture on each EVM chain (Polygon, Ethereum, Arbitrum):
+Satora uses a two-contract architecture on each EVM chain (Polygon, Ethereum, Arbitrum):
 
 **HTLCErc20** - The core HTLC contract that holds ERC-20 tokens. Supports:
 - Direct claiming by the designated claim address
@@ -1155,7 +1155,7 @@ LendaSwap uses a two-contract architecture on each EVM chain (Polygon, Ethereum,
 
 **DEX-agnostic design:** The coordinator accepts arbitrary call arrays, currently routing through Uniswap V3 (primary) (fallback) for DEX aggregation.
 
-### LendaSwap HTLC Flow (BTC to EVM)
+### Satora HTLC Flow (BTC to EVM)
 
 1. **Client Generates Secret** - Client generates a random 32-byte preimage S and computes H = SHA256(S). The client shares H with the service - never the preimage itself.
 2. **Client Pays BTC** - Client pays via a Boltz reverse swap (Lightning), sends to an Arkade VHTLC, or sends to an on-chain P2WSH HTLC.
@@ -1165,7 +1165,7 @@ LendaSwap uses a two-contract architecture on each EVM chain (Polygon, Ethereum,
 
 ### Gasless Execution
 
-LendaSwap uses EIP-712 typed data signatures so users never need to pay gas:
+Satora uses EIP-712 typed data signatures so users never need to pay gas:
 
 1. User signs an EIP-712 message binding: preimage, destination address, sweep token, and minimum output amount
 2. Server submits `redeemAndExecute` on the HTLCCoordinator (server pays gas)
@@ -1280,13 +1280,13 @@ function refundTo(
 
 ### Deterministic Deployment
 
-LendaSwap uses CREATE2 for deterministic contract addresses across all chains. This means the HTLCErc20 and HTLCCoordinator contracts have the same address on Polygon, Ethereum, and Arbitrum.
+Satora uses CREATE2 for deterministic contract addresses across all chains. This means the HTLCErc20 and HTLCCoordinator contracts have the same address on Polygon, Ethereum, and Arbitrum.
 
 ---
 
 ## Advanced: Swap State Machine
 
-LendaSwap swaps progress through a well-defined state machine that ensures atomicity and proper handling of all scenarios. The state machine is the same for both directions (BTC to EVM and EVM to BTC) - the difference is which addresses the client and server fund.
+Satora swaps progress through a well-defined state machine that ensures atomicity and proper handling of all scenarios. The state machine is the same for both directions (BTC to EVM and EVM to BTC) - the difference is which addresses the client and server fund.
 
 ### Who Funds What
 
@@ -1478,17 +1478,17 @@ These states are final - no further transitions occur:
 
 ### General
 
-**What is LendaSwap?**
-LendaSwap enables instant, trustless swaps between Bitcoin (Lightning, Arkade, or on-chain) and EVM tokens (USDC, USDT, etc.) on Polygon, Ethereum, and Arbitrum. All swaps are non-custodial using Hash Time-Locked Contracts (HTLCs).
+**What is Satora?**
+Satora enables instant, trustless swaps between Bitcoin (Lightning, Arkade, or on-chain) and EVM tokens (USDC, USDT, etc.) on Polygon, Ethereum, and Arbitrum. All swaps are non-custodial using Hash Time-Locked Contracts (HTLCs).
 
-**Is LendaSwap custodial?**
-No. LendaSwap is fully non-custodial. Swaps use atomic HTLCs - either both sides complete, or neither does. At no point does LendaSwap hold your funds without a cryptographic guarantee that you can reclaim them.
+**Is Satora custodial?**
+No. Satora is fully non-custodial. Swaps use atomic HTLCs - either both sides complete, or neither does. At no point does Satora hold your funds without a cryptographic guarantee that you can reclaim them.
 
 **Which chains and tokens are supported?**
 Bitcoin side: Lightning Network, Arkade (off-chain), and on-chain BTC. EVM side: Polygon, Ethereum, and Arbitrum. Supported tokens include USDC, USDT, and other ERC-20 tokens routed via Uniswap V3.
 
 **What are the fees?**
-LendaSwap charges a small percentage fee on each swap, plus network fees. Use the quote endpoint to get an exact fee breakdown before creating a swap. Gasless claiming on EVM chains deducts a small gas fee from the swap amount.
+Satora charges a small percentage fee on each swap, plus network fees. Use the quote endpoint to get an exact fee breakdown before creating a swap. Gasless claiming on EVM chains deducts a small gas fee from the swap amount.
 
 ### Integration
 
@@ -1499,7 +1499,7 @@ Use the TypeScript SDK. It handles wallet management, state tracking, error reco
 The SDK is pure TypeScript with zero native dependencies. It works in browsers (any modern browser), React Native (with custom storage adapters), and Node.js (server-side integrations). No WASM, no native modules.
 
 **Do I need an API key?**
-No authentication is required to use LendaSwap. You can optionally pass an API key for tracking and analytics purposes.
+No authentication is required to use Satora. You can optionally pass an API key for tracking and analytics purposes.
 
 **How do I handle errors and failed swaps?**
 The SDK has built-in error handling. See the Error Codes section for common error codes and recovery strategies.
@@ -1510,7 +1510,7 @@ Swaps have built-in timeouts. If a swap isn't completed within the timelock peri
 ### Gasless & Fees
 
 **What does 'gasless' mean?**
-When claiming EVM tokens (BTC to EVM swaps), you don't need to hold ETH/MATIC for gas. Instead, you sign an EIP-712 message and LendaSwap's server submits the transaction on your behalf. A small gas fee is deducted from the swap amount.
+When claiming EVM tokens (BTC to EVM swaps), you don't need to hold ETH/MATIC for gas. Instead, you sign an EIP-712 message and Satora's server submits the transaction on your behalf. A small gas fee is deducted from the swap amount.
 
 **Can I pay gas myself instead of using gasless?**
 Yes. You can claim manually by calling the HTLC contract directly with your own wallet. This requires holding native gas tokens (ETH/MATIC/ARB) but avoids the gasless fee deduction.
@@ -1520,14 +1520,14 @@ Rates are sourced from DEX liquidity at the time of the swap. Use the quote endp
 
 ### Security
 
-**What if LendaSwap goes offline during my swap?**
+**What if Satora goes offline during my swap?**
 Your funds are safe. HTLCs have a built-in timelock - if the service doesn't complete its side, you can refund after the timeout expires.
 
-**Can LendaSwap steal my funds?**
-No. The HTLC protocol is cryptographically enforced on-chain. LendaSwap never has unilateral access to your funds. Either the swap completes atomically or you can reclaim your funds after the timelock.
+**Can Satora steal my funds?**
+No. The HTLC protocol is cryptographically enforced on-chain. Satora never has unilateral access to your funds. Either the swap completes atomically or you can reclaim your funds after the timelock.
 
 **How are smart contracts audited?**
-LendaSwap's HTLC contracts use deterministic CREATE2 deployment across all chains. The contracts are open-source and verifiable.
+Satora's HTLC contracts use deterministic CREATE2 deployment across all chains. The contracts are open-source and verifiable.
 
 ### Troubleshooting
 

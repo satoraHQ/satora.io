@@ -91,7 +91,7 @@ export default function Features() {
           {/* Row 2: Three pillars (wide) + Non-custodial (narrow) */}
           <div className={`${cardClass} sm:col-span-3`}>
             <h3 className="text-[15px] font-semibold text-gray-900 dark:text-white mb-6">
-              Why LendaSwap
+              Why Satora
             </h3>
             <div className="grid grid-cols-3 gap-4">
               <div>

@@ -31,7 +31,7 @@ const STORIES: Story[] = [
     url: "https://blitz-wallet.com",
     useCase: "Payment Links",
     description:
-      "Blitz Wallet integrates LendaSwap to offer CashApp-style payment links. Users share a link, recipients pay via Lightning, and the sender receives stablecoins instantly.",
+      "Blitz Wallet integrates Satora to offer CashApp-style payment links. Users share a link, recipients pay via Lightning, and the sender receives stablecoins instantly.",
     tag: "USDC → BTC Lightning · SDK",
     video: "/assets/videos/blitz_demo.mp4",
   },
@@ -42,7 +42,7 @@ const STORIES: Story[] = [
     url: "https://arkade.money",
     useCase: "Wallet Iframe Integration",
     description:
-      "Arkade embeds LendaSwap via iframe so users can swap between off-chain Bitcoin and stablecoins without leaving the wallet.",
+      "Arkade embeds Satora via iframe so users can swap between off-chain Bitcoin and stablecoins without leaving the wallet.",
     tag: "Arkade ↔ EVM · Iframe",
     video: "/assets/videos/arkade_iframe_demo.mov",
   },

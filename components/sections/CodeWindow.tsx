@@ -29,7 +29,7 @@ export interface Token {
 }
 
 export const CODE_LINES: Token[][] = [
-  [{ text: "// Import LendaSwap SDK and packages", type: "comment" }],
+  [{ text: "// Import Satora SDK and packages", type: "comment" }],
   [
     { text: "import", type: "keyword" },
     { text: " { ", type: "punct" },
@@ -147,7 +147,7 @@ export const CODE_LINES: Token[][] = [
   ],
 ];
 
-const PLAIN_CODE = `// Import LendaSwap SDK and packages
+const PLAIN_CODE = `// Import Satora SDK and packages
 import { Client, Asset, InMemoryWalletStorage, InMemorySwapStorage }
   from "@satora/swap";
 

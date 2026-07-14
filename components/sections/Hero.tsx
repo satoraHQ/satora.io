@@ -20,7 +20,7 @@ export default function Hero() {
           </h1>
 
           <p className="mt-8 text-[15px] text-gray-500 dark:text-gray-400 leading-relaxed max-w-sm">
-            LendaSwap is the developer SDK for non-custodial atomic swaps between Bitcoin and stablecoins. Ship in
+            Satora is the developer SDK for non-custodial atomic swaps between Bitcoin and stablecoins. Ship in
             minutes.
           </p>
 
