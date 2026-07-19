@@ -43,7 +43,7 @@ const client = await Client.builder()
   .build();
 ```
 
-**Authentication:** The public API endpoints are open and don't require authentication. For tracking, attribution, or referral programs, configure an organization code via `withOrgCode("your-org-code")` on the `ClientBuilder` — it's sent as the `X-Org-Code` header on every request and is optional.
+**Authentication:** The public API endpoints are open and don't require authentication. Optionally, configure an API key via `withReferralCode("your-api-key")` on the `ClientBuilder` for swap attribution and custom fee markup — see [API Keys](/setup/api-keys).
 
 ---
 

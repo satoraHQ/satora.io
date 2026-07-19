@@ -1,0 +1,100 @@
+---
+title: API Keys
+description: Optional API keys for swap attribution and custom fee markup
+icon: "key"
+---
+
+API keys are **optional**. All public endpoints work without authentication, and you can create and complete swaps without one.
+
+An API key gives you two things:
+
+1. **Attribution & tracking** — every swap created with your key is attributed to you, so you can track your integration's volume in the developer dashboard.
+2. **Fee markup** — you can add your own surcharge on top of Satora's swap fee and earn revenue on each swap routed through your integration.
+
+## Get an API Key
+
+Sign up at [developer.satora.io](https://developer.satora.io) and create a key. Each key has two fee settings:
+
+- `default_extra_fee_bps` — the markup (in basis points) applied when a swap doesn't specify one.
+- `max_extra_fee_bps` — the cap for per-swap markups. Requests above this cap are rejected with `400`.
+
+## Configure the Key on the Client
+
+Set the key once on the `ClientBuilder` — every `getQuote` / `createSwap` call is then attributed to it automatically:
+
+```ts
+import { Client, IdbSwapStorage, IdbWalletStorage } from "@satora/swap";
+
+const client = await Client.builder()
+  .withSignerStorage(new IdbWalletStorage())
+  .withSwapStorage(new IdbSwapStorage())
+  .withReferralCode(process.env.SATORA_API_KEY!)
+  .build();
+```
+
+## Configure the Key per Swap
+
+Alternatively, pass the key on individual calls. A per-call `referralCode` always wins over the client-level default:
+
+```ts
+const quote = await client.getQuote({
+  sourceChain: "Lightning",
+  sourceToken: "btc",
+  targetChain: "Polygon",
+  targetToken: USDC_POLYGON_ADDRESS,
+  sourceAmount: 100_000, // sats
+  referralCode: "your-api-key",
+});
+
+const result = await client.createSwap({
+  source: Asset.BTC_LIGHTNING,
+  target: Asset.USDC_POLYGON,
+  targetAddress: destinationAddress,
+  sourceAmount: 100_000,
+  referralCode: "your-api-key",
+});
+```
+
+## Add a Fee Markup
+
+To charge a per-swap markup, pass `extraFees` (basis points, up to your key's `max_extra_fee_bps`). If you omit it, the key's `default_extra_fee_bps` applies.
+
+<Warning>
+Pass the same `extraFees` value to both `getQuote` and the matching
+`createSwap` — otherwise the quoted amount won't match what the swap
+actually charges.
+</Warning>
+
+```ts
+const quote = await client.getQuote({
+  sourceChain: "Lightning",
+  sourceToken: "btc",
+  targetChain: "Polygon",
+  targetToken: USDC_POLYGON_ADDRESS,
+  sourceAmount: 100_000,
+  referralCode: "your-api-key",
+  extraFees: 25, // +0.25% on top of the base swap fee
+});
+
+const result = await client.createSwap({
+  source: Asset.BTC_LIGHTNING,
+  target: Asset.USDC_POLYGON,
+  targetAddress: destinationAddress,
+  sourceAmount: 100_000,
+  referralCode: "your-api-key",
+  extraFees: 25, // must match the quote
+});
+```
+
+You can preview the effective extra-fee rate for a key with `getReferralFee`:
+
+```ts
+const fee = await client.getReferralFee({
+  referralCode: "your-api-key",
+  extraFees: 25,
+});
+```
+
+## REST API
+
+If you call the HTTP API directly, pass the key as the `ref` query parameter on `GET /quote` (with optional `extra_fees` in bps), and as `referral_code` / `extra_fees` in the body when creating a swap. See the [API Reference](/api-reference) for the exact schemas.

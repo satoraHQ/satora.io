@@ -57,7 +57,8 @@
                 "icon": "wrench",
                 "pages": [
                   "setup/setup",
-                  "setup/wallet-mnemonic"
+                  "setup/wallet-mnemonic",
+                  "setup/api-keys"
                 ]
               },
               {
