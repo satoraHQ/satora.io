@@ -55,3 +55,16 @@ Sign up to track your swaps, manage referral codes, and monitor your integration
 <Card title="API Reference" icon="book" href="/api-reference/health">
   Browse the full REST API documentation.
 </Card>
+
+### Client compatibility headers
+
+SDK requests include two compatibility headers:
+
+```http
+X-Lendaswap-Client: @satora/swap/0.5.0
+x-satora-server-version: 0.2.49
+```
+
+`X-Lendaswap-Client` identifies the SDK and SDK version. EVM-target swap creation requires a recognizable `<sdk-name>/<semver>` value.
+
+`x-satora-server-version` identifies the semver server/API version the SDK was built against. The API currently parses and logs it for diagnostics but does not enforce compatibility.
