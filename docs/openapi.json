@@ -6,7 +6,7 @@
     "license": {
       "name": ""
     },
-    "version": "0.2.49"
+    "version": "0.2.52"
   },
   "servers": [
     {
@@ -2006,7 +2006,7 @@
           "swap-btc-evm"
         ],
         "summary": "Claims an EVM-targeted swap gaslessly via the HTLCCoordinator contract.",
-        "description": "Supports Arkade-to-EVM, Lightning and Bitcoin-to-EVM swaps. The server submits\n`coordinator.redeemAndExecute` on the client's behalf, using the client's\nEIP-712 signature and secret.\n\n# Prerequisites — what the client must do before calling this endpoint\n\n1. **Create a swap** via one of the swap endpoints (e.g. `POST /swap/arkade/evm`). Wait for the\n   swap status to reach `ServerFunded`.\n\n2. **Fetch calldata** via [`GET\n   /swap/{id}/redeem-and-swap-calldata`](#/redeem-and-swap-calldata/get_dex_calldata). This\n   returns:\n   - `dex_calldata` — DEX swap calldata (only for non-WBTC targets)\n   - `gasless_fee_sats` — the fee deducted from the HTLC amount\n   - `calls_hash` — `keccak256(abi.encode(calls))`, must be included in the signature\n\n3. **Construct the EIP-712 signature** over the `Redeem` struct:\n\n   **Domain:**\n   ```text\n   EIP712Domain(string name, string version, uint256 chainId, address verifyingContract)\n   name            = \"HTLCErc20\"\n   version         = \"3\"\n   chainId         = <target EVM chain ID>\n   verifyingContract = <HTLCErc20 contract address (swap.evm_htlc_address)>\n   ```\n\n   **Struct:**\n   ```text\n   Redeem(\n       bytes32 preimage,       // the swap secret\n       uint256 amount,         // WBTC amount in the HTLC (in sats)\n       address token,          // WBTC token address\n       address sender,         // server's EVM address\n       uint256 timelock,       // HTLC refund locktime\n       address caller,         // HTLCCoordinator contract address\n       address destination,    // where output tokens go\n       address sweepToken,     // target token (or WBTC if direct)\n       uint256 minAmountOut,   // slippage protection from step 2\n       bytes32 callsHash       // from step 2\n   )\n   ```\n\n   The final digest is: `keccak256(\\x19\\x01 || domainSeparator || structHash)`\n\n   Sign this digest with the client's EVM private key (secp256k1) to obtain\n   `v`, `r`, `s`.\n\n   **JavaScript example (using ethers v6):**\n\n   ```javascript\n   import { ethers } from \"ethers\";\n\n   // 1. Fetch calldata (returns calls_hash + optional dex_calldata)\n   const { calls_hash, dex_calldata, gasless_fee_sats, min_amount_out } = await fetch(\n     `${baseUrl}/swap/${swapId}/redeem-and-swap-calldata?destination=${destination}`\n   ).then(r => r.json());\n\n   // 2. Determine sweepToken\n   const needsDexSwap = targetTokenAddress.toLowerCase() !== wbtcAddress.toLowerCase();\n   const sweepToken = needsDexSwap ? targetTokenAddress : wbtcAddress;\n\n   // 3. Build EIP-712 typed data and sign\n   const wallet = new ethers.Wallet(privateKey);\n\n   const domain = {\n     name: \"HTLCErc20\",\n     version: \"3\",\n     chainId: swap.evm_chain_id,               // e.g. 42161 for Arbitrum\n     verifyingContract: swap.evm_htlc_address,  // HTLCErc20 contract\n   };\n\n   const types = {\n     Redeem: [\n       { name: \"preimage\",     type: \"bytes32\" },\n       { name: \"amount\",       type: \"uint256\" },\n       { name: \"token\",        type: \"address\" },\n       { name: \"sender\",       type: \"address\" },\n       { name: \"timelock\",     type: \"uint256\" },\n       { name: \"caller\",       type: \"address\" },\n       { name: \"destination\",  type: \"address\" },\n       { name: \"sweepToken\",   type: \"address\" },\n       { name: \"minAmountOut\", type: \"uint256\" },\n       { name: \"callsHash\",   type: \"bytes32\" },\n     ],\n   };\n\n   const message = {\n     preimage:     secret,                        // 0x-prefixed 32-byte hex\n     amount:       swap.evm_expected_sats,        // WBTC sats locked in HTLC\n     token:        wbtcAddress,                   // WBTC on the target chain\n     sender:       swap.server_evm_address,       // server (HTLC creator)\n     timelock:     swap.evm_refund_locktime,      // HTLC expiry timestamp\n     caller:       swap.evm_coordinator_address,  // HTLCCoordinator contract\n     destination:  destination,                   // where output tokens go\n     sweepToken:   sweepToken,\n     minAmountOut: min_amount_out,                // from step 1\n     callsHash:    calls_hash,                    // from step 1\n   };\n\n   const sig = await wallet.signTypedData(domain, types, message);\n   const { v, r, s } = ethers.Signature.from(sig);\n\n   // 4. POST to claim-gasless\n   await fetch(`${baseUrl}/swap/${swapId}/claim-gasless`, {\n     method: \"POST\",\n     headers: { \"Content-Type\": \"application/json\" },\n     body: JSON.stringify({\n       secret, destination, v, r, s,\n       dex_calldata: needsDexSwap ? dex_calldata : undefined,\n     }),\n   });\n   ```\n\n4. **POST** the request to this endpoint with the secret, destination, signature, and optionally\n   the `dex_calldata` from step 2.",
+        "description": "Supports Arkade-to-EVM, Lightning and Bitcoin-to-EVM swaps. The server submits\n`coordinator.redeemAndExecute` on the client's behalf, using the client's\nEIP-712 signature and secret.\n\n# Prerequisites — what the client must do before calling this endpoint\n\n1. **Create a swap** via one of the swap endpoints (e.g. `POST /swap/arkade/evm`). Wait for the\n   swap status to reach `ServerFunded`.\n\n2. **Fetch calldata** via [`GET\n   /swap/{id}/redeem-and-swap-calldata`](#/redeem-and-swap-calldata/get_dex_calldata). This\n   returns:\n   - `dex_calldata` — DEX swap calldata (only for non-WBTC targets)\n   - `gasless_fee_sats` — the fee deducted from the HTLC amount\n   - `calls_hash` — `keccak256(abi.encode(calls))`, must be included in the signature\n\n3. **Construct the EIP-712 signature** over the `Redeem` struct:\n\n   **Domain:**\n   ```text\n   EIP712Domain(string name, string version, uint256 chainId, address verifyingContract)\n   name            = \"HTLCErc20\"\n   version         = \"4\"\n   chainId         = <target EVM chain ID>\n   verifyingContract = <HTLCErc20 contract address (swap.evm_htlc_address)>\n   ```\n\n   **Struct:**\n   ```text\n   Redeem(\n       bytes32 preimage,       // the swap secret\n       uint256 amount,         // WBTC amount in the HTLC (in sats)\n       address token,          // WBTC token address\n       address sender,         // server's EVM address\n       uint256 timelock,       // HTLC refund locktime\n       address caller,         // HTLCCoordinator contract address\n       address destination,    // where output tokens go\n       address sweepToken,     // target token (or WBTC if direct)\n       uint256 minAmountOut,   // slippage protection from step 2\n       bytes32 callsHash       // from step 2\n   )\n   ```\n\n   The final digest is: `keccak256(\\x19\\x01 || domainSeparator || structHash)`\n\n   Sign this digest with the client's EVM private key (secp256k1) to obtain\n   `v`, `r`, `s`.\n\n   **JavaScript example (using ethers v6):**\n\n   ```javascript\n   import { ethers } from \"ethers\";\n\n   // 1. Fetch calldata (returns calls_hash + optional dex_calldata)\n   const { calls_hash, dex_calldata, gasless_fee_sats, min_amount_out } = await fetch(\n     `${baseUrl}/swap/${swapId}/redeem-and-swap-calldata?destination=${destination}`\n   ).then(r => r.json());\n\n   // 2. Determine sweepToken\n   const needsDexSwap = targetTokenAddress.toLowerCase() !== wbtcAddress.toLowerCase();\n   const sweepToken = needsDexSwap ? targetTokenAddress : wbtcAddress;\n\n   // 3. Build EIP-712 typed data and sign\n   const wallet = new ethers.Wallet(privateKey);\n\n   const domain = {\n     name: \"HTLCErc20\",\n     version: \"4\",\n     chainId: swap.evm_chain_id,               // e.g. 42161 for Arbitrum\n     verifyingContract: swap.evm_htlc_address,  // HTLCErc20 contract\n   };\n\n   const types = {\n     Redeem: [\n       { name: \"preimage\",     type: \"bytes32\" },\n       { name: \"amount\",       type: \"uint256\" },\n       { name: \"token\",        type: \"address\" },\n       { name: \"sender\",       type: \"address\" },\n       { name: \"timelock\",     type: \"uint256\" },\n       { name: \"caller\",       type: \"address\" },\n       { name: \"destination\",  type: \"address\" },\n       { name: \"sweepToken\",   type: \"address\" },\n       { name: \"minAmountOut\", type: \"uint256\" },\n       { name: \"callsHash\",   type: \"bytes32\" },\n     ],\n   };\n\n   const message = {\n     preimage:     secret,                        // 0x-prefixed 32-byte hex\n     amount:       swap.evm_expected_sats,        // WBTC sats locked in HTLC\n     token:        wbtcAddress,                   // WBTC on the target chain\n     sender:       swap.server_evm_address,       // server (HTLC creator)\n     timelock:     swap.evm_refund_locktime,      // HTLC expiry timestamp\n     caller:       swap.evm_coordinator_address,  // HTLCCoordinator contract\n     destination:  destination,                   // where output tokens go\n     sweepToken:   sweepToken,\n     minAmountOut: min_amount_out,                // from step 1\n     callsHash:    calls_hash,                    // from step 1\n   };\n\n   const sig = await wallet.signTypedData(domain, types, message);\n   const { v, r, s } = ethers.Signature.from(sig);\n\n   // 4. POST to claim-gasless\n   await fetch(`${baseUrl}/swap/${swapId}/claim-gasless`, {\n     method: \"POST\",\n     headers: { \"Content-Type\": \"application/json\" },\n     body: JSON.stringify({\n       secret, destination, v, r, s,\n       dex_calldata: needsDexSwap ? dex_calldata : undefined,\n     }),\n   });\n   ```\n\n4. **POST** the request to this endpoint with the secret, destination, signature, and optionally\n   the `dex_calldata` from step 2.",
         "operationId": "claim_via_gasless",
         "parameters": [
           {
@@ -2471,6 +2471,7 @@
           "evm_chain_id",
           "token_address",
           "hash_lock",
+          "arkade_htlc_script_version",
           "refund_pk",
           "user_id"
         ],
@@ -2492,6 +2493,11 @@
             "format": "int64",
             "description": "How much target token the user wants to receive (mutually exclusive with `amount_in`).\nValue is in the target token's smallest unit (e.g. for USDC with 6 decimals, 1000000 = 1\nUSDC).",
             "minimum": 0
+          },
+          "arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Arkade HTLC script version. New swaps must use version 1."
           },
           "bridge_recipient_setup": {
             "type": "boolean",
@@ -2590,12 +2596,17 @@
           "receiver_pk",
           "arkade_server_pk",
           "vhtlc_refund_locktime",
+          "arkade_htlc_script_version",
           "unilateral_claim_delay",
           "unilateral_refund_delay",
           "unilateral_refund_without_receiver_delay",
           "network"
         ],
         "properties": {
+          "arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64"
+          },
           "arkade_server_pk": {
             "type": "string"
           },
@@ -2965,9 +2976,21 @@
           "claim_pk",
           "refund_pk",
           "hash_lock",
+          "btc_htlc_script_version",
+          "arkade_htlc_script_version",
           "user_id"
         ],
         "properties": {
+          "arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Arkade VHTLC script version. New swaps must use version 1."
+          },
+          "btc_htlc_script_version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Bitcoin HTLC script version. New swaps must use version 1."
+          },
           "claim_pk": {
             "type": "string",
             "description": "User's claim public key for the Arkade VHTLC"
@@ -3020,6 +3043,7 @@
           "evm_chain_id",
           "token_address",
           "hash_lock",
+          "btc_htlc_script_version",
           "refund_pk",
           "user_id"
         ],
@@ -3059,6 +3083,11 @@
               "null"
             ],
             "description": "Optional: USDC address on the bridge destination chain."
+          },
+          "btc_htlc_script_version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Bitcoin HTLC script version. New swaps must use version 1."
           },
           "claiming_address": {
             "type": "string",
@@ -3124,6 +3153,7 @@
           "btc_hash_lock",
           "btc_server_pk",
           "btc_refund_locktime",
+          "btc_htlc_script_version",
           "network",
           "created_at",
           "chain",
@@ -3176,6 +3206,10 @@
           "btc_htlc_address": {
             "type": "string",
             "description": "On-chain Bitcoin HTLC P2WSH address (user sends BTC here)"
+          },
+          "btc_htlc_script_version": {
+            "type": "integer",
+            "format": "int64"
           },
           "btc_refund_locktime": {
             "type": "integer",
@@ -3404,6 +3438,7 @@
           "fee_sats",
           "hash_lock",
           "btc_refund_locktime",
+          "btc_htlc_script_version",
           "arkade_vhtlc_address",
           "target_arkade_address",
           "network",
@@ -3411,6 +3446,7 @@
           "server_vhtlc_pk",
           "arkade_server_pk",
           "vhtlc_refund_locktime",
+          "arkade_htlc_script_version",
           "unilateral_claim_delay",
           "unilateral_refund_delay",
           "unilateral_refund_without_receiver_delay",
@@ -3433,6 +3469,10 @@
               "null"
             ],
             "description": "Arkade VHTLC fund transaction ID"
+          },
+          "arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64"
           },
           "arkade_server_pk": {
             "type": "string",
@@ -3464,6 +3504,10 @@
           "btc_htlc_address": {
             "type": "string",
             "description": "On-chain Bitcoin HTLC P2WSH address (user sends BTC here)"
+          },
+          "btc_htlc_script_version": {
+            "type": "integer",
+            "format": "int64"
           },
           "btc_refund_locktime": {
             "type": "integer",
@@ -4027,10 +4071,17 @@
         "required": [
           "vtxos",
           "preimage_hash",
+          "client_arkade_htlc_script_version",
+          "server_arkade_htlc_script_version",
           "client_pk",
           "user_id"
         ],
         "properties": {
+          "client_arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Client Arkade HTLC script version. New swaps must use version 1."
+          },
           "client_pk": {
             "type": "string",
             "description": "Client's public key for the VHTLC"
@@ -4038,6 +4089,11 @@
           "preimage_hash": {
             "type": "string",
             "description": "SHA256(preimage) - client generates the secret"
+          },
+          "server_arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Server Arkade HTLC script version. New swaps must use version 1."
           },
           "user_id": {
             "type": "string",
@@ -4540,6 +4596,7 @@
           "evm_chain_id",
           "token_address",
           "hash_lock",
+          "arkade_htlc_script_version",
           "receiver_pk",
           "user_address",
           "user_id"
@@ -4562,6 +4619,11 @@
             "format": "int64",
             "description": "Desired BTC output in sats (mutually exclusive with `amount_in`).",
             "minimum": 0
+          },
+          "arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Arkade HTLC script version. New swaps must use version 1."
           },
           "bridge_source_chain": {
             "type": [
@@ -4655,6 +4717,7 @@
           "receiver_pk",
           "arkade_server_pk",
           "vhtlc_refund_locktime",
+          "arkade_htlc_script_version",
           "unilateral_claim_delay",
           "unilateral_refund_delay",
           "unilateral_refund_without_receiver_delay",
@@ -4662,6 +4725,10 @@
           "gasless"
         ],
         "properties": {
+          "arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64"
+          },
           "arkade_server_pk": {
             "type": "string"
           },
@@ -4800,6 +4867,7 @@
           "evm_chain_id",
           "token_address",
           "hash_lock",
+          "btc_htlc_script_version",
           "claim_pk",
           "user_id"
         ],
@@ -4835,6 +4903,11 @@
               "null"
             ],
             "description": "Optional: USDC address on the bridge source chain."
+          },
+          "btc_htlc_script_version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Bitcoin HTLC script version. New swaps must use version 1."
           },
           "claim_pk": {
             "type": "string",
@@ -4916,6 +4989,7 @@
           "btc_user_claim_pk",
           "btc_server_refund_pk",
           "btc_refund_locktime",
+          "btc_htlc_script_version",
           "wbtc_address",
           "network",
           "gasless"
@@ -4961,6 +5035,10 @@
           "btc_htlc_address": {
             "type": "string",
             "description": "On-chain BTC Taproot HTLC address (server creates, user claims)"
+          },
+          "btc_htlc_script_version": {
+            "type": "integer",
+            "format": "int64"
           },
           "btc_refund_locktime": {
             "type": "integer",
@@ -5649,7 +5727,7 @@
               "string",
               "null"
             ],
-            "description": "Optional description shown in the payer's wallet when they open the Lightning\ninvoice. When omitted (`null`), a default is used. An empty string is honored\nas-is (results in an invoice with no description)."
+            "description": "Optional description shown in the payer's wallet when they open the Lightning\ninvoice. When omitted (`null`), a default is used. Use empty string to unset it."
           },
           "referral_code": {
             "type": [
@@ -5690,6 +5768,7 @@
           "bolt11_invoice",
           "boltz_swap_id",
           "arkade_vhtlc_address",
+          "arkade_htlc_script_version",
           "target_arkade_address",
           "sender_pk",
           "receiver_pk",
@@ -5714,6 +5793,10 @@
               "null"
             ],
             "description": "Arkade VHTLC fund transaction ID"
+          },
+          "arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64"
           },
           "arkade_server_pk": {
             "type": "string",
@@ -5892,7 +5975,7 @@
               "string",
               "null"
             ],
-            "description": "Optional description shown in the payer's wallet when they open the Lightning\ninvoice. When omitted (`null`), a default is used. An empty string is honored\nas-is (results in an invoice with no description)."
+            "description": "Optional description shown in the payer's wallet when they open the Lightning\ninvoice. When omitted (`null`), a default is used. Use empty string to unset it."
           },
           "referral_code": {
             "type": [
@@ -6953,6 +7036,7 @@
           "client_unilateral_claim_delay",
           "client_unilateral_refund_delay",
           "client_unilateral_refund_without_receiver_delay",
+          "client_arkade_htlc_script_version",
           "server_vhtlc_address",
           "server_fund_amount_sats",
           "server_pk",
@@ -6960,6 +7044,7 @@
           "server_unilateral_claim_delay",
           "server_unilateral_refund_delay",
           "server_unilateral_refund_without_receiver_delay",
+          "server_arkade_htlc_script_version",
           "arkade_server_pk",
           "preimage_hash",
           "fee_sats",
@@ -6968,6 +7053,10 @@
         "properties": {
           "arkade_server_pk": {
             "type": "string"
+          },
+          "client_arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64"
           },
           "client_fund_amount_sats": {
             "type": "integer",
@@ -7015,6 +7104,10 @@
           },
           "preimage_hash": {
             "type": "string"
+          },
+          "server_arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64"
           },
           "server_fund_amount_sats": {
             "type": "integer",
