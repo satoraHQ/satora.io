@@ -1257,6 +1257,78 @@
         }
       }
     },
+    "/swap/arkade/lightning": {
+      "post": {
+        "tags": [
+          "swap-arkade-lightning"
+        ],
+        "summary": "Create a new Arkade to Lightning swap request",
+        "description": "The user locks Arkade VTXOs in a VHTLC and receives BTC on their\nLightning invoice. Flow:\n1. User funds the returned Arkade VHTLC (locked to the invoice's payment hash)\n2. Server pays the invoice; the settled payment reveals the preimage\n3. Server claims the VHTLC with the preimage\n\nIf the payment fails the swap becomes `ServerWontFund` and the user\nreclaims their VTXOs via the collaborative refund endpoint (or\nunilaterally after the refund locktime).",
+        "operationId": "arkade_to_lightning_swap",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ArkadeToLightningSwapRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Swap created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArkadeToLightningSwapResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - a swap with this payment hash exists already",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Lightning is not available on this deployment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/swap/bitcoin/arkade": {
       "post": {
         "tags": [
@@ -2481,6 +2553,219 @@
           "wbtc_address": {
             "type": "string",
             "description": "WBTC token contract address on the target EVM chain (the token locked in the HTLC)."
+          }
+        }
+      },
+      "ArkadeToLightningSwapRequest": {
+        "type": "object",
+        "required": [
+          "refund_pk",
+          "arkade_htlc_script_version",
+          "user_id"
+        ],
+        "properties": {
+          "arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Arkade VHTLC script version. New swaps must use version 1."
+          },
+          "extra_fees": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Optional per-swap fee surcharge in basis points\n(0..=max_extra_fee_bps configured on the matching developer key).",
+            "minimum": 0
+          },
+          "lightning_address": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Lightning address (`user@domain`) to resolve into an invoice over\nthe payout amount. Mutually exclusive with the other destination\nfields."
+          },
+          "lightning_invoice": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "BOLT11 invoice the user wants paid. Must carry an amount (which\npins the payout — `source_amount_sats` cannot be combined with it).\nMutually exclusive with `lightning_address` and `lnurl`."
+          },
+          "lnurl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "LNURL-pay string to resolve into an invoice over the payout amount.\nMutually exclusive with the other destination fields."
+          },
+          "referral_code": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Optional referral code for fee exemption"
+          },
+          "refund_pk": {
+            "type": "string",
+            "description": "User's refund public key for the Arkade VHTLC (sender role)."
+          },
+          "source_amount_sats": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Total amount the user wants to lock on Arkade in satoshis (fees are\ndeducted from the Lightning payout — use this for send-max flows).\nOnly valid with `lightning_address`/`lnurl`; mutually exclusive\nwith `target_amount_sats`."
+          },
+          "target_amount_sats": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int64",
+            "description": "Amount the recipient should receive over Lightning in satoshis\n(fees are added on top). Required with `lightning_address`/`lnurl`\nunless `source_amount_sats` is given; optional with\n`lightning_invoice`, where it must match the invoice amount."
+          },
+          "user_id": {
+            "type": "string",
+            "description": "User ID derived from wallet for recovery purposes"
+          }
+        }
+      },
+      "ArkadeToLightningSwapResponse": {
+        "type": "object",
+        "description": "Arkade → Lightning swap response.",
+        "required": [
+          "id",
+          "status",
+          "client_lightning_invoice",
+          "invoice_expires_at",
+          "fee_sats",
+          "network_fee_sats",
+          "hash_lock",
+          "arkade_vhtlc_address",
+          "arkade_htlc_script_version",
+          "sender_pk",
+          "receiver_pk",
+          "arkade_server_pk",
+          "vhtlc_refund_locktime",
+          "unilateral_claim_delay",
+          "unilateral_refund_delay",
+          "unilateral_refund_without_receiver_delay",
+          "network",
+          "created_at",
+          "source_token",
+          "target_token",
+          "source_amount",
+          "target_amount"
+        ],
+        "properties": {
+          "arkade_claim_txid": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Arkade VHTLC claim transaction ID (server claim)"
+          },
+          "arkade_fund_txid": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Arkade VHTLC fund transaction ID (user funding)"
+          },
+          "arkade_htlc_script_version": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "arkade_server_pk": {
+            "type": "string",
+            "description": "Arkade server's public key"
+          },
+          "arkade_vhtlc_address": {
+            "type": "string",
+            "description": "Arkade VHTLC address the user must fund"
+          },
+          "client_lightning_invoice": {
+            "type": "string",
+            "description": "BOLT11 invoice the server will pay once the VHTLC is funded"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of when the swap was created"
+          },
+          "fee_sats": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Protocol fee in satoshis"
+          },
+          "hash_lock": {
+            "type": "string",
+            "description": "Hash lock (0x-prefixed 32-byte hex; the invoice's payment hash)"
+          },
+          "id": {
+            "type": "string",
+            "description": "Unique swap identifier"
+          },
+          "invoice_expires_at": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix timestamp after which the invoice can no longer be paid"
+          },
+          "network": {
+            "type": "string",
+            "description": "Bitcoin network"
+          },
+          "network_fee_sats": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Flat network fee in satoshis; the provider's actual Lightning send\nfee is paid out of `fee_sats + network_fee_sats`, never on top"
+          },
+          "receiver_pk": {
+            "type": "string",
+            "description": "Server's VHTLC public key (receiver in the VHTLC)"
+          },
+          "sender_pk": {
+            "type": "string",
+            "description": "User's refund public key (sender in the VHTLC)"
+          },
+          "source_amount": {
+            "type": "string",
+            "description": "Amount the user must lock in the Arkade VHTLC in satoshis"
+          },
+          "source_token": {
+            "$ref": "#/components/schemas/TokenInfo",
+            "description": "Source token info"
+          },
+          "status": {
+            "$ref": "#/components/schemas/SwapStatus",
+            "description": "Current status of the swap"
+          },
+          "target_amount": {
+            "type": "string",
+            "description": "Amount paid out on the user's Lightning invoice in satoshis"
+          },
+          "target_token": {
+            "$ref": "#/components/schemas/TokenInfo",
+            "description": "Target token info"
+          },
+          "unilateral_claim_delay": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unilateral_refund_delay": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unilateral_refund_without_receiver_delay": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "vhtlc_refund_locktime": {
+            "type": "integer",
+            "format": "int64",
+            "description": "VHTLC refund locktime (unix timestamp)"
           }
         }
       },
@@ -4820,6 +5105,27 @@
           {
             "allOf": [
               {
+                "$ref": "#/components/schemas/ArkadeToLightningSwapResponse"
+              },
+              {
+                "type": "object",
+                "required": [
+                  "direction"
+                ],
+                "properties": {
+                  "direction": {
+                    "type": "string",
+                    "enum": [
+                      "arkade_to_lightning"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "allOf": [
+              {
                 "$ref": "#/components/schemas/BitcoinToEvmSwapResponse"
               },
               {
@@ -4984,6 +5290,7 @@
           "bolt11_invoice",
           "invoice_expires_at",
           "fee_sats",
+          "network_fee_sats",
           "hash_lock",
           "arkade_vhtlc_address",
           "arkade_htlc_script_version",
@@ -5059,6 +5366,11 @@
           "network": {
             "type": "string",
             "description": "Bitcoin network"
+          },
+          "network_fee_sats": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Flat network fee in satoshis; the provider's actual Lightning\nreceive fee is paid out of `fee_sats + network_fee_sats`"
           },
           "receiver_pk": {
             "type": "string",
@@ -5137,9 +5449,16 @@
         "description": "Sats the server pays on each side of the pair at *current* gas/mining\nprices. Extensible — future breakouts (`htlc_create_sats`,\n`dex_swap_sats`, …) land alongside.",
         "required": [
           "source_sats",
-          "target_sats"
+          "target_sats",
+          "flat_sats"
         ],
         "properties": {
+          "flat_sats": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Flat route-level network fee in sats charged on every swap of this\npair (Lightning routes: covers the provider's flat fee component).\nComposed total = `source_sats + target_sats + flat_sats`.",
+            "minimum": 0
+          },
           "source_sats": {
             "type": "integer",
             "format": "int64",
@@ -5637,7 +5956,8 @@
           "target",
           "min_sats",
           "max_sats",
-          "fee_percentage"
+          "fee_percentage",
+          "network_fee_sats"
         ],
         "properties": {
           "fee_percentage": {
@@ -5655,6 +5975,12 @@
             "type": "integer",
             "format": "int64",
             "description": "Minimum BTC amount in satoshis.",
+            "minimum": 0
+          },
+          "network_fee_sats": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Flat network fee in satoshis charged on every swap of this pair on\ntop of `fee_percentage` (0 for pairs that do not charge one).\nStatic config, like the rest of this response — the dynamic\ngas-derived fees live on `/network-fees`.",
             "minimum": 0
           },
           "source": {
@@ -6123,6 +6449,10 @@
     {
       "name": "swap-lightning-arkade",
       "description": "Create Lightning to Arkade swaps."
+    },
+    {
+      "name": "swap-arkade-lightning",
+      "description": "Create Arkade to Lightning swaps."
     },
     {
       "name": "swaps",
