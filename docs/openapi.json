@@ -958,11 +958,9 @@
             "required": false,
             "schema": {
               "type": [
-                "integer",
+                "string",
                 "null"
-              ],
-              "format": "int64",
-              "minimum": 0
+              ]
             }
           },
           {
@@ -972,11 +970,9 @@
             "required": false,
             "schema": {
               "type": [
-                "integer",
+                "string",
                 "null"
-              ],
-              "format": "int64",
-              "minimum": 0
+              ]
             }
           },
           {
