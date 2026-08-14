@@ -37,11 +37,8 @@ This works precisely when you have funded the EVM HTLC but the swap subsequently
 ```ts
 // Collaborative refund: the SDK signs an EIP-712 message and the
 // server cosigns + submits the on-chain transaction. No gas needed.
-//
-// Settlement modes:
-// - "swap-back": swap WBTC back to your original token (e.g. USDT) via DEX
-// - "direct":    return the locked WBTC/tBTC directly
-const result = await client.collabRefundEvmSwap(swapId, "swap-back");
+// The locked WBTC/tBTC is returned directly to the depositor.
+const result = await client.collabRefundEvmSwap(swapId);
 
 console.log("Refund TX:", result.txHash);
 // ... "0xabc123..."
@@ -50,7 +47,7 @@ console.log("Message:", result.message);
 ```
 
 <Info>
-`refundSwap()` defaults to `swap-back` mode. The lower-level `collabRefundEvmSwap()` defaults to `direct`. Always pass the mode explicitly to be safe.
+EVM refunds always return the BTC-pegged HTLC token (WBTC/tBTC), regardless of which token you originally deposited.
 </Info>
 
 ---
@@ -72,15 +69,8 @@ declare const signer: EvmSigner; // your wallet - see EvmSigner docs
 
 // refundEvmWithSigner handles everything: fetches calldata, sends the
 // transaction, and waits for the receipt.
-//
-// Settlement modes:
-// - "swap-back": swap WBTC back to your original token (e.g. USDT) via DEX
-// - "direct":    return the locked WBTC/tBTC directly
-const { txHash } = await client.refundEvmWithSigner(
-  swapId,
-  signer,
-  "swap-back",
-);
+// The locked WBTC/tBTC is returned directly to the depositor.
+const { txHash } = await client.refundEvmWithSigner(swapId, signer);
 
 console.log("Refund TX:", txHash);
 // ... "0xabc123..."
@@ -103,6 +93,6 @@ console.log("Refund TX:", txHash);
 **Try collaborative first.** It's instant and gasless. Only fall back to the timeout-based refund if the server is down.
 </Info>
 
-1. **Settlement modes** - Both methods support `"swap-back"` (receive your original token) or `"direct"` (receive WBTC/tBTC)
+1. **Refund token** - Both methods return the BTC-pegged HTLC token (WBTC/tBTC), not the originally deposited token
 2. **Automatic refunds** - The server also detects expired HTLCs and processes refunds automatically in the background
 3. **Gas fees** - Only the timeout-based refund requires gas (ETH/MATIC)

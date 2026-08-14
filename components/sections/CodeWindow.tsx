@@ -523,14 +523,12 @@ if (swap.status === "serverredeemed") {
 // (looking up the swap by its ID) without knowing any internal state.
 //
 // Collaborative refund (faster, Satora cooperates):
-// await client.collabRefundEvmSwap(response.id, "swap-back");
+// await client.collabRefundEvmSwap(response.id);
 //
 // Timeout refund (after 24h, if Satora is unresponsive):
-// await client.refundEvmWithSigner(response.id, evmSigner, "swap-back");
+// await client.refundEvmWithSigner(response.id, evmSigner);
 //
-// Settlement modes:
-//   "swap-back" → converts WBTC back to your original token (e.g. USDC) via DEX
-//   "direct"    → returns the locked WBTC/tBTC directly to your address
+// Refunds return the locked WBTC/tBTC directly to your address.
 \`\`\``;
 
   // ── Assemble the full prompt ──
@@ -616,8 +614,8 @@ const client = await Client.builder()
   } |
 | \`client.fundSwap(swapId, evmSigner)\` | Fund EVM→BTC swap (handles approval + Permit2 + tx) |
 | \`client.refundSwap(swapId, {destinationAddress, feeRateSatPerVb})\` | Refund BTC (after 24h locktime expiry) |
-| \`client.collabRefundEvmSwap(swapId, "swap-back"\\|"direct")\` | Refund EVM (collaborative, faster) |
-| \`client.refundEvmWithSigner(swapId, evmSigner, "swap-back"\\|"direct")\` | Refund EVM (timeout, after 24h) |
+| \`client.collabRefundEvmSwap(swapId)\` | Refund EVM (collaborative, faster) |
+| \`client.refundEvmWithSigner(swapId, evmSigner)\` | Refund EVM (timeout, after 24h) |
 | \`client.recoverAllSwaps()\` | Restore all discoverable swaps from the server into local storage |
 | \`client.listAllSwaps()\` | List all stored swaps |
 | \`client.getTokens(chainId?)\` | Discover available tokens on a chain |
