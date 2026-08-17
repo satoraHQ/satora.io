@@ -84,17 +84,6 @@ These errors are returned as `400 Bad Request` when creating a swap:
 
 ---
 
-## VTXO Swap Errors (400)
-
-| Error Message (contains)                           | Description                           | Solution                     |
-| -------------------------------------------------- | ------------------------------------- | ---------------------------- |
-| `"At least one VTXO is required"`                  | Empty VTXO list                       | Provide at least one VTXO    |
-| `"Server cannot fund this swap"`                   | Server lacks sufficient VTXOs         | Retry later or reduce amount |
-| `"VTXOs total value ... must be greater than fee"` | VTXOs too small to cover fees         | Add more VTXOs               |
-| `"not fresher than client's VTXOs"`                | Swap would not improve VTXO freshness | No refresh needed            |
-
----
-
 ## SDK-Specific Errors
 
 The SDK throws standard JavaScript `Error` objects. Match on the `message` property.

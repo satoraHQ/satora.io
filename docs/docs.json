@@ -148,15 +148,6 @@
             ]
           },
           {
-            "group": "VTXO Swaps",
-            "icon": "bolt",
-            "pages": [
-              "api-reference/vtxo-swap",
-              "api-reference/vtxo-swap/estimate",
-              "api-reference/vtxo-swap/id"
-            ]
-          },
-          {
             "group": "Swap Management",
             "icon": "list-check",
             "pages": [
