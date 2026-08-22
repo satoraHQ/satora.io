@@ -32,7 +32,7 @@ export default function DevelopersPage() {
             <DeveloperIntegrationFlow />
             <Features />
             <CustomerStories />
-            <CTA />
+            <CTA variant="developers" />
           </div>
 
           <div className="hidden lg:block lg:w-[46%] xl:w-[48%] flex-shrink-0 relative">

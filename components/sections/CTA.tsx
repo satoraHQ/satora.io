@@ -6,8 +6,13 @@ import { useState } from "react";
 
 const NPM_COMMAND = "npm i @satora/swap";
 
-export default function CTA() {
+interface CTAProps {
+  variant?: "default" | "developers";
+}
+
+export default function CTA({ variant = "default" }: CTAProps) {
   const [copied, setCopied] = useState(false);
+  const isDevelopers = variant === "developers";
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(NPM_COMMAND);
@@ -38,19 +43,32 @@ export default function CTA() {
               </span>
             </h2>
             <p className="mt-4 text-[15px] text-gray-500 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
-              Read the docs, grab the SDK, and ship your first swap in under 10 minutes.
+              {isDevelopers
+                ? "Read the docs, install the SDK, or create an optional API key for attribution and fee markup."
+                : "Read the docs, grab the SDK, and ship your first swap in under 10 minutes."}
             </p>
 
-            <div className="mt-8 flex flex-col sm:flex-row justify-center items-center gap-3">
+            <div className="mt-8 flex flex-col sm:flex-row sm:flex-wrap justify-center items-center gap-3">
               <Link
-                href="https://docs.satora.io"
+                href={isDevelopers ? "https://docs.satora.io/getting-started" : "https://docs.satora.io"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group inline-flex items-center justify-center gap-2 w-full sm:w-auto h-11 px-5 rounded-full bg-lime-light text-black text-sm font-medium hover:brightness-[0.93] dark:hover:brightness-110 active:scale-95 transition-all duration-150 ease-out shadow-[0_0_20px_rgba(163,196,16,0.25)] dark:shadow-[0_0_20px_rgba(194,232,33,0.2)]"
               >
-                Get Started
+                {isDevelopers ? "Read the docs" : "Get Started"}
                 <GoArrowUpRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </Link>
+              {isDevelopers && (
+                <Link
+                  href="https://developer.satora.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center justify-center gap-2 w-full sm:w-auto h-11 px-5 rounded-full bg-white/60 dark:bg-white/[0.06] backdrop-blur-lg border border-gray-200/60 dark:border-white/[0.08] text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-white/80 dark:hover:bg-white/[0.1] active:scale-95 transition-all duration-150 ease-out"
+                >
+                  Get an API key
+                  <GoArrowUpRight className="w-4 h-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </Link>
+              )}
               <button
                 onClick={handleCopy}
                 className="relative inline-flex items-center justify-center gap-2 w-full sm:w-auto h-11 px-5 rounded-full bg-white/60 dark:bg-white/[0.06] backdrop-blur-lg border border-gray-200/60 dark:border-white/[0.08] text-xs font-semibold text-gray-600 dark:text-gray-300 font-mono hover:bg-white/80 dark:hover:bg-white/[0.1] active:scale-95 transition-all duration-150 ease-out"

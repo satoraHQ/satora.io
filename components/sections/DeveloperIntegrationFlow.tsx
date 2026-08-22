@@ -1,3 +1,5 @@
+import { GoArrowUpRight } from "@/components/ui/icons";
+
 const FLOW_STEPS = [
   {
     number: "01",
@@ -55,6 +57,20 @@ export default function DeveloperIntegrationFlow() {
             A production integration covers more than execution. Satora gives your product the states it needs from
             quote creation to completion or recovery.
           </p>
+          <div className="mt-6 flex flex-col sm:flex-row sm:items-center gap-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+              Bitcoin on-chain, Lightning, Arkade, and EVM assets across supported swap directions.
+            </p>
+            <a
+              href="https://docs.satora.io/quotes-rates/supported-tokens"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-1.5 text-sm font-medium text-lime dark:text-lime-light whitespace-nowrap hover:brightness-110 transition-[filter]"
+            >
+              View supported routes
+              <GoArrowUpRight className="w-3.5 h-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+            </a>
+          </div>
         </div>
 
         <div className="mt-14">
