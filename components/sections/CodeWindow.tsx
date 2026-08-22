@@ -169,6 +169,105 @@ const { response } = await client.createSwap({
 // Pay the Lightning invoice to execute the swap
 console.log("Invoice:", response.bolt11_invoice);`;
 
+const IFRAME_CODE_LINES: Token[][] = [
+  [
+    {
+      text: "<!-- Add your reflink from the Developer Portal to track swaps -->",
+      type: "comment",
+    },
+  ],
+  [{ text: "<iframe", type: "keyword" }],
+  [
+    { text: "  src", type: "text" },
+    { text: "=", type: "punct" },
+    { text: "\"https://app.satora.io?ref=YOUR_REFLINK\"", type: "string" },
+  ],
+  [
+    { text: "  width", type: "text" },
+    { text: "=", type: "punct" },
+    { text: "\"100%\"", type: "string" },
+  ],
+  [
+    { text: "  height", type: "text" },
+    { text: "=", type: "punct" },
+    { text: "\"700\"", type: "string" },
+  ],
+  [
+    { text: "  frameborder", type: "text" },
+    { text: "=", type: "punct" },
+    { text: "\"0\"", type: "string" },
+  ],
+  [
+    { text: "  allow", type: "text" },
+    { text: "=", type: "punct" },
+    { text: "\"clipboard-write\"", type: "string" },
+  ],
+  [{ text: "/>", type: "punct" }],
+];
+
+const IFRAME_CODE = `<!-- Add your reflink from the Developer Portal to track swaps -->
+<iframe
+  src="https://app.satora.io?ref=YOUR_REFLINK"
+  width="100%"
+  height="700"
+  frameborder="0"
+  allow="clipboard-write"
+/>`;
+
+const REST_API_CODE_LINES: Token[][] = [
+  [{ text: "# Public quote endpoint — no API key required", type: "comment" }],
+  [
+    { text: "curl", type: "func" },
+    { text: " --get ", type: "punct" },
+    { text: "\"https://api.satora.io/quote\"", type: "string" },
+    { text: " \\", type: "punct" },
+  ],
+  [
+    { text: "  --data-urlencode ", type: "punct" },
+    { text: "\"source_chain=Lightning\"", type: "string" },
+    { text: " \\", type: "punct" },
+  ],
+  [
+    { text: "  --data-urlencode ", type: "punct" },
+    { text: "\"source_token=btc\"", type: "string" },
+    { text: " \\", type: "punct" },
+  ],
+  [
+    { text: "  --data-urlencode ", type: "punct" },
+    { text: "\"target_chain=137\"", type: "string" },
+    { text: " \\", type: "punct" },
+  ],
+  [
+    { text: "  --data-urlencode ", type: "punct" },
+    { text: "\"target_token=0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359\"", type: "string" },
+    { text: " \\", type: "punct" },
+  ],
+  [
+    { text: "  --data-urlencode ", type: "punct" },
+    { text: "\"source_amount=100000\"", type: "string" },
+  ],
+  [],
+  [{ text: "# Use the SDK for the complete swap lifecycle", type: "comment" }],
+];
+
+const REST_API_CODE = `# Public quote endpoint — no API key required
+curl --get "https://api.satora.io/quote" \\
+  --data-urlencode "source_chain=Lightning" \\
+  --data-urlencode "source_token=btc" \\
+  --data-urlencode "target_chain=137" \\
+  --data-urlencode "target_token=0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359" \\
+  --data-urlencode "source_amount=100000"
+
+# Use the SDK for the complete swap lifecycle`;
+
+type IntegrationTab = "sdk" | "iframe" | "rest";
+
+const INTEGRATION_EXAMPLES: Record<IntegrationTab, { code: string; lines: Token[][] }> = {
+  sdk: { code: PLAIN_CODE, lines: CODE_LINES },
+  iframe: { code: IFRAME_CODE, lines: IFRAME_CODE_LINES },
+  rest: { code: REST_API_CODE, lines: REST_API_CODE_LINES },
+};
+
 export const TOKEN_COLORS: Record<string, string> = {
   keyword: "text-[#7a8a0e] dark:text-lime-light",
   string: "text-[#e88332] dark:text-[#f7931a]",
@@ -860,7 +959,7 @@ const GASLESS_OPTIONS: WizardOption<boolean>[] = [
 const WIZARD_STEPS = ["direction", "platform", "gasless", "extras"] as const;
 
 export default function CodeWindow({ wizard = false }: { wizard?: boolean } = {}) {
-  const [tab, setTab] = useState<"example" | "ai">("example");
+  const [tab, setTab] = useState<IntegrationTab | "ai">("sdk");
   const [copied, setCopied] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
   const [wizardStep, setWizardStep] = useState(0);
@@ -887,39 +986,75 @@ export default function CodeWindow({ wizard = false }: { wizard?: boolean } = {}
 
   const prompt = buildPrompt(config);
   const isReady = config.direction && config.platform;
+  const activeExample = tab === "ai" ? null : INTEGRATION_EXAMPLES[tab];
 
   return (
     <div className="w-full h-full flex flex-col rounded-2xl border border-gray-200/40 dark:border-white/[0.10] bg-white/50 dark:bg-[#0d0d0d]/60 backdrop-blur-2xl backdrop-saturate-150 shadow-sm dark:shadow-md dark:shadow-black/30 overflow-hidden">
       {/* Tab bar */}
-      <div className="flex items-center justify-between px-3 h-11 border-b border-gray-100/80 dark:border-white/[0.06] bg-gray-50/50 dark:bg-white/[0.02] flex-shrink-0">
+      <div className="flex items-center gap-2 px-3 min-h-11 py-1.5 border-b border-gray-100/80 dark:border-white/[0.06] bg-gray-50/50 dark:bg-white/[0.02] flex-shrink-0 overflow-x-auto">
         <div className="flex items-center gap-0.5 bg-gray-100/80 dark:bg-white/[0.04] rounded-lg p-0.5">
           <button
-            onClick={() => setTab("example")}
+            type="button"
+            onClick={() => setTab("sdk")}
+            aria-pressed={tab === "sdk"}
             className={`px-3 py-1.5 text-[11px] font-medium rounded-[7px] transition-all duration-200 inline-flex items-center gap-1.5 ${
-              tab === "example"
+              tab === "sdk"
                 ? "text-gray-900 dark:text-white bg-white dark:bg-white/[0.10] shadow-sm"
                 : "text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/50"
             }`}
           >
             <HiOutlineCodeBracket className="w-3 h-3" />
-            Integration Example
+            SDK
+            <span className="hidden xl:inline text-[8px] uppercase tracking-wider text-lime dark:text-lime-light">
+              Recommended
+            </span>
           </button>
           <button
-            onClick={() => setTab("ai")}
-            className={`px-3 py-1.5 text-[11px] font-medium rounded-[7px] transition-all duration-200 inline-flex items-center gap-1.5 ${
-              tab === "ai"
+            type="button"
+            onClick={() => setTab("iframe")}
+            aria-pressed={tab === "iframe"}
+            className={`px-3 py-1.5 text-[11px] font-medium rounded-[7px] transition-all duration-200 ${
+              tab === "iframe"
                 ? "text-gray-900 dark:text-white bg-white dark:bg-white/[0.10] shadow-sm"
                 : "text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/50"
             }`}
           >
-            <HiOutlineSparkles className="w-3 h-3" />
-            Build with AI
+            Iframe
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("rest")}
+            aria-pressed={tab === "rest"}
+            className={`px-3 py-1.5 text-[11px] font-medium rounded-[7px] transition-all duration-200 whitespace-nowrap ${
+              tab === "rest"
+                ? "text-gray-900 dark:text-white bg-white dark:bg-white/[0.10] shadow-sm"
+                : "text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/50"
+            }`}
+          >
+            REST API
           </button>
         </div>
 
         <button
-          onClick={() => handleCopy(tab === "example" ? PLAIN_CODE : prompt)}
-          className="flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/60 transition-colors"
+          type="button"
+          onClick={() => setTab("ai")}
+          aria-pressed={tab === "ai"}
+          className={`px-2.5 py-1.5 text-[11px] font-medium rounded-lg transition-all duration-200 inline-flex items-center gap-1.5 whitespace-nowrap ${
+            tab === "ai"
+              ? "text-gray-900 dark:text-white bg-white dark:bg-white/[0.10] shadow-sm"
+              : "text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/50"
+          }`}
+        >
+          <HiOutlineSparkles className="w-3 h-3" />
+          <span className="hidden sm:inline">Build with AI</span>
+          <span className="sm:hidden">AI</span>
+        </button>
+
+        <div className="flex-1" />
+        <button
+          type="button"
+          onClick={() => handleCopy(tab === "ai" ? prompt : activeExample!.code)}
+          className="flex items-center gap-1.5 text-[11px] text-gray-400 dark:text-white/30 hover:text-gray-600 dark:hover:text-white/60 transition-colors whitespace-nowrap"
           aria-label="Copy"
         >
           {copied
@@ -939,12 +1074,12 @@ export default function CodeWindow({ wizard = false }: { wizard?: boolean } = {}
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto min-h-0">
-        {tab === "example"
+      <div className="flex-1 overflow-auto min-h-0">
+        {tab !== "ai"
           ? (
             /* ─── Code tab ─── */
             <div className="py-4 font-mono text-[13px] leading-[1.7]">
-              {CODE_LINES.map((tokens, i) => (
+              {activeExample!.lines.map((tokens, i) => (
                 <div
                   key={i}
                   className="flex hover:bg-gray-50 dark:hover:bg-white/[0.02] px-4 min-h-[1.7em]"

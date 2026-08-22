@@ -102,13 +102,19 @@ export default function MobileCodePreview() {
             {/* Tab bar — visually matches the real CodeWindow */}
             <div className="flex items-center justify-between px-3 h-11 border-b border-gray-100/80 dark:border-white/[0.06] bg-gray-50/50 dark:bg-white/[0.02]">
               <div className="flex items-center gap-0.5 bg-gray-100/80 dark:bg-white/[0.04] rounded-lg p-0.5">
-                <span className="px-3 py-1.5 text-[11px] font-medium rounded-[7px] inline-flex items-center gap-1.5 text-gray-900 dark:text-white bg-white dark:bg-white/[0.10] shadow-sm">
+                <span className="px-2.5 py-1.5 text-[11px] font-medium rounded-[7px] inline-flex items-center gap-1.5 text-gray-900 dark:text-white bg-white dark:bg-white/[0.10] shadow-sm">
                   <HiOutlineCodeBracket className="w-3 h-3" />
-                  Integration Example
+                  SDK
                 </span>
-                <span className="px-3 py-1.5 text-[11px] font-medium rounded-[7px] inline-flex items-center gap-1.5 text-gray-400 dark:text-white/30">
+                <span className="px-2.5 py-1.5 text-[11px] font-medium rounded-[7px] text-gray-400 dark:text-white/30">
+                  Iframe
+                </span>
+                <span className="px-2.5 py-1.5 text-[11px] font-medium rounded-[7px] text-gray-400 dark:text-white/30 whitespace-nowrap">
+                  REST API
+                </span>
+                <span className="hidden sm:inline-flex px-2.5 py-1.5 text-[11px] font-medium rounded-[7px] items-center gap-1.5 text-gray-400 dark:text-white/30">
                   <HiOutlineSparkles className="w-3 h-3" />
-                  Build with AI
+                  AI
                 </span>
               </div>
               <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono text-gray-300 dark:text-white/20">
