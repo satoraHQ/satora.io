@@ -14,15 +14,15 @@ export default function RetailHero() {
       <div className="pointer-events-none absolute inset-0 opacity-50 [background-image:radial-gradient(circle_at_center,rgba(0,0,0,0.12)_1px,transparent_1px)] [background-size:28px_28px] dark:opacity-25" />
       <div className="pointer-events-none absolute right-[6%] top-20 h-[520px] w-[520px] rounded-full bg-lime-light/20 blur-[150px] dark:bg-lime-light/10" />
 
-      <div className="relative mx-auto max-w-7xl px-6 pb-20 pt-32 sm:px-8 md:pb-28 md:pt-40 lg:px-12">
-        <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-          <div className="max-w-2xl">
+      <div className="relative mx-auto max-w-7xl px-4 pb-16 pt-28 sm:px-8 sm:pb-20 sm:pt-32 md:pb-28 md:pt-40 lg:px-12">
+        <div className="grid min-w-0 items-center gap-10 sm:gap-14 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+          <div className="min-w-0 max-w-2xl">
             <p className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-3.5 py-2 text-xs font-medium uppercase tracking-[0.12em] text-gray-600 dark:border-white/10 dark:bg-white/[0.04] dark:text-gray-300">
               <span className="h-2 w-2 rounded-full bg-lime-light shadow-[0_0_12px_rgba(194,232,33,0.8)]" />
               Bitcoin ↔ stablecoins
             </p>
 
-            <h1 className="mt-7 text-[2.75rem] font-semibold leading-[0.98] tracking-[-0.055em] text-gray-950 sm:text-6xl lg:text-[4.2rem] xl:text-[4.75rem] dark:text-white">
+            <h1 className="mt-7 text-[2.45rem] font-semibold leading-[1.01] tracking-[-0.05em] text-gray-950 min-[360px]:text-[2.75rem] sm:text-6xl sm:leading-[0.98] lg:text-[3.5rem] xl:text-[4.2rem] 2xl:text-[4.75rem] dark:text-white">
               Swap Bitcoin and stablecoins without sending your funds to an exchange.
             </h1>
 
@@ -59,8 +59,8 @@ export default function RetailHero() {
             </ul>
           </div>
 
-          <div className="relative mx-auto w-full max-w-xl">
-            <div className="absolute -inset-10 rounded-full bg-lime-light/15 blur-[80px]" />
+          <div className="relative mx-auto min-w-0 w-full max-w-xl">
+            <div className="pointer-events-none absolute -inset-6 rounded-full bg-lime-light/15 blur-[80px] sm:-inset-10" />
             <HomepageSwapWidget />
           </div>
         </div>

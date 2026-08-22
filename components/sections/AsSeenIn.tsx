@@ -74,7 +74,7 @@ function PartnerLogo({ partner }: { partner: (typeof PARTNERS_DATA)[number] }) {
             ? "grayscale rounded-md dark:invert"
             : "filter brightness-0 dark:invert"
         }`}
-        style={{ maxWidth: "90px" }}
+        style={{ maxWidth: "90px", width: "auto" }}
       />
     </a>
   );
@@ -86,11 +86,11 @@ export default function AsSeenIn() {
   return (
     <div ref={ref} className="w-full bg-white dark:bg-black">
       <div
-        className={`w-full max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 py-6 transition-all duration-500 delay-100 ${
+        className={`w-full max-w-6xl mx-auto px-4 sm:px-8 lg:px-12 py-6 transition-all duration-500 delay-100 ${
           isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
         }`}
       >
-        <div className="flex items-center gap-8">
+        <div className="flex items-center gap-5 sm:gap-8">
           {/* Left label */}
           <p className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider whitespace-nowrap flex-shrink-0">
             Partnered with

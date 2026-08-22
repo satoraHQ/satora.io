@@ -27,7 +27,7 @@ export default function RetailHome() {
   return (
     <>
       <section className="overflow-hidden bg-[#0b0c0a] text-white">
-        <div className="mx-auto max-w-7xl px-6 py-24 sm:px-8 sm:py-32 lg:px-12">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-8 sm:py-32 lg:px-12">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-lime-light">How it works</p>
             <h2 className="mt-5 text-4xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">
@@ -39,9 +39,9 @@ export default function RetailHome() {
             </p>
           </div>
 
-          <div className="relative mt-20">
+          <div className="relative mt-16 sm:mt-20">
             <div className="absolute left-1/2 top-1/2 h-[480px] w-[480px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-lime-light/[0.045] blur-[100px]" />
-            <div className="relative grid items-center gap-8 lg:grid-cols-[1fr_88px_1.25fr_88px_1fr] lg:gap-4">
+            <div className="relative grid min-w-0 items-center gap-7 sm:gap-8 lg:grid-cols-[1fr_88px_1.25fr_88px_1fr] lg:gap-4">
               <WalletNode
                 eyebrow="From your wallet"
                 title="Send Bitcoin"
@@ -92,7 +92,7 @@ export default function RetailHome() {
       </section>
 
       <section className="overflow-hidden bg-white dark:bg-black">
-        <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-24 sm:px-8 sm:py-32 lg:grid-cols-2 lg:gap-20 lg:px-12">
+        <div className="mx-auto grid min-w-0 max-w-7xl items-center gap-12 px-4 py-20 sm:px-8 sm:py-32 lg:grid-cols-2 lg:gap-20 lg:px-12">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-lime">For developers</p>
             <h2 className="mt-5 text-4xl font-semibold tracking-[-0.04em] text-gray-950 sm:text-5xl dark:text-white">
@@ -138,7 +138,7 @@ export default function RetailHome() {
                   </span>
                 ))}
               </div>
-              <div className="p-6 sm:p-8">
+              <div className="p-4 min-[360px]:p-6 sm:p-8">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.14em] text-gray-400 dark:text-white/35">Satora SDK</p>
@@ -151,7 +151,7 @@ export default function RetailHome() {
                   </span>
                 </div>
 
-                <div className="mt-7 rounded-2xl bg-[#0b0c0a] p-5 font-mono text-xs leading-6 text-white/65 sm:text-sm">
+                <div className="mt-7 rounded-2xl bg-[#0b0c0a] p-4 font-mono text-xs leading-6 text-white/65 min-[360px]:p-5 sm:text-sm">
                   <p>
                     <span className="text-lime-light">$</span> npm install @satora/swap
                   </p>
@@ -181,7 +181,7 @@ export default function RetailHome() {
       </section>
 
       <section className="border-y border-black/[0.07] bg-[#f8f8f5] text-black dark:border-white/[0.07] dark:bg-[#080808] dark:text-white">
-        <div className="mx-auto max-w-7xl px-6 py-24 sm:px-8 sm:py-28 lg:px-12">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-8 sm:py-28 lg:px-12">
           <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-lime">Built-in recovery</p>
             <h2 className="mt-5 text-4xl font-semibold leading-[1.02] tracking-[-0.05em] sm:text-6xl">
@@ -200,7 +200,7 @@ export default function RetailHome() {
               </div>
               <span className="mx-auto block h-10 w-px bg-black/15 dark:bg-white/20" />
             </div>
-            <div className="relative grid grid-cols-2 gap-6 pt-10 sm:gap-16">
+            <div className="relative grid min-w-0 grid-cols-2 gap-3 pt-10 min-[360px]:gap-6 sm:gap-16">
               <span className="absolute left-1/4 right-1/4 top-0 h-px bg-black/15 dark:bg-white/20" />
               <span className="absolute left-1/4 top-0 h-10 w-px bg-black/15 dark:bg-white/20" />
               <span className="absolute right-1/4 top-0 h-10 w-px bg-black/15 dark:bg-white/20" />
@@ -221,7 +221,7 @@ export default function RetailHome() {
       </section>
 
       <section className="bg-white dark:bg-black">
-        <div className="mx-auto max-w-4xl px-6 py-24 sm:px-8 sm:py-32">
+        <div className="mx-auto max-w-4xl px-4 py-20 sm:px-8 sm:py-32">
           <p className="text-center text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
             Questions before you swap
           </p>
@@ -243,7 +243,7 @@ export default function RetailHome() {
       </section>
 
       <section className="bg-[#0b0c0a] text-white">
-        <div className="mx-auto max-w-7xl px-6 py-20 text-center sm:px-8 sm:py-28 lg:px-12">
+        <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-8 sm:py-28 lg:px-12">
           <p className="text-xs uppercase tracking-[0.16em] text-lime-light">Make Bitcoin move.</p>
           <h2 className="mx-auto mt-5 max-w-4xl text-4xl font-semibold tracking-[-0.05em] sm:text-6xl">
             Move between Bitcoin and stablecoins. Stay in control.
@@ -253,13 +253,13 @@ export default function RetailHome() {
               href="https://app.satora.io"
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-full bg-lime-light px-6 py-3 text-sm font-semibold text-black transition hover:brightness-95"
+              className="w-full rounded-full bg-lime-light px-6 py-3 text-sm font-semibold text-black transition hover:brightness-95 min-[360px]:w-auto"
             >
               Swap now
             </a>
             <Link
               href="/developers"
-              className="rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/35"
+              className="w-full rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white transition hover:border-white/35 min-[360px]:w-auto"
             >
               Build with Satora
             </Link>

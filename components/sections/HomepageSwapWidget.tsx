@@ -308,60 +308,58 @@ export default function HomepageSwapWidget() {
 
   return (
     <div
-      className={`relative rounded-[2rem] border border-black/10 bg-[#0b0c0a] p-3 shadow-[0_35px_100px_rgba(0,0,0,0.28)] transition duration-200 dark:border-white/10 sm:p-4 ${
+      className={`relative w-full min-w-0 rounded-[1.5rem] border border-white/[0.08] bg-[#11130f] p-3 shadow-[0_35px_100px_rgba(0,0,0,0.28)] transition duration-200 sm:rounded-[1.75rem] sm:p-4 ${
         isLeaving ? "scale-[0.985] opacity-70" : "scale-100 opacity-100"
       }`}
     >
-      <div className="rounded-[1.5rem] border border-white/[0.08] bg-[#11130f] p-3 sm:p-4">
-        <div className="relative">
-          <AmountPanel
-            label="Sell"
-            asset={source}
-            amount={sourceAmount}
-            onAmountChange={handleSourceAmount}
-            onSelect={() => openSelector("source")}
-            isLoading={quoteStatus === "loading" && lastEdited === "target"}
-          />
-
-          <button
-            type="button"
-            onClick={handleSwitch}
-            disabled={!canSwitch}
-            aria-label="Switch sell and buy assets"
-            title={canSwitch ? "Switch sell and buy assets" : "This route is currently one-way"}
-            className="group absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-[#11130f] p-1 transition-transform duration-200 hover:scale-110 active:scale-125 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100"
-          >
-            <span className="grid h-9 w-9 place-items-center rounded-lg border border-white/[0.08] bg-[#20231f] text-xl text-white/55 transition-colors group-hover:text-lime-light">
-              ↓
-            </span>
-          </button>
-
-          <AmountPanel
-            label="Buy"
-            asset={target}
-            amount={targetAmount}
-            onAmountChange={handleTargetAmount}
-            onSelect={() => openSelector("target")}
-            className="mt-1"
-            isLoading={quoteStatus === "loading" && lastEdited === "source"}
-          />
-        </div>
-
-        <QuoteLine
-          quote={quote}
-          status={quoteStatus}
-          source={source}
-          target={target}
+      <div className="relative min-w-0">
+        <AmountPanel
+          label="Sell"
+          asset={source}
+          amount={sourceAmount}
+          onAmountChange={handleSourceAmount}
+          onSelect={() => openSelector("source")}
+          isLoading={quoteStatus === "loading" && lastEdited === "target"}
         />
 
-        <a
-          href={swapUrl}
-          onClick={handleNavigate}
-          className="block w-full rounded-2xl bg-lime-light py-3.5 text-center text-sm font-semibold text-black transition hover:brightness-95 active:scale-[0.99]"
+        <button
+          type="button"
+          onClick={handleSwitch}
+          disabled={!canSwitch}
+          aria-label="Switch sell and buy assets"
+          title={canSwitch ? "Switch sell and buy assets" : "This route is currently one-way"}
+          className="group absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-[#11130f] p-1 transition-transform duration-200 hover:scale-110 active:scale-125 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100"
         >
-          {isLeaving ? "Opening Satora…" : "Swap"}
-        </a>
+          <span className="grid h-9 w-9 place-items-center rounded-lg border border-white/[0.08] bg-[#20231f] text-xl text-white/55 transition-colors group-hover:text-lime-light">
+            ↓
+          </span>
+        </button>
+
+        <AmountPanel
+          label="Buy"
+          asset={target}
+          amount={targetAmount}
+          onAmountChange={handleTargetAmount}
+          onSelect={() => openSelector("target")}
+          className="mt-1"
+          isLoading={quoteStatus === "loading" && lastEdited === "source"}
+        />
       </div>
+
+      <QuoteLine
+        quote={quote}
+        status={quoteStatus}
+        source={source}
+        target={target}
+      />
+
+      <a
+        href={swapUrl}
+        onClick={handleNavigate}
+        className="block w-full rounded-2xl bg-lime-light py-3.5 text-center text-sm font-semibold text-black transition hover:brightness-95 active:scale-[0.99]"
+      >
+        {isLeaving ? "Opening Satora…" : "Swap"}
+      </a>
 
       {selector && (
         <TokenSelector
@@ -398,21 +396,27 @@ function AmountPanel({
   className?: string;
 }) {
   return (
-    <div className={`rounded-2xl border border-white/[0.075] bg-[#1c1f1d]/80 p-4 sm:p-5 ${className}`}>
+    <div
+      className={`min-w-0 rounded-2xl border border-white/[0.075] bg-[#1c1f1d]/80 p-3.5 sm:p-5 ${className}`}
+    >
       <p className="mb-2 text-sm text-white/45">{label}</p>
-      <div className="flex items-center justify-between gap-3">
+      <div className="grid min-w-0 grid-cols-1 items-center gap-2 min-[360px]:grid-cols-[minmax(0,1fr)_auto] sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="text-2xl text-white/30 sm:text-3xl">{asset.kind === "bitcoin" ? "₿" : "$"}</span>
+          <span className="text-xl text-white/30 min-[360px]:text-2xl sm:text-3xl">
+            {asset.kind === "bitcoin" ? "₿" : "$"}
+          </span>
           <input
             value={amount}
             onChange={(event) => onAmountChange(event.target.value)}
             inputMode="decimal"
             aria-label={`${label} amount in ${asset.symbol}`}
             placeholder={isLoading ? "…" : "0"}
-            className="min-w-0 flex-1 bg-transparent text-3xl font-medium tracking-tight text-white outline-none placeholder:text-white/25 sm:text-4xl"
+            className="w-full min-w-0 bg-transparent text-2xl font-medium tracking-tight text-white outline-none placeholder:text-white/25 min-[360px]:text-3xl sm:text-4xl"
           />
         </div>
-        <AssetButton asset={asset} onClick={onSelect} />
+        <div className="justify-self-end">
+          <AssetButton asset={asset} onClick={onSelect} />
+        </div>
       </div>
       <p className="mt-2 h-4 text-right text-[11px] text-white/25">{asset.chain}</p>
     </div>
@@ -463,10 +467,10 @@ function AssetButton({ asset, onClick }: { asset: SwapAsset; onClick: () => void
       type="button"
       onClick={onClick}
       aria-label={`Select ${asset.symbol} on ${asset.chain}`}
-      className="flex shrink-0 items-center gap-2 rounded-full bg-[#0d0e0d] py-2 pl-2 pr-3 text-white transition-colors hover:bg-black"
+      className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#0d0e0d] py-1.5 pl-1.5 pr-2.5 text-white transition-colors hover:bg-black sm:gap-2 sm:py-2 sm:pl-2 sm:pr-3"
     >
       <AssetIcon asset={asset} size="small" />
-      <span className="text-sm font-semibold sm:text-base">{asset.symbol}</span>
+      <span className="text-xs font-semibold min-[360px]:text-sm sm:text-base">{asset.symbol}</span>
       <HiOutlineChevronDown className="h-4 w-4 text-white/40" />
     </button>
   );
