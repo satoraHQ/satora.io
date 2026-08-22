@@ -1,5 +1,5 @@
+import HomepageSwapWidget from "@/components/sections/HomepageSwapWidget";
 import { GoArrowUpRight } from "@/components/ui/icons";
-import Image from "next/image";
 import Link from "next/link";
 
 const BENEFITS = [
@@ -61,107 +61,10 @@ export default function RetailHero() {
 
           <div className="relative mx-auto w-full max-w-xl">
             <div className="absolute -inset-10 rounded-full bg-lime-light/15 blur-[80px]" />
-            <div className="relative rounded-[2rem] border border-black/10 bg-[#0b0c0a] p-3 shadow-[0_35px_100px_rgba(0,0,0,0.28)] dark:border-white/10 sm:p-4">
-              <div className="rounded-[1.5rem] border border-white/[0.08] bg-[#11130f] p-5 sm:p-7">
-                <div className="mb-8 flex items-center justify-between gap-4">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.14em] text-white/40">New swap</p>
-                    <p className="mt-1 text-lg font-semibold text-white">Bitcoin → USDC</p>
-                  </div>
-                  <span className="rounded-full border border-lime-light/25 bg-lime-light/10 px-3 py-1.5 text-xs font-medium text-lime-light">
-                    Wallet to wallet
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  <SwapAmount
-                    label="You send"
-                    network="Bitcoin network"
-                    amount="0.01000000"
-                    symbol="BTC"
-                    icon="/assets/chains/bitcoin.svg"
-                  />
-
-                  <div className="relative h-3" aria-hidden="true">
-                    <span className="absolute -top-3 left-1/2 grid h-9 w-9 -translate-x-1/2 place-items-center rounded-full bg-lime-light text-lg text-black">
-                      ↓
-                    </span>
-                  </div>
-
-                  <SwapAmount
-                    label="You receive"
-                    network="Polygon"
-                    amount="≈ 650.24"
-                    symbol="USDC"
-                    icon="/assets/chains/usdc.svg"
-                    highlighted
-                  />
-                </div>
-
-                <div className="mt-5 grid grid-cols-3 gap-2 text-center">
-                  {[
-                    ["Rate", "Locked"],
-                    ["Fee", "Upfront"],
-                    ["Receive", "Your wallet"],
-                  ].map(([label, value]) => (
-                    <div key={label} className="rounded-xl bg-white/[0.035] px-2 py-3">
-                      <p className="text-[10px] uppercase tracking-wider text-white/35">{label}</p>
-                      <p className="mt-1 text-xs font-medium text-white/80">{value}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <a
-                  href="https://app.satora.io"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-5 block w-full rounded-2xl bg-lime-light py-3.5 text-center text-sm font-semibold text-black transition hover:brightness-95"
-                >
-                  Open Satora
-                </a>
-              </div>
-            </div>
+            <HomepageSwapWidget />
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function SwapAmount({
-  label,
-  network,
-  amount,
-  symbol,
-  icon,
-  highlighted = false,
-}: {
-  label: string;
-  network: string;
-  amount: string;
-  symbol: string;
-  icon: string;
-  highlighted?: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-2xl border p-5 ${
-        highlighted
-          ? "border-lime-light/20 bg-lime-light/[0.055]"
-          : "border-white/[0.08] bg-white/[0.04]"
-      }`}
-    >
-      <div className="mb-4 flex items-center justify-between text-xs text-white/45">
-        <span>{label}</span>
-        <span>{network}</span>
-      </div>
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-2xl font-medium tracking-tight text-white sm:text-4xl">{amount}</p>
-        <div className="flex items-center gap-2 rounded-full bg-white/[0.06] px-3 py-2 text-sm font-semibold text-white">
-          <Image src={icon} alt="" width={22} height={22} />
-          {symbol}
-        </div>
-      </div>
-    </div>
   );
 }
