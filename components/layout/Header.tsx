@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 const NAV_LINKS = [
+  { label: "Developers", href: "/developers" },
   { label: "Docs", href: "https://docs.satora.io", external: true },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "mailto:support@satora.io", external: true },

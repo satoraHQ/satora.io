@@ -28,6 +28,9 @@ export default function Footer() {
               Product
             </p>
             <div className="space-y-2.5">
+              <Link href="/developers" className={linkClass + " block"}>
+                Developers
+              </Link>
               <Link
                 href="https://docs.satora.io"
                 className={linkClass + " block"}
