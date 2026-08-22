@@ -4,7 +4,6 @@ import { HiOutlineChevronDown, HiOutlineXMark } from "@/components/ui/icons";
 import Image from "next/image";
 import type { MouseEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { preconnect } from "react-dom";
 
 type AssetKind = "bitcoin" | "stablecoin";
 type SelectorSide = "source" | "target";
@@ -28,8 +27,23 @@ interface SwapAsset {
   kind: AssetKind;
   icon: string;
   networkIcon?: string;
-  networkBadge?: string;
 }
+
+interface QuoteResponse {
+  exchange_rate: string;
+  net_source_amount: string;
+  net_target_amount: string;
+}
+
+type QuoteStatus = "idle" | "loading" | "success" | "error";
+
+const DECIMAL_AMOUNT_PATTERN = /^\d+(\.\d*)?$/;
+const LARGE_RATE_FORMATTER = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 2,
+});
+const SMALL_RATE_FORMATTER = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 8,
+});
 
 const ASSETS: SwapAsset[] = [
   {
@@ -57,7 +71,7 @@ const ASSETS: SwapAsset[] = [
     decimals: 8,
     kind: "bitcoin",
     icon: "/assets/chains/bitcoin.svg",
-    networkBadge: "A",
+    networkIcon: "/assets/chains/arkade.svg",
   },
   {
     id: "42161:USDC",
@@ -159,8 +173,6 @@ const DEFAULT_SOURCE = ASSETS[0];
 const DEFAULT_TARGET = ASSETS[3];
 
 export default function HomepageSwapWidget() {
-  preconnect("https://app.satora.io");
-
   const [source, setSource] = useState(DEFAULT_SOURCE);
   const [target, setTarget] = useState(DEFAULT_TARGET);
   const [sourceAmount, setSourceAmount] = useState("");
@@ -168,18 +180,82 @@ export default function HomepageSwapWidget() {
   const [lastEdited, setLastEdited] = useState<SelectorSide>("source");
   const [selector, setSelector] = useState<SelectorSide | null>(null);
   const [isLeaving, setIsLeaving] = useState(false);
+  const [quote, setQuote] = useState<QuoteResponse | null>(null);
+  const [quoteStatus, setQuoteStatus] = useState<QuoteStatus>("idle");
 
-  const availableTargets = useMemo(() => getAvailableTargets(source), [source]);
+  const availableTargets = getAvailableTargets(source);
+  const canSwitch = isValidPair(target, source);
+  const activeAmount = lastEdited === "source" ? sourceAmount : targetAmount;
+  const sourceId = source.id;
+  const sourceDecimals = source.decimals;
+  const targetId = target.id;
+  const targetDecimals = target.decimals;
   const swapUrl = useMemo(() => {
     const url = new URL(`https://app.satora.io/${source.id}/${target.id}`);
     const activeAmount = lastEdited === "source" ? sourceAmount : targetAmount;
-    const activeAsset = lastEdited === "source" ? source : target;
-    const baseUnits = decimalToBaseUnits(activeAmount, activeAsset.decimals);
+    const activeDecimals = lastEdited === "source" ? sourceDecimals : targetDecimals;
+    const baseUnits = decimalToBaseUnits(activeAmount, activeDecimals);
     if (baseUnits && baseUnits !== "0") {
       url.searchParams.set(lastEdited === "source" ? "sourceAmount" : "targetAmount", baseUnits);
     }
     return url.toString();
   }, [lastEdited, source, sourceAmount, target, targetAmount]);
+
+  useEffect(() => {
+    const activeAsset = lastEdited === "source" ? source : target;
+    const baseUnits = decimalToBaseUnits(activeAmount, activeAsset.decimals);
+
+    if (!baseUnits || baseUnits === "0") {
+      setQuote(null);
+      setQuoteStatus("idle");
+      return;
+    }
+
+    const controller = new AbortController();
+    setQuote(null);
+    setQuoteStatus("loading");
+
+    const timeout = window.setTimeout(async () => {
+      const params = new URLSearchParams({
+        source: sourceId,
+        target: targetId,
+        [lastEdited === "source" ? "sourceAmount" : "targetAmount"]: baseUnits,
+      });
+
+      try {
+        const response = await fetch(`/api/quote?${params}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        const result = await response.json();
+
+        if (!response.ok) throw new Error(result.error ?? "Quote unavailable");
+        if (controller.signal.aborted) return;
+
+        if (!isQuoteResponse(result)) throw new Error("Invalid quote response");
+        const nextQuote = result;
+        setQuote(nextQuote);
+        setQuoteStatus("success");
+        if (lastEdited === "source") {
+          setTargetAmount(
+            baseUnitsToDecimal(nextQuote.net_target_amount, targetDecimals),
+          );
+        } else {
+          setSourceAmount(
+            baseUnitsToDecimal(nextQuote.net_source_amount, sourceDecimals),
+          );
+        }
+      } catch {
+        if (controller.signal.aborted) return;
+        setQuoteStatus("error");
+      }
+    }, 300);
+
+    return () => {
+      window.clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [activeAmount, lastEdited, sourceDecimals, sourceId, targetDecimals, targetId]);
 
   const openSelector = (side: SelectorSide) => setSelector(side);
 
@@ -244,13 +320,16 @@ export default function HomepageSwapWidget() {
             amount={sourceAmount}
             onAmountChange={handleSourceAmount}
             onSelect={() => openSelector("source")}
+            isLoading={quoteStatus === "loading" && lastEdited === "target"}
           />
 
           <button
             type="button"
             onClick={handleSwitch}
+            disabled={!canSwitch}
             aria-label="Switch sell and buy assets"
-            className="group absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-[#11130f] p-1 transition-transform duration-200 hover:scale-110 active:scale-125"
+            title={canSwitch ? "Switch sell and buy assets" : "This route is currently one-way"}
+            className="group absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-[#11130f] p-1 transition-transform duration-200 hover:scale-110 active:scale-125 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100"
           >
             <span className="grid h-9 w-9 place-items-center rounded-lg border border-white/[0.08] bg-[#20231f] text-xl text-white/55 transition-colors group-hover:text-lime-light">
               ↓
@@ -264,12 +343,16 @@ export default function HomepageSwapWidget() {
             onAmountChange={handleTargetAmount}
             onSelect={() => openSelector("target")}
             className="mt-1"
+            isLoading={quoteStatus === "loading" && lastEdited === "source"}
           />
         </div>
 
-        <p className="px-2 pb-2 pt-4 text-center text-[11px] leading-relaxed text-white/35">
-          Live quote and destination address continue in the Satora app.
-        </p>
+        <QuoteLine
+          quote={quote}
+          status={quoteStatus}
+          source={source}
+          target={target}
+        />
 
         <a
           href={swapUrl}
@@ -303,6 +386,7 @@ function AmountPanel({
   amount,
   onAmountChange,
   onSelect,
+  isLoading = false,
   className = "",
 }: {
   label: "Sell" | "Buy";
@@ -310,6 +394,7 @@ function AmountPanel({
   amount: string;
   onAmountChange: (value: string) => void;
   onSelect: () => void;
+  isLoading?: boolean;
   className?: string;
 }) {
   return (
@@ -323,7 +408,7 @@ function AmountPanel({
             onChange={(event) => onAmountChange(event.target.value)}
             inputMode="decimal"
             aria-label={`${label} amount in ${asset.symbol}`}
-            placeholder="0"
+            placeholder={isLoading ? "…" : "0"}
             className="min-w-0 flex-1 bg-transparent text-3xl font-medium tracking-tight text-white outline-none placeholder:text-white/25 sm:text-4xl"
           />
         </div>
@@ -331,6 +416,44 @@ function AmountPanel({
       </div>
       <p className="mt-2 h-4 text-right text-[11px] text-white/25">{asset.chain}</p>
     </div>
+  );
+}
+
+function QuoteLine({
+  quote,
+  status,
+  source,
+  target,
+}: {
+  quote: QuoteResponse | null;
+  status: QuoteStatus;
+  source: SwapAsset;
+  target: SwapAsset;
+}) {
+  let content = "Enter an amount to see the live rate.";
+  let className = "text-white/35";
+
+  if (status === "loading") {
+    content = "Fetching live quote…";
+    className = "text-white/50";
+  } else if (status === "error") {
+    content = "Live quote unavailable. You can continue in the app.";
+    className = "text-amber-200/60";
+  } else if (status === "success" && quote) {
+    const stablecoin = source.kind === "stablecoin" ? source : target;
+    content = source.kind === target.kind
+      ? "1 BTC = 1 BTC · Live quote"
+      : `1 BTC ≈ ${formatRate(quote.exchange_rate)} ${stablecoin.symbol} · Live quote`;
+    className = "text-lime-light/75";
+  }
+
+  return (
+    <p
+      aria-live="polite"
+      className={`min-h-10 px-2 pb-2 pt-4 text-center text-[11px] leading-relaxed ${className}`}
+    >
+      {content}
+    </p>
   );
 }
 
@@ -486,7 +609,7 @@ function AssetIcon({ asset, size }: { asset: SwapAsset; size: "small" | "large" 
       <span className="absolute -bottom-0.5 -right-0.5 grid h-4 w-4 place-items-center overflow-hidden rounded-full border border-[#0c0d0c] bg-[#0c0d0c] text-[8px] font-bold text-lime-light">
         {asset.networkIcon
           ? <Image src={asset.networkIcon} alt="" width={13} height={13} />
-          : asset.networkBadge}
+          : null}
       </span>
     </span>
   );
@@ -499,6 +622,7 @@ function getAvailableTargets(source: SwapAsset): SwapAsset[] {
 function isValidPair(source: SwapAsset, target: SwapAsset): boolean {
   if (source.id === target.id) return false;
   if (source.kind === "stablecoin" && target.kind === "stablecoin") return false;
+  if (source.kind === "stablecoin" && target.chain === "Lightning") return false;
   if (source.kind !== target.kind) return true;
 
   if (source.chain === "Arkade") return target.chain === "Lightning";
@@ -547,9 +671,35 @@ function normalizeAmount(value: string, decimals: number): string {
 }
 
 function decimalToBaseUnits(value: string, decimals: number): string | null {
-  if (!/^\d+(\.\d*)?$/.test(value)) return null;
+  if (!DECIMAL_AMOUNT_PATTERN.test(value)) return null;
   const [whole = "0", fraction = ""] = value.split(".");
   const paddedFraction = `${fraction}${"0".repeat(decimals)}`.slice(0, decimals);
   const combined = `${whole}${paddedFraction}`.replace(/^0+(?=\d)/, "");
   return combined || "0";
+}
+
+function baseUnitsToDecimal(value: string, decimals: number): string {
+  const digits = value.replace(/^0+(?=\d)/, "") || "0";
+  if (decimals === 0) return digits;
+
+  const padded = digits.padStart(decimals + 1, "0");
+  const whole = padded.slice(0, -decimals);
+  const fraction = padded.slice(-decimals).replace(/0+$/, "");
+  return fraction ? `${whole}.${fraction}` : whole;
+}
+
+function formatRate(value: string): string {
+  const rate = Number(value);
+  if (!Number.isFinite(rate)) return value;
+  return (rate >= 1 ? LARGE_RATE_FORMATTER : SMALL_RATE_FORMATTER).format(rate);
+}
+
+function isQuoteResponse(value: unknown): value is QuoteResponse {
+  if (typeof value !== "object" || value === null) return false;
+  return "exchange_rate" in value
+    && typeof value.exchange_rate === "string"
+    && "net_source_amount" in value
+    && typeof value.net_source_amount === "string"
+    && "net_target_amount" in value
+    && typeof value.net_target_amount === "string";
 }
