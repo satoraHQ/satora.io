@@ -39,8 +39,11 @@ const COMMUNITY_LINKS: CommunityLink[] = [
     href: "https://linkedin.com/company/satoraio",
     Icon: FaLinkedin,
   },
-  // TODO: replace with the actual Satora/Lendasat npub on njump.me
-  { label: "Nostr", href: "https://nostr.com", Icon: SiNostr },
+  {
+    label: "Nostr",
+    href: "https://primal.net/p/nprofile1qqs94l0vtwjq6nqyw7gp09gwjyrr9202nt4jl5aly4ah2hmv9433hcgtncrpz",
+    Icon: SiNostr,
+  },
 ];
 
 export default function Header() {

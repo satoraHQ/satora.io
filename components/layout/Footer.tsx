@@ -130,9 +130,8 @@ export default function Footer() {
               >
                 <FaLinkedin className="w-3.5 h-3.5" /> LinkedIn
               </a>
-              {/* TODO: replace with the actual Satora/Lendasat npub on njump.me */}
               <a
-                href="https://nostr.com"
+                href="https://primal.net/p/nprofile1qqs94l0vtwjq6nqyw7gp09gwjyrr9202nt4jl5aly4ah2hmv9433hcgtncrpz"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={linkClass + " flex items-center gap-2"}
