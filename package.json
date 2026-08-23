@@ -3,8 +3,6 @@
   "version": "0.0.9",
   "private": true,
   "scripts": {
-    "predev": "node scripts/sync-sdk-examples.mjs",
-    "prebuild": "node scripts/sync-sdk-examples.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -12,15 +10,16 @@
     "typecheck": "tsc",
     "prepare": "husky",
     "lint-staged": "lint-staged",
-    "deploy": "node scripts/sync-sdk-examples.mjs && opennextjs-cloudflare build && opennextjs-cloudflare deploy",
-    "upload": "node scripts/sync-sdk-examples.mjs && opennextjs-cloudflare build && opennextjs-cloudflare upload",
-    "preview": "node scripts/sync-sdk-examples.mjs && opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv ./cloudflare-env.d.ts"
   },
   "dependencies": {
     "@ai-sdk/openai-compatible": "^1.0.27",
     "@opennextjs/cloudflare": "^1.19.5",
     "@types/react": "^19.2.14",
+    "@web3icons/react": "^4.1.17",
     "ai": "^5.0.93",
     "clsx": "^2.1.1",
     "fumadocs-core": "^16.8.7",
@@ -38,6 +37,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.2.4",
     "@types/node": "24.10.1",
+    "@types/react-dom": "^19.2.4",
     "autoprefixer": "^10.5.0",
     "dprint": "^0.54.0",
     "husky": "^9.1.7",

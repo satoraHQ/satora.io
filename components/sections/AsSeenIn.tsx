@@ -60,22 +60,23 @@ function PartnerLogo({ partner }: { partner: (typeof PARTNERS_DATA)[number] }) {
       href={partner.url}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex-shrink-0 flex items-center justify-center opacity-40 hover:opacity-70 transition-opacity"
+      className="flex-shrink-0 flex items-center justify-center opacity-65 transition-opacity hover:opacity-95"
     >
-      <Image
-        src={partner.logo}
-        alt={partner.name}
-        width={90}
-        height={36}
-        className={`${partner.height} w-auto object-contain ${
-          partner.name === "10101"
-            ? "grayscale contrast-200 dark:invert"
-            : partner.name === "Freedomia"
-            ? "grayscale rounded-md dark:invert"
-            : "filter brightness-0 dark:invert"
-        }`}
-        style={{ maxWidth: "90px", width: "auto" }}
-      />
+      <span className={`relative block w-[90px] ${partner.height}`}>
+        <Image
+          src={partner.logo}
+          alt={partner.name}
+          fill
+          sizes="90px"
+          className={`object-contain ${
+            partner.name === "10101"
+              ? "grayscale contrast-200 dark:invert"
+              : partner.name === "Freedomia"
+              ? "grayscale rounded-md dark:invert"
+              : "filter brightness-0 dark:invert"
+          }`}
+        />
+      </span>
     </a>
   );
 }

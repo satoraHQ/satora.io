@@ -1,11 +1,17 @@
 "use client";
 
 import { HiOutlineChevronDown, HiOutlineXMark } from "@/components/ui/icons";
+import TokenEURC from "@web3icons/react/icons/tokens/TokenEURC";
+import TokenEURE from "@web3icons/react/icons/tokens/TokenEURE";
+import TokenTBTC from "@web3icons/react/icons/tokens/TokenTBTC";
+import TokenWBTC from "@web3icons/react/icons/tokens/TokenWBTC";
+import TokenXAUT from "@web3icons/react/icons/tokens/TokenXAUT";
 import Image from "next/image";
 import type { MouseEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
-type AssetKind = "bitcoin" | "stablecoin";
+type AssetKind = "bitcoin" | "evm";
 type SelectorSide = "source" | "target";
 type Category =
   | "all"
@@ -25,7 +31,7 @@ interface SwapAsset {
   chain: string;
   decimals: number;
   kind: AssetKind;
-  icon: string;
+  icon?: string;
   networkIcon?: string;
 }
 
@@ -33,17 +39,14 @@ interface QuoteResponse {
   exchange_rate: string;
   net_source_amount: string;
   net_target_amount: string;
+  network_fee?: string | number;
+  gasless_network_fee?: string | number;
+  protocol_fee?: string | number;
 }
 
 type QuoteStatus = "idle" | "loading" | "success" | "error";
 
 const DECIMAL_AMOUNT_PATTERN = /^\d+(\.\d*)?$/;
-const LARGE_RATE_FORMATTER = new Intl.NumberFormat("en-US", {
-  maximumFractionDigits: 2,
-});
-const SMALL_RATE_FORMATTER = new Intl.NumberFormat("en-US", {
-  maximumFractionDigits: 8,
-});
 
 const ASSETS: SwapAsset[] = [
   {
@@ -78,7 +81,7 @@ const ASSETS: SwapAsset[] = [
     symbol: "USDC",
     chain: "Arbitrum",
     decimals: 6,
-    kind: "stablecoin",
+    kind: "evm",
     icon: "/assets/chains/usdc.svg",
     networkIcon: "/assets/chains/arbitrum.svg",
   },
@@ -87,7 +90,7 @@ const ASSETS: SwapAsset[] = [
     symbol: "USDC",
     chain: "Polygon",
     decimals: 6,
-    kind: "stablecoin",
+    kind: "evm",
     icon: "/assets/chains/usdc.svg",
     networkIcon: "/assets/chains/polygon.svg",
   },
@@ -96,7 +99,7 @@ const ASSETS: SwapAsset[] = [
     symbol: "USDC",
     chain: "Ethereum",
     decimals: 6,
-    kind: "stablecoin",
+    kind: "evm",
     icon: "/assets/chains/usdc.svg",
     networkIcon: "/assets/chains/ethereum.svg",
   },
@@ -105,7 +108,7 @@ const ASSETS: SwapAsset[] = [
     symbol: "USDC",
     chain: "Base",
     decimals: 6,
-    kind: "stablecoin",
+    kind: "evm",
     icon: "/assets/chains/usdc.svg",
     networkIcon: "/assets/chains/base.svg",
   },
@@ -114,7 +117,7 @@ const ASSETS: SwapAsset[] = [
     symbol: "USDC",
     chain: "Optimism",
     decimals: 6,
-    kind: "stablecoin",
+    kind: "evm",
     icon: "/assets/chains/usdc.svg",
     networkIcon: "/assets/chains/optimism.svg",
   },
@@ -123,7 +126,7 @@ const ASSETS: SwapAsset[] = [
     symbol: "USDC",
     chain: "Avalanche",
     decimals: 6,
-    kind: "stablecoin",
+    kind: "evm",
     icon: "/assets/chains/usdc.svg",
     networkIcon: "/assets/chains/avalanche.svg",
   },
@@ -132,7 +135,7 @@ const ASSETS: SwapAsset[] = [
     symbol: "USDT0",
     chain: "Arbitrum",
     decimals: 6,
-    kind: "stablecoin",
+    kind: "evm",
     icon: "/assets/chains/usdt.svg",
     networkIcon: "/assets/chains/arbitrum.svg",
   },
@@ -141,7 +144,7 @@ const ASSETS: SwapAsset[] = [
     symbol: "USDT0",
     chain: "Polygon",
     decimals: 6,
-    kind: "stablecoin",
+    kind: "evm",
     icon: "/assets/chains/usdt.svg",
     networkIcon: "/assets/chains/polygon.svg",
   },
@@ -150,7 +153,7 @@ const ASSETS: SwapAsset[] = [
     symbol: "USDT",
     chain: "Ethereum",
     decimals: 6,
-    kind: "stablecoin",
+    kind: "evm",
     icon: "/assets/chains/usdt.svg",
     networkIcon: "/assets/chains/ethereum.svg",
   },
@@ -173,6 +176,7 @@ const DEFAULT_SOURCE = ASSETS[0];
 const DEFAULT_TARGET = ASSETS[3];
 
 export default function HomepageSwapWidget() {
+  const [assets, setAssets] = useState(ASSETS);
   const [source, setSource] = useState(DEFAULT_SOURCE);
   const [target, setTarget] = useState(DEFAULT_TARGET);
   const [sourceAmount, setSourceAmount] = useState("");
@@ -183,7 +187,7 @@ export default function HomepageSwapWidget() {
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [quoteStatus, setQuoteStatus] = useState<QuoteStatus>("idle");
 
-  const availableTargets = getAvailableTargets(source);
+  const availableTargets = getAvailableTargets(source, assets);
   const canSwitch = isValidPair(target, source);
   const activeAmount = lastEdited === "source" ? sourceAmount : targetAmount;
   const sourceId = source.id;
@@ -200,6 +204,31 @@ export default function HomepageSwapWidget() {
     }
     return url.toString();
   }, [lastEdited, source, sourceAmount, target, targetAmount]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    void fetch("/api/assets", { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("Unable to load supported assets");
+        return response.json() as Promise<SwapAsset[]>;
+      })
+      .then((nextAssets) => {
+        if (controller.signal.aborted || nextAssets.length === 0) return;
+        setAssets(nextAssets);
+        setSource((current) => nextAssets.find((asset) => asset.id === current.id) ?? nextAssets[0]);
+        setTarget((current) => {
+          const matching = nextAssets.find((asset) => asset.id === current.id);
+          if (matching) return matching;
+          return nextAssets.find((asset) => asset.kind === "evm") ?? nextAssets[0];
+        });
+      })
+      .catch(() => {
+        // Keep the core routes visible if the live asset endpoint is temporarily unavailable.
+      });
+
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
     const activeAsset = lastEdited === "source" ? source : target;
@@ -262,7 +291,7 @@ export default function HomepageSwapWidget() {
   const handleSourceSelect = (asset: SwapAsset) => {
     setSource(asset);
     if (!isValidPair(asset, target)) {
-      setTarget(getAvailableTargets(asset)[0]);
+      setTarget(getAvailableTargets(asset, assets)[0]);
     }
     resetAmounts();
   };
@@ -365,7 +394,7 @@ export default function HomepageSwapWidget() {
         <TokenSelector
           side={selector}
           selected={selector === "source" ? source : target}
-          assets={selector === "source" ? ASSETS : availableTargets}
+          assets={selector === "source" ? assets : availableTargets}
           onClose={() => setSelector(null)}
           onSelect={(asset) => {
             if (selector === "source") handleSourceSelect(asset);
@@ -403,7 +432,7 @@ function AmountPanel({
       <div className="grid min-w-0 grid-cols-1 items-center gap-2 min-[360px]:grid-cols-[minmax(0,1fr)_auto] sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-2">
           <span className="text-xl text-white/30 min-[360px]:text-2xl sm:text-3xl">
-            {asset.kind === "bitcoin" ? "₿" : "$"}
+            {getAmountPrefix(asset)}
           </span>
           <input
             value={amount}
@@ -444,10 +473,10 @@ function QuoteLine({
     content = "Live quote unavailable. You can continue in the app.";
     className = "text-amber-200/60";
   } else if (status === "success" && quote) {
-    const stablecoin = source.kind === "stablecoin" ? source : target;
-    content = source.kind === target.kind
-      ? "1 BTC = 1 BTC · Live quote"
-      : `1 BTC ≈ ${formatRate(quote.exchange_rate)} ${stablecoin.symbol} · Live quote`;
+    const totalFee = getTotalFee(quote);
+    content = totalFee > 0n
+      ? `Total fee: ${formatBitcoinBaseUnits(totalFee)} BTC · Live quote`
+      : "Live quote · Fees included in the amount shown.";
     className = "text-lime-light/75";
   }
 
@@ -517,7 +546,7 @@ function TokenSelector({
     return matchesTab && matchesSearch;
   });
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[100] flex items-end justify-center p-0 sm:items-center sm:p-6">
       <button
         type="button"
@@ -598,7 +627,8 @@ function TokenSelector({
             : <p className="py-10 text-center text-sm text-white/40">No currencies found</p>}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
@@ -609,7 +639,9 @@ function AssetIcon({ asset, size }: { asset: SwapAsset; size: "small" | "large" 
     <span
       className={`relative grid shrink-0 place-items-center rounded-full border border-white/[0.08] bg-white/[0.04] ${dimensions}`}
     >
-      <Image src={asset.icon} alt="" width={iconSize} height={iconSize} />
+      {asset.icon
+        ? <Image src={asset.icon} alt="" width={iconSize} height={iconSize} />
+        : <TokenBadge symbol={asset.symbol} size={size} />}
       <span className="absolute -bottom-0.5 -right-0.5 grid h-4 w-4 place-items-center overflow-hidden rounded-full border border-[#0c0d0c] bg-[#0c0d0c] text-[8px] font-bold text-lime-light">
         {asset.networkIcon
           ? <Image src={asset.networkIcon} alt="" width={13} height={13} />
@@ -619,30 +651,82 @@ function AssetIcon({ asset, size }: { asset: SwapAsset; size: "small" | "large" 
   );
 }
 
-function getAvailableTargets(source: SwapAsset): SwapAsset[] {
-  return ASSETS.filter((asset) => isValidPair(source, asset));
+function TokenBadge({ symbol, size }: { symbol: string; size: "small" | "large" }) {
+  const normalizedSymbol = symbol.toUpperCase();
+  const iconSize = size === "large" ? 36 : 28;
+
+  switch (normalizedSymbol) {
+    case "WBTC":
+      return <TokenWBTC size={iconSize} variant="branded" aria-hidden="true" />;
+    case "TBTC":
+      return <TokenTBTC size={iconSize} variant="branded" aria-hidden="true" />;
+    case "XAUT":
+      return <TokenXAUT size={iconSize} variant="branded" aria-hidden="true" />;
+    case "EURC":
+      return <TokenEURC size={iconSize} variant="branded" aria-hidden="true" />;
+    case "EURE":
+      return <TokenEURE size={iconSize} variant="branded" aria-hidden="true" />;
+  }
+
+  const badge = getTokenBadge(normalizedSymbol);
+
+  return (
+    <span
+      className={`grid h-full w-full place-items-center rounded-full font-bold tracking-[-0.04em] ${badge.className} ${
+        size === "large" ? "text-[10px]" : "text-[8px]"
+      }`}
+      aria-hidden="true"
+    >
+      {badge.label}
+    </span>
+  );
+}
+
+function getTokenBadge(symbol: string): { label: string; className: string } {
+  switch (symbol) {
+    case "USAT":
+      return { label: "US", className: "bg-[#26a17b] text-white" };
+    default:
+      return { label: symbol.slice(0, 3), className: "bg-white/15 text-white" };
+  }
+}
+
+function getAmountPrefix(asset: SwapAsset): string {
+  const symbol = asset.symbol.toUpperCase();
+  if (["BTC", "WBTC", "TBTC"].includes(symbol)) return "₿";
+  if (["EURC", "EURE"].includes(symbol)) return "€";
+  if (symbol === "XAUT") return "Au";
+  if (["USDC", "USDT", "USDT0", "USAT"].includes(symbol)) return "$";
+  return "·";
+}
+
+function getAvailableTargets(source: SwapAsset, assets: SwapAsset[]): SwapAsset[] {
+  return assets.filter((asset) => isValidPair(source, asset));
 }
 
 function isValidPair(source: SwapAsset, target: SwapAsset): boolean {
   if (source.id === target.id) return false;
-  if (source.kind === "stablecoin" && target.kind === "stablecoin") return false;
-  if (source.kind === "stablecoin" && target.chain === "Lightning") return false;
-  if (source.kind !== target.kind) return true;
+  if (source.kind === "evm" && target.kind === "evm") return false;
+  if (source.kind === "evm" && target.kind === "bitcoin") {
+    return target.chain !== "Lightning";
+  }
+  if (source.kind === "bitcoin" && target.kind === "evm") return true;
 
   if (source.chain === "Arkade") return target.chain === "Lightning";
   return target.chain === "Arkade";
 }
 
 function matchesCategory(asset: SwapAsset, category: Category): boolean {
+  const symbol = asset.symbol.toUpperCase();
   switch (category) {
     case "all":
       return true;
     case "bitcoin":
       return asset.kind === "bitcoin";
     case "usdc":
-      return asset.symbol === "USDC";
+      return symbol === "USDC";
     case "usdt":
-      return asset.symbol === "USDT" || asset.symbol === "USDT0";
+      return symbol === "USDT" || symbol === "USDT0";
     case "ethereum":
       return asset.chain === "Ethereum";
     case "arbitrum":
@@ -692,10 +776,23 @@ function baseUnitsToDecimal(value: string, decimals: number): string {
   return fraction ? `${whole}.${fraction}` : whole;
 }
 
-function formatRate(value: string): string {
-  const rate = Number(value);
-  if (!Number.isFinite(rate)) return value;
-  return (rate >= 1 ? LARGE_RATE_FORMATTER : SMALL_RATE_FORMATTER).format(rate);
+function getTotalFee(quote: QuoteResponse): bigint {
+  return toBigInt(quote.network_fee)
+    + toBigInt(quote.gasless_network_fee)
+    + toBigInt(quote.protocol_fee);
+}
+
+function toBigInt(value: string | number | undefined): bigint {
+  if (value == null) return 0n;
+  try {
+    return BigInt(value);
+  } catch {
+    return 0n;
+  }
+}
+
+function formatBitcoinBaseUnits(value: bigint): string {
+  return baseUnitsToDecimal(value.toString(), 8);
 }
 
 function isQuoteResponse(value: unknown): value is QuoteResponse {
