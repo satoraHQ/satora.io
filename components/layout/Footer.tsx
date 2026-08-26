@@ -67,22 +67,22 @@ export default function Footer() {
             </p>
             <div className="space-y-2.5">
               <Link
-                href="https://docs.satora.io"
+                href="/privacy"
                 className={linkClass + " block"}
               >
                 Privacy Policy
               </Link>
               <Link
-                href="https://docs.satora.io"
+                href="/terms"
                 className={linkClass + " block"}
               >
                 Terms of Service
               </Link>
               <Link
-                href="https://docs.satora.io"
+                href="/imprint"
                 className={linkClass + " block"}
               >
-                Impressum
+                Imprint
               </Link>
               <Link
                 href="https://docs.satora.io/design/media"

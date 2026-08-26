@@ -38,6 +38,24 @@
     },
     "baseUrl": "https://api.satora.io"
   },
+  "redirects": [
+    {
+      "source": "/faq/legal/lendasat/privacy",
+      "destination": "https://satora.io/privacy"
+    },
+    {
+      "source": "/faq/legal/lendasat/terms",
+      "destination": "https://satora.io/terms"
+    },
+    {
+      "source": "/faq/legal/lendasat/cookies",
+      "destination": "https://satora.io/cookies"
+    },
+    {
+      "source": "/faq/legal/lendasat/impressum",
+      "destination": "https://satora.io/imprint"
+    }
+  ],
   "navigation": {
     "tabs": [
       {
@@ -211,22 +229,6 @@
               "faq/gasless-and-fees",
               "faq/security",
               "faq/troubleshooting"
-            ]
-          },
-          {
-            "group": "Legal",
-            "icon": "scale-balanced",
-            "pages": [
-              {
-                "group": "Lendasat",
-                "icon": "handshake-angle",
-                "pages": [
-                  "faq/legal/lendasat/terms",
-                  "faq/legal/lendasat/privacy",
-                  "faq/legal/lendasat/cookies",
-                  "faq/legal/lendasat/impressum"
-                ]
-              }
             ]
           }
         ]

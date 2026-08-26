@@ -8,6 +8,11 @@ const projectRoot = dirname(fileURLToPath(import.meta.url));
 /** @type {import('next').NextConfig} */
 const config = {
 	reactStrictMode: true,
+	async redirects() {
+		return [
+			{ source: "/impressum", destination: "/imprint", permanent: true },
+		];
+	},
 	turbopack: {
 		root: projectRoot,
 	},

@@ -208,7 +208,7 @@ export default function CookieConsent() {
           {/* Privacy Links */}
           <div className="flex items-center gap-3 mt-2">
             <Link
-              href="https://docs.satora.io"
+              href="/privacy"
               className="text-[12px] text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors duration-200"
             >
               Privacy
@@ -217,7 +217,7 @@ export default function CookieConsent() {
               |
             </span>
             <Link
-              href="https://docs.satora.io"
+              href="/cookies"
               className="text-[12px] text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors duration-200"
             >
               Cookies
@@ -226,7 +226,7 @@ export default function CookieConsent() {
               |
             </span>
             <Link
-              href="https://docs.satora.io"
+              href="/terms"
               className="text-[12px] text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors duration-200"
             >
               Terms
