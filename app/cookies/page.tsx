@@ -1,5 +1,5 @@
-import LegalDocument from "@/components/legal/LegalDocument";
-import { legalDocuments } from "@/content/legal-documents";
+import LegalDocument, { legalMdxComponents } from "@/components/legal/LegalDocument";
+import { legalSource } from "@/config/legal-source";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,5 +9,11 @@ export const metadata: Metadata = {
 };
 
 export default function CookiesPage() {
-  return <LegalDocument title="Cookie Policy" source={legalDocuments.cookies} />;
+  const Content = legalSource.getPage(["cookies"])!.data.body;
+
+  return (
+    <LegalDocument title="Cookie Policy">
+      <Content components={legalMdxComponents} />
+    </LegalDocument>
+  );
 }

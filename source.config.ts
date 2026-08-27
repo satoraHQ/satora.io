@@ -18,3 +18,13 @@ export const blog = defineCollections({
     tags: z.array(z.string()),
   }),
 });
+
+export const legal = defineCollections({
+  type: "doc",
+  dir: "docs/faq/legal/lendasat",
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    icon: z.string().optional(),
+  }),
+});

@@ -1,5 +1,5 @@
-import LegalDocument from "@/components/legal/LegalDocument";
-import { legalDocuments } from "@/content/legal-documents";
+import LegalDocument, { legalMdxComponents } from "@/components/legal/LegalDocument";
+import { legalSource } from "@/config/legal-source";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,5 +9,11 @@ export const metadata: Metadata = {
 };
 
 export default function ImprintPage() {
-  return <LegalDocument title="Imprint" source={legalDocuments.imprint} />;
+  const Content = legalSource.getPage(["impressum"])!.data.body;
+
+  return (
+    <LegalDocument title="Imprint">
+      <Content components={legalMdxComponents} />
+    </LegalDocument>
+  );
 }
