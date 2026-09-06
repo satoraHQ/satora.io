@@ -733,7 +733,7 @@ Next, fund the swap by sending the EVM tokens to the contract:
 //   chainId: chain.id,
 //   signTypedData: (td) => walletClient.signTypedData({ ...td, account: walletClient.account }),
 //   sendTransaction: (tx) => walletClient.sendTransaction({ to: tx.to, data: tx.data, chain, gas: tx.gas }),
-//   waitForReceipt: (h) => publicClient.waitForTransactionReceipt({ hash: h }).then((r) => ({ status: r.status, blockNumber: r.blockNumber, transactionHash: r.transactionHash })),
+//   waitForReceipt: (h) => publicClient.waitForTransactionReceipt({ hash: h }).then((r) => ({ status: r.status, blockNumber: r.blockNumber, transactionHash: r.transactionHash, logs: r.logs })),
 //   getTransaction: (h) => publicClient.getTransaction({ hash: h }).then((tx) => ({ to: tx.to ?? null, input: tx.input, from: tx.from })),
 //   call: (tx) => publicClient.call({ to: tx.to, data: tx.data, account: tx.from, blockNumber: tx.blockNumber }).then((r) => r.data ?? "0x"),
 // };

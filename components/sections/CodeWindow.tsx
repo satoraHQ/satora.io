@@ -558,7 +558,7 @@ const evmSigner: EvmSigner = {
     walletClient.sendTransaction({ to: tx.to, data: tx.data, chain: polygon, gas: tx.gas }),
   waitForReceipt: (hash) =>
     publicClient.waitForTransactionReceipt({ hash }).then((r) => ({
-      status: r.status, blockNumber: Number(r.blockNumber), transactionHash: r.transactionHash,
+      status: r.status, blockNumber: Number(r.blockNumber), transactionHash: r.transactionHash, logs: r.logs,
     })),
   getTransaction: (hash) =>
     publicClient.getTransaction({ hash }).then((t) => ({
@@ -568,7 +568,7 @@ const evmSigner: EvmSigner = {
     publicClient.call({
       to: tx.to as \`0x\${string}\`, data: tx.data as \`0x\${string}\`,
       account: tx.from as \`0x\${string}\`,
-    }).then((r) => r.data!),
+    }).then((r) => r.data ?? "0x"),
 };`
       : `// Build an EvmSigner that implements:
 // {
@@ -576,7 +576,7 @@ const evmSigner: EvmSigner = {
 //   chainId: number;           // e.g. 137 for Polygon
 //   signTypedData(td: TypedDataDefinition): Promise<\`0x\${string}\`>;
 //   sendTransaction(tx: { to, data, gas? }): Promise<\`0x\${string}\`>;
-//   waitForReceipt(hash): Promise<{ status, blockNumber, transactionHash }>;
+//   waitForReceipt(hash): Promise<{ status, blockNumber, transactionHash, logs }>;
 //   getTransaction(hash): Promise<{ to, input, from }>;
 //   call(tx: { to, data, from }): Promise<\`0x\${string}\`>;
 // }
@@ -756,7 +756,7 @@ interface EvmSigner {
   chainId: number;
   signTypedData(td: TypedDataDefinition): Promise<\`0x\${string}\`>;
   sendTransaction(tx: { to: string; data: string; gas?: bigint }): Promise<\`0x\${string}\`>;
-  waitForReceipt(hash: \`0x\${string}\`): Promise<{ status: "success"|"reverted"; blockNumber: number; transactionHash: string }>;
+  waitForReceipt(hash: \`0x\${string}\`): Promise<{ status: "success"|"reverted"; blockNumber: number; transactionHash: string; logs?: { address: string; topics: string[]; data: string }[] }>;
   getTransaction(hash: \`0x\${string}\`): Promise<{ to: string|null; input: string; from: string }>;
   call(tx: { to: string; data: string; from: string }): Promise<\`0x\${string}\`>;
 }
