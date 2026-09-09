@@ -7,7 +7,6 @@ import TokenTBTC from "@web3icons/react/icons/tokens/TokenTBTC";
 import TokenWBTC from "@web3icons/react/icons/tokens/TokenWBTC";
 import TokenXAUT from "@web3icons/react/icons/tokens/TokenXAUT";
 import Image from "next/image";
-import type { MouseEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -183,7 +182,6 @@ export default function HomepageSwapWidget() {
   const [targetAmount, setTargetAmount] = useState("");
   const [lastEdited, setLastEdited] = useState<SelectorSide>("source");
   const [selector, setSelector] = useState<SelectorSide | null>(null);
-  const [isLeaving, setIsLeaving] = useState(false);
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [quoteStatus, setQuoteStatus] = useState<QuoteStatus>("idle");
 
@@ -328,19 +326,8 @@ export default function HomepageSwapWidget() {
     setLastEdited("target");
   };
 
-  const handleNavigate = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    event.preventDefault();
-    setIsLeaving(true);
-    window.setTimeout(() => window.location.assign(swapUrl), 180);
-  };
-
   return (
-    <div
-      className={`relative w-full min-w-0 rounded-[1.5rem] border border-white/[0.08] bg-[#11130f] p-3 shadow-[0_35px_100px_rgba(0,0,0,0.28)] transition duration-200 sm:rounded-[1.75rem] sm:p-4 ${
-        isLeaving ? "scale-[0.985] opacity-70" : "scale-100 opacity-100"
-      }`}
-    >
+    <div className="relative w-full min-w-0 rounded-[1.5rem] border border-black/[0.08] bg-white p-3 shadow-[0_35px_100px_rgba(0,0,0,0.12)] sm:rounded-[1.75rem] sm:p-4 dark:border-white/[0.08] dark:bg-[#11130f] dark:shadow-[0_35px_100px_rgba(0,0,0,0.28)]">
       <div className="relative min-w-0">
         <AmountPanel
           label="Sell"
@@ -357,9 +344,9 @@ export default function HomepageSwapWidget() {
           disabled={!canSwitch}
           aria-label="Switch sell and buy assets"
           title={canSwitch ? "Switch sell and buy assets" : "This route is currently one-way"}
-          className="group absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-[#11130f] p-1 transition-transform duration-200 hover:scale-110 active:scale-125 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100"
+          className="group absolute left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-1 transition-transform dark:bg-[#11130f] duration-200 hover:scale-110 active:scale-125 disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:scale-100"
         >
-          <span className="grid h-9 w-9 place-items-center rounded-lg border border-white/[0.08] bg-[#20231f] text-xl text-white/55 transition-colors group-hover:text-lime-light">
+          <span className="grid h-9 w-9 place-items-center rounded-lg border border-black/[0.08] bg-[#f3f3ef] text-xl text-black/55 transition-colors group-hover:text-[#728600] dark:border-white/[0.08] dark:bg-[#20231f] dark:text-white/55 dark:group-hover:text-lime-light">
             ↓
           </span>
         </button>
@@ -384,10 +371,11 @@ export default function HomepageSwapWidget() {
 
       <a
         href={swapUrl}
-        onClick={handleNavigate}
+        target="_blank"
+        rel="noopener noreferrer"
         className="block w-full rounded-2xl bg-lime-light py-3.5 text-center text-sm font-semibold text-black transition hover:brightness-95 active:scale-[0.99]"
       >
-        {isLeaving ? "Opening Satora…" : "Swap"}
+        Swap
       </a>
 
       {selector && (
@@ -426,12 +414,12 @@ function AmountPanel({
 }) {
   return (
     <div
-      className={`min-w-0 rounded-2xl border border-white/[0.075] bg-[#1c1f1d]/80 p-3.5 sm:p-5 ${className}`}
+      className={`min-w-0 rounded-2xl border border-black/[0.06] bg-[#f5f5f1] p-3.5 sm:p-5 dark:border-white/[0.075] dark:bg-[#1c1f1d]/80 ${className}`}
     >
-      <p className="mb-2 text-sm text-white/45">{label}</p>
+      <p className="mb-2 text-sm text-black/50 dark:text-white/45">{label}</p>
       <div className="grid min-w-0 grid-cols-1 items-center gap-2 min-[360px]:grid-cols-[minmax(0,1fr)_auto] sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <span className="text-xl text-white/30 min-[360px]:text-2xl sm:text-3xl">
+          <span className="text-xl text-black/30 min-[360px]:text-2xl sm:text-3xl dark:text-white/30">
             {getAmountPrefix(asset)}
           </span>
           <input
@@ -440,14 +428,14 @@ function AmountPanel({
             inputMode="decimal"
             aria-label={`${label} amount in ${asset.symbol}`}
             placeholder={isLoading ? "…" : "0"}
-            className="w-full min-w-0 bg-transparent text-2xl font-medium tracking-tight text-white outline-none placeholder:text-white/25 min-[360px]:text-3xl sm:text-4xl"
+            className="w-full min-w-0 bg-transparent text-2xl font-medium tracking-tight text-gray-950 outline-none placeholder:text-black/25 min-[360px]:text-3xl sm:text-4xl dark:text-white dark:placeholder:text-white/25"
           />
         </div>
         <div className="justify-self-end">
           <AssetButton asset={asset} onClick={onSelect} />
         </div>
       </div>
-      <p className="mt-2 h-4 text-right text-[11px] text-white/25">{asset.chain}</p>
+      <p className="mt-2 h-4 text-right text-[11px] text-black/30 dark:text-white/25">{asset.chain}</p>
     </div>
   );
 }
@@ -464,20 +452,20 @@ function QuoteLine({
   target: SwapAsset;
 }) {
   let content = "Enter an amount to see the live rate.";
-  let className = "text-white/35";
+  let className = "text-black/40 dark:text-white/35";
 
   if (status === "loading") {
     content = "Fetching live quote…";
-    className = "text-white/50";
+    className = "text-black/55 dark:text-white/50";
   } else if (status === "error") {
     content = "Live quote unavailable. You can continue in the app.";
-    className = "text-amber-200/60";
+    className = "text-amber-700/80 dark:text-amber-200/60";
   } else if (status === "success" && quote) {
     const totalFee = getTotalFee(quote);
     content = totalFee > 0n
       ? `Total fee: ${formatBitcoinBaseUnits(totalFee)} BTC · Live quote`
       : "Live quote · Fees included in the amount shown.";
-    className = "text-lime-light/75";
+    className = "text-[#728600] dark:text-lime-light/75";
   }
 
   return (
@@ -496,11 +484,11 @@ function AssetButton({ asset, onClick }: { asset: SwapAsset; onClick: () => void
       type="button"
       onClick={onClick}
       aria-label={`Select ${asset.symbol} on ${asset.chain}`}
-      className="flex shrink-0 items-center gap-1.5 rounded-full bg-[#0d0e0d] py-1.5 pl-1.5 pr-2.5 text-white transition-colors hover:bg-black sm:gap-2 sm:py-2 sm:pl-2 sm:pr-3"
+      className="flex shrink-0 items-center gap-1.5 rounded-full bg-white py-1.5 pl-1.5 pr-2.5 text-gray-950 shadow-[0_1px_2px_rgba(0,0,0,0.08)] ring-1 ring-black/[0.06] transition-colors hover:bg-[#f3f3ef] sm:gap-2 dark:bg-[#0d0e0d] dark:text-white dark:shadow-none dark:ring-0 dark:hover:bg-black sm:py-2 sm:pl-2 sm:pr-3"
     >
       <AssetIcon asset={asset} size="small" />
       <span className="text-xs font-semibold min-[360px]:text-sm sm:text-base">{asset.symbol}</span>
-      <HiOutlineChevronDown className="h-4 w-4 text-white/40" />
+      <HiOutlineChevronDown className="h-4 w-4 text-black/40 dark:text-white/40" />
     </button>
   );
 }
@@ -552,13 +540,13 @@ function TokenSelector({
         type="button"
         aria-label="Close token selector"
         onClick={onClose}
-        className="absolute inset-0 bg-black/65 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm dark:bg-black/65"
       />
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="token-selector-title"
-        className="relative z-10 max-h-[86dvh] w-full min-w-0 max-w-full overflow-hidden rounded-t-[1.5rem] border border-white/10 bg-[#0c0d0c] text-white shadow-2xl sm:max-w-md sm:rounded-[1.5rem]"
+        className="relative z-10 max-h-[86dvh] w-full min-w-0 max-w-full overflow-hidden rounded-t-[1.5rem] border border-black/10 bg-white text-gray-950 shadow-2xl sm:max-w-md sm:rounded-[1.5rem] dark:border-white/10 dark:bg-[#0c0d0c] dark:text-white"
       >
         <div className="flex items-center justify-between px-5 pb-2 pt-5">
           <h2 id="token-selector-title" className="text-lg font-semibold">
@@ -568,7 +556,7 @@ function TokenSelector({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="grid h-8 w-8 place-items-center rounded-full text-white/45 transition hover:bg-white/[0.07] hover:text-white"
+            className="grid h-8 w-8 place-items-center rounded-full text-black/45 transition hover:bg-black/[0.06] hover:text-gray-950 dark:text-white/45 dark:hover:bg-white/[0.07] dark:hover:text-white"
           >
             <HiOutlineXMark className="h-5 w-5" />
           </button>
@@ -581,7 +569,9 @@ function TokenSelector({
               type="button"
               onClick={() => setCategory(item.id)}
               className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-                category === item.id ? "bg-white text-black" : "bg-white/[0.07] text-white/55 hover:bg-white/[0.11]"
+                category === item.id
+                  ? "bg-black text-white dark:bg-white dark:text-black"
+                  : "bg-black/[0.06] text-black/60 hover:bg-black/[0.1] dark:bg-white/[0.07] dark:text-white/55 dark:hover:bg-white/[0.11]"
               }`}
             >
               {item.label}
@@ -590,7 +580,7 @@ function TokenSelector({
         </div>
 
         <div className="px-5 pb-2 pt-1">
-          <label className="flex h-11 items-center gap-3 rounded-2xl bg-white/[0.07] px-4 text-white/45 focus-within:ring-1 focus-within:ring-white/20">
+          <label className="flex h-11 items-center gap-3 rounded-2xl bg-black/[0.05] px-4 text-black/45 focus-within:ring-1 focus-within:ring-black/20 dark:bg-white/[0.07] dark:text-white/45 dark:focus-within:ring-white/20">
             <span aria-hidden="true">⌕</span>
             <span className="sr-only">Search by name or network</span>
             <input
@@ -598,7 +588,7 @@ function TokenSelector({
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search by name or network"
-              className="min-w-0 flex-1 bg-transparent text-sm text-white outline-none placeholder:text-white/35"
+              className="min-w-0 flex-1 bg-transparent text-sm text-gray-950 outline-none placeholder:text-black/40 dark:text-white dark:placeholder:text-white/35"
             />
           </label>
         </div>
@@ -610,12 +600,12 @@ function TokenSelector({
                 key={asset.id}
                 type="button"
                 onClick={() => onSelect(asset)}
-                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-left transition-colors hover:bg-white/[0.06]"
+                className="flex w-full items-center gap-3 rounded-xl px-2 py-3 text-left transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.06]"
               >
                 <AssetIcon asset={asset} size="large" />
                 <span className="min-w-0 flex-1">
                   <span className="block font-semibold">{asset.symbol}</span>
-                  <span className="block text-sm text-white/45">{asset.chain}</span>
+                  <span className="block text-sm text-black/50 dark:text-white/45">{asset.chain}</span>
                 </span>
                 {selected.id === asset.id && (
                   <span className="grid h-6 w-6 place-items-center rounded-full bg-lime-light text-sm font-bold text-black">
@@ -624,7 +614,7 @@ function TokenSelector({
                 )}
               </button>
             ))
-            : <p className="py-10 text-center text-sm text-white/40">No currencies found</p>}
+            : <p className="py-10 text-center text-sm text-black/45 dark:text-white/40">No currencies found</p>}
         </div>
       </div>
     </div>,
@@ -637,12 +627,12 @@ function AssetIcon({ asset, size }: { asset: SwapAsset; size: "small" | "large" 
   const iconSize = size === "large" ? 36 : 28;
   return (
     <span
-      className={`relative grid shrink-0 place-items-center rounded-full border border-white/[0.08] bg-white/[0.04] ${dimensions}`}
+      className={`relative grid shrink-0 place-items-center rounded-full border border-black/[0.08] bg-black/[0.03] dark:border-white/[0.08] dark:bg-white/[0.04] ${dimensions}`}
     >
       {asset.icon
         ? <Image src={asset.icon} alt="" width={iconSize} height={iconSize} />
         : <TokenBadge symbol={asset.symbol} size={size} />}
-      <span className="absolute -bottom-0.5 -right-0.5 grid h-4 w-4 place-items-center overflow-hidden rounded-full border border-[#0c0d0c] bg-[#0c0d0c] text-[8px] font-bold text-lime-light">
+      <span className="absolute -bottom-0.5 -right-0.5 grid h-4 w-4 place-items-center overflow-hidden rounded-full border border-white bg-white text-[8px] font-bold text-[#728600] dark:border-[#0c0d0c] dark:bg-[#0c0d0c] dark:text-lime-light">
         {asset.networkIcon
           ? <Image src={asset.networkIcon} alt="" width={13} height={13} />
           : null}
@@ -687,7 +677,7 @@ function getTokenBadge(symbol: string): { label: string; className: string } {
     case "USAT":
       return { label: "US", className: "bg-[#26a17b] text-white" };
     default:
-      return { label: symbol.slice(0, 3), className: "bg-white/15 text-white" };
+      return { label: symbol.slice(0, 3), className: "bg-black/10 text-gray-950 dark:bg-white/15 dark:text-white" };
   }
 }
 

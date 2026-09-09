@@ -24,11 +24,11 @@ export default function RetailHero() {
 
         <div className="mx-auto mt-9 max-w-3xl text-center sm:mt-11">
           <h2 className="text-3xl font-semibold leading-tight tracking-[-0.04em] text-gray-950 sm:text-4xl dark:text-white">
-            Swap without the centralized exchange detour.
+            Swap without trust.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg dark:text-gray-400">
-            Move between Bitcoin and stablecoins from your wallet to your chosen destination, without making an
-            exchange deposit first.
+            Move between Bitcoin and stablecoins from your wallet to your chosen destination, without making an exchange
+            deposit first.
           </p>
 
           <ul className="mt-7 flex flex-wrap justify-center gap-x-7 gap-y-3 text-sm text-gray-500 dark:text-gray-400">

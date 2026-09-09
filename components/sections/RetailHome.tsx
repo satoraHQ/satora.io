@@ -18,7 +18,7 @@ const FAQS = [
   ],
   [
     "What fees will I pay?",
-    "Satora's standard service fee is 0.5%. Applicable network fees are charged separately. The live quote shows the exact amount you receive and all fees before you continue.",
+    "Satora's service fee is dynamic and depends on supply and demand. Applicable network fees are charged separately. The live quote shows the amount you receive and fees before you continue.",
   ],
   [
     "How long does a swap take?",
@@ -30,7 +30,7 @@ const FAQS = [
   ],
   [
     "What happens if a swap does not complete?",
-    "The swap flow keeps its status and recovery action visible, so you have a clear next step if settlement is interrupted.",
+    "Locked up funds can be refunded after a timeout.",
   ],
 ];
 
@@ -39,10 +39,10 @@ export default function RetailHome() {
     <>
       <section className="overflow-hidden bg-[#0b0c0a] text-white">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-8 sm:py-32 lg:px-12">
-          <div className="mx-auto max-w-2xl text-center">
+          <div className="mx-auto max-w-3xl text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-lime-light">How it works</p>
             <h2 className="mt-5 text-4xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">
-              Bitcoin rails meet stablecoin networks.
+              Non-custodial Bitcoin Swaps.
             </h2>
             <p className="mt-5 leading-relaxed text-white/50">
               Satora connects Bitcoin on-chain, Lightning and Arkade with USDC and USDT across supported networks
@@ -96,76 +96,12 @@ export default function RetailHome() {
       </section>
 
       <section className="border-y border-black/[0.07] bg-[#f8f8f5] text-black dark:border-white/[0.07] dark:bg-[#080808] dark:text-white">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-8 sm:py-28 lg:px-12">
-          <div className="mx-auto max-w-3xl text-center">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-lime">Built-in recovery</p>
-            <h2 className="mt-5 text-4xl font-semibold leading-[1.02] tracking-[-0.05em] sm:text-6xl">
-              A stopped swap is not a dead end.
-            </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-gray-500 dark:text-gray-400">
-              Every swap keeps its status and available actions visible. If settlement is interrupted, you return to
-              the same swap to see the next recovery step.
-            </p>
-          </div>
-
-          <div className="mx-auto mt-16 max-w-5xl rounded-[2rem] border border-black/[0.08] bg-white p-4 shadow-[0_24px_70px_rgba(0,0,0,0.06)] sm:p-7 dark:border-white/[0.08] dark:bg-[#0d0d0d]">
-            <div className="grid items-stretch gap-3 md:grid-cols-[1fr_auto_1fr_auto_1fr] md:gap-4">
-              <RecoveryStep
-                number="1"
-                eyebrow="Your wallet"
-                title="Fund the swap"
-                description="Send the selected asset from the wallet you control."
-              />
-              <FlowArrow />
-              <RecoveryStep
-                number="2"
-                eyebrow="Atomic settlement"
-                title="Both sides settle"
-                description="Satora coordinates the Bitcoin and stablecoin legs of the swap."
-                active
-              />
-              <FlowArrow />
-              <RecoveryStep
-                number="3"
-                eyebrow="Destination wallet"
-                title="Receive your asset"
-                description="The output is delivered to the address you selected."
-              />
-            </div>
-
-            <div className="mt-4 grid gap-3 rounded-[1.5rem] border border-lime/20 bg-lime-light/[0.08] p-4 sm:grid-cols-[auto_1fr_auto] sm:items-center sm:gap-5 sm:p-5 dark:border-lime-light/20">
-              <span className="grid h-11 w-11 place-items-center rounded-full bg-lime-light text-lg font-bold text-black">
-                ↺
-              </span>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#728600] dark:text-lime-light">
-                  If settlement is interrupted
-                </p>
-                <p className="mt-1 text-lg font-semibold text-gray-950 dark:text-white">
-                  The same swap stays visible with its current status.
-                </p>
-              </div>
-              <Link
-                href="https://docs.satora.io/faq/integration"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-black px-4 py-2.5 text-center text-xs font-semibold text-white transition-colors hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80"
-              >
-                Explore recovery guides
-                <GoArrowUpRight className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-white dark:bg-black">
         <div className="mx-auto max-w-4xl px-4 py-20 sm:px-8 sm:py-32">
           <p className="text-center text-xs font-semibold uppercase tracking-[0.16em] text-gray-400">
             Questions before you swap
           </p>
           <h2 className="mt-5 text-center text-4xl font-semibold tracking-[-0.04em] text-gray-950 sm:text-5xl dark:text-white">
-            Know what happens before you send.
+            Frequently Asked Questions
           </h2>
           <div className="mt-12 divide-y divide-black/[0.08] border-y border-black/[0.08] dark:divide-white/[0.08] dark:border-white/[0.08]">
             {FAQS.map(([question, answer]) => (
@@ -206,51 +142,5 @@ export default function RetailHome() {
         </div>
       </section>
     </>
-  );
-}
-
-function RecoveryStep({
-  number,
-  eyebrow,
-  title,
-  description,
-  active = false,
-}: {
-  number: string;
-  eyebrow: string;
-  title: string;
-  description: string;
-  active?: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-[1.5rem] border p-5 sm:p-6 ${
-        active
-          ? "border-lime/30 bg-lime-light/[0.1] dark:border-lime-light/25"
-          : "border-black/[0.07] bg-[#f8f8f5] dark:border-white/[0.07] dark:bg-white/[0.025]"
-      }`}
-    >
-      <span
-        className={`grid h-9 w-9 place-items-center rounded-full text-sm font-bold ${
-          active ? "bg-lime-light text-black" : "bg-black text-white dark:bg-white dark:text-black"
-        }`}
-      >
-        {number}
-      </span>
-      <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400 dark:text-white/35">
-        {eyebrow}
-      </p>
-      <p className="mt-2 text-xl font-semibold text-gray-950 dark:text-white">{title}</p>
-      <p className="mt-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{description}</p>
-    </div>
-  );
-}
-
-function FlowArrow() {
-  return (
-    <div className="grid place-items-center text-xl text-black/20 dark:text-white/20" aria-hidden="true">
-      <span className="md:hidden">↓</span>
-      <span className="hidden md:block">→</span>
-    </div>
   );
 }
