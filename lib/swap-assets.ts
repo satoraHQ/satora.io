@@ -98,8 +98,8 @@ function toAssetRecord(token: ApiToken | BridgeToken): SwapAssetRecord {
   const chainLabel = bitcoin
     ? token.chain
     : "chain_name" in token
-      ? token.chain_name
-      : NETWORK_NAMES[token.chain] ?? token.chain;
+    ? token.chain_name
+    : NETWORK_NAMES[token.chain] ?? token.chain;
 
   return {
     id: bitcoin ? `${token.chain.toLowerCase()}:BTC` : `${token.chain}:${symbol}`,
@@ -110,10 +110,10 @@ function toAssetRecord(token: ApiToken | BridgeToken): SwapAssetRecord {
     icon: bitcoin
       ? "/assets/chains/bitcoin.svg"
       : normalizedSymbol === "USDC"
-        ? "/assets/chains/usdc.svg"
-        : normalizedSymbol === "USDT" || normalizedSymbol === "USDT0"
-          ? "/assets/chains/usdt.svg"
-          : undefined,
+      ? "/assets/chains/usdc.svg"
+      : normalizedSymbol === "USDT" || normalizedSymbol === "USDT0"
+      ? "/assets/chains/usdt.svg"
+      : undefined,
     networkIcon: NETWORK_ICONS[token.chain],
     quoteChain: token.chain,
     quoteToken: token.token_id,
