@@ -33,12 +33,11 @@ export const metadata: Metadata = {
     default: "Satora - Make Bitcoin Move",
     template: "%s | Satora",
   },
-  description: "Bitcoin loans without counterparty risk. Borrow against your Bitcoin using the Lightning Network.",
-  keywords:
-    "Bitcoin loans, BTC lending, crypto-backed loans, Bitcoin collateral, Lightning Network, DeFi lending, cryptocurrency loans, borrow against Bitcoin, Bitcoin liquidity",
+  description: "Bitcoin swaps without counterparty risk.",
+  keywords: "Bitcoin swaps, atomic swaps, stablecoins, USDC, USDT, Lightning Network",
   openGraph: {
     title: "Satora - Make Bitcoin Move",
-    description: "Bitcoin loans without counterparty risk",
+    description: "Bitcoin swaps without counterparty risk.",
     url: "https://satora.io",
     siteName: "Satora",
     images: [
@@ -54,7 +53,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Satora - Make Bitcoin Move",
-    description: "Bitcoin loans without counterparty risk",
+    description: "Bitcoin swaps without counterparty risk.",
     images: ["https://satora.io/thumbnail.jpg"],
     creator: "@satora",
     site: "@satora",
