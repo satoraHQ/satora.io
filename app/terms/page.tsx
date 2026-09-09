@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "Lendasat Terms of Service",
+  description: "Satora Terms of Service",
   alternates: { canonical: "/terms" },
 };
 
