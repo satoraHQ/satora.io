@@ -102,7 +102,11 @@ You use the Service at your sole option, discretion and risk. When you create an
 
 (c) Refund transactions incur network fees, which are deducted from the refunded amount.
 
-(d) Satora is not responsible for delays or failures in completing a swap caused by network congestion, insufficient liquidity, third-party infrastructure, your software or connectivity, or your failure to follow Section 5.
+(d) **Refunds are paid in the asset you locked, not the asset you started with.** If you converted a stablecoin or another asset not denominated in Bitcoin into WBTC or tBTC on the client side before funding a swap (Section 3(c)), and that swap fails, the refund is paid in WBTC or tBTC respectively. A refund to the original asset is not possible. Converting back is a separate client-side transaction at the rate and fees applicable at that time, and you bear the resulting exchange rate risk.
+
+(e) **Cross-chain refunds are paid on Arbitrum.** Where a swap is funded from an EVM network other than Arbitrum, such as Ink or Optimism, and routed through a bridge, a failed swap can only be refunded on Arbitrum. The refund is not returned to the network you funded from. You must be able to receive and use the refunded asset on Arbitrum, and moving it elsewhere is your responsibility and at your cost.
+
+(f) Satora is not responsible for delays or failures in completing a swap caused by network congestion, insufficient liquidity, third-party infrastructure, your software or connectivity, or your failure to follow Section 5.
 
 ## 9. API and SDK
 
