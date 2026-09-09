@@ -33,11 +33,8 @@ export default function Features() {
       <div className="max-w-6xl mx-auto px-6 sm:px-8 lg:px-12 pt-20 pb-24 md:pt-28 md:pb-32">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-14">
           <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-gray-900 dark:text-white">
-            Built for production
-          </h2>
-          <p className="text-[15px] text-gray-500 dark:text-gray-400 leading-relaxed sm:text-right max-w-sm">
             Bitcoin Swaps for Fintechs
-          </p>
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">

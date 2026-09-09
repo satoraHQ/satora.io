@@ -29,7 +29,6 @@ export default function DevelopersPage() {
             <Hero />
             <MobileCodePreview />
             <AsSeenIn />
-            <DeveloperIntegrationFlow />
             <Features />
             <CustomerStories />
             <CTA variant="developers" />
