@@ -697,9 +697,7 @@ function getAvailableTargets(source: SwapAsset, assets: SwapAsset[]): SwapAsset[
 function isValidPair(source: SwapAsset, target: SwapAsset): boolean {
   if (source.id === target.id) return false;
   if (source.kind === "evm" && target.kind === "evm") return false;
-  if (source.kind === "evm" && target.kind === "bitcoin") {
-    return target.chain !== "Lightning";
-  }
+  if (source.kind === "evm" && target.kind === "bitcoin") return true;
   if (source.kind === "bitcoin" && target.kind === "evm") return true;
 
   if (source.chain === "Arkade") return target.chain === "Lightning";
