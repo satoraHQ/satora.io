@@ -58,13 +58,17 @@ Sign up to track your swaps, manage referral codes, and monitor your integration
 
 ### Client compatibility headers
 
-SDK requests include two compatibility headers:
+SDK requests include a client identifier and one protocol epoch header per protocol component:
 
 ```http
 X-Lendaswap-Client: @satora/swap/0.5.0
-x-satora-server-version: 0.2.49
+x-satora-bitcoin-htlc-version: 1
+x-satora-arkade-vhtlc-version: 1
+x-satora-lightning-version: 1
+x-satora-evm-erc20-htlc-version: 1
+x-satora-evm-native-htlc-version: 1
 ```
 
 `X-Lendaswap-Client` identifies the SDK and SDK version. EVM-target swap creation requires a recognizable `<sdk-name>/<semver>` value.
 
-`x-satora-server-version` identifies the semver server/API version the SDK was built against. The API currently parses and logs it for diagnostics but does not enforce compatibility.
+Each `x-satora-<component>-version` header carries the integer protocol epoch the client speaks for that component. Swap creation and the signing-sensitive per-swap endpoints check the components the swap uses and reject a client whose epoch for one of them is older than the server supports. Clients that still send the legacy `x-satora-server-version` header are accepted while every component is at epoch 1.
