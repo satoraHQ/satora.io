@@ -137,9 +137,9 @@ function PressPage(): ReactNode {
               </a>
             </p>
             <p>
-              <strong>Twitter:</strong>{" "}
-              <a href="https://twitter.com/satora" className="underline">
-                @satora
+              <strong>X:</strong>{" "}
+              <a href="https://x.com/satora_io" className="underline">
+                @satora_io
               </a>
             </p>
           </div>

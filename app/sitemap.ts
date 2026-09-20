@@ -4,46 +4,24 @@ import type { MetadataRoute } from "next";
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://satora.io";
 
+  // Omit lastModified until genuine modification dates are available.
+  // Build timestamps and article publication dates do not track content edits.
   const staticPages: MetadataRoute.Sitemap = [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}/blog`,
-      lastModified: new Date(),
-      changeFrequency: "daily",
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/developers`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/press`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.5,
-    },
-    ...["privacy", "terms", "cookies", "imprint"].map((slug) => ({
-      url: `${baseUrl}/${slug}`,
-      lastModified: new Date(),
-      changeFrequency: "yearly" as const,
-      priority: 0.3,
-    })),
-  ];
+    "",
+    "/blog",
+    "/developers",
+    "/press",
+    "/privacy",
+    "/terms",
+    "/cookies",
+    "/imprint",
+    "/security",
+  ].map((path) => ({ url: `${baseUrl}${path}` }));
 
   const blogPages: MetadataRoute.Sitemap = blogSource
     .getPages()
     .map((post) => ({
       url: `${baseUrl}/blog/${post.slugs.join("/")}`,
-      lastModified: post.data.date ? new Date(post.data.date) : new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
     }));
 
   return [...staticPages, ...blogPages];

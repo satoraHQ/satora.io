@@ -12,6 +12,8 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: {
+    creator: "@satora_io",
+    site: "@satora_io",
     card: "summary_large_image",
     title: "Press Kit | Satora - Bitcoin Lending Platform",
     description: "Official media resources, brand assets, and company information for Satora.",

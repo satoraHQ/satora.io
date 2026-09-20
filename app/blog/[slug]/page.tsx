@@ -1,6 +1,8 @@
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
+import StructuredData from "@/components/StructuredData";
 import { blogSource } from "@/config/blog-source";
+import { organizationSchema } from "@/lib/structured-data";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import Image, { type ImageProps } from "next/image";
 import Link from "next/link";
@@ -40,17 +42,10 @@ export default async function BlogPost(props: {
     "@type": "BlogPosting",
     headline: title,
     description: subtitle || excerpt || "",
-    image: "https://satora.io/favicon/dot.svg",
+    image: titleImage ? new URL(titleImage, "https://satora.io").href : undefined,
     datePublished: new Date(date).toISOString(),
-    author: { "@type": "Person", name: author },
-    publisher: {
-      "@type": "Organization",
-      name: "Satora",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://satora.io/favicon/dot.svg",
-      },
-    },
+    author: { "@type": author === "Lendasat Team" ? "Organization" : "Person", name: author },
+    publisher: organizationSchema,
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": `https://satora.io/blog/${params.slug}`,
@@ -59,10 +54,7 @@ export default async function BlogPost(props: {
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostSchema) }}
-      />
+      <StructuredData data={blogPostSchema} />
       <Header />
       <div className="min-h-screen bg-white dark:bg-black">
         <div className="max-w-3xl mx-auto px-6 sm:px-8 pt-20 pb-16">
@@ -220,6 +212,8 @@ export async function generateMetadata(props: {
       images: [{ url: ogImage }],
     },
     twitter: {
+      creator: "@satora_io",
+      site: "@satora_io",
       card: "summary_large_image",
       title,
       description,

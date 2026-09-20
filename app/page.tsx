@@ -3,6 +3,8 @@ import Header from "@/components/layout/Header";
 import AsSeenIn from "@/components/sections/AsSeenIn";
 import RetailHero from "@/components/sections/RetailHero";
 import RetailHome from "@/components/sections/RetailHome";
+import StructuredData from "@/components/StructuredData";
+import { websiteSchema } from "@/lib/structured-data";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -16,6 +18,8 @@ export const metadata: Metadata = {
     url: "/",
   },
   twitter: {
+    creator: "@satora_io",
+    site: "@satora_io",
     title: "Swap Bitcoin and Stablecoins | Satora",
     description: "Swap Bitcoin and stablecoins without sending your funds to an exchange.",
   },
@@ -24,6 +28,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <>
+      <StructuredData data={websiteSchema} />
       <Header />
 
       <main>

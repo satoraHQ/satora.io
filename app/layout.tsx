@@ -55,8 +55,8 @@ export const metadata: Metadata = {
     title: "Satora - Make Bitcoin Move",
     description: "Bitcoin swaps without counterparty risk.",
     images: ["https://satora.io/thumbnail.jpg"],
-    creator: "@satora",
-    site: "@satora",
+    creator: "@satora_io",
+    site: "@satora_io",
   },
   icons: {
     icon: "/favicon/dot.svg",
