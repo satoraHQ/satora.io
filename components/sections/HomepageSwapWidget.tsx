@@ -174,10 +174,20 @@ const CATEGORIES: { id: Category; label: string }[] = [
 const DEFAULT_SOURCE = ASSETS[0];
 const DEFAULT_TARGET = ASSETS[3];
 
-export default function HomepageSwapWidget() {
-  const [assets, setAssets] = useState(ASSETS);
-  const [source, setSource] = useState(DEFAULT_SOURCE);
-  const [target, setTarget] = useState(DEFAULT_TARGET);
+interface HomepageSwapWidgetProps {
+  initialSourceId?: string;
+  initialTargetId?: string;
+  assetScope?: "all" | "bitcoin-usdc";
+}
+
+export default function HomepageSwapWidget({
+  initialSourceId = DEFAULT_SOURCE.id,
+  initialTargetId = DEFAULT_TARGET.id,
+  assetScope = "all",
+}: HomepageSwapWidgetProps = {}) {
+  const [assets, setAssets] = useState(() => filterAssetsForScope(ASSETS, assetScope));
+  const [source, setSource] = useState(() => assets.find((asset) => asset.id === initialSourceId) ?? DEFAULT_SOURCE);
+  const [target, setTarget] = useState(() => assets.find((asset) => asset.id === initialTargetId) ?? DEFAULT_TARGET);
   const [sourceAmount, setSourceAmount] = useState("");
   const [targetAmount, setTargetAmount] = useState("");
   const [lastEdited, setLastEdited] = useState<SelectorSide>("source");
@@ -185,7 +195,10 @@ export default function HomepageSwapWidget() {
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [quoteStatus, setQuoteStatus] = useState<QuoteStatus>("idle");
 
-  const availableTargets = getAvailableTargets(source, assets);
+  const networkOnly = assetScope === "bitcoin-usdc";
+  const availableSources = networkOnly ? assets.filter((asset) => asset.kind === source.kind) : assets;
+  const availableTargets = getAvailableTargets(source, assets)
+    .filter((asset) => !networkOnly || asset.kind !== source.kind);
   const canSwitch = isValidPair(target, source);
   const activeAmount = lastEdited === "source" ? sourceAmount : targetAmount;
   const sourceId = source.id;
@@ -211,13 +224,23 @@ export default function HomepageSwapWidget() {
         if (!response.ok) throw new Error("Unable to load supported assets");
         return response.json() as Promise<SwapAsset[]>;
       })
-      .then((nextAssets) => {
+      .then((liveAssets) => {
+        const nextAssets = filterAssetsForScope(liveAssets, assetScope);
         if (controller.signal.aborted || nextAssets.length === 0) return;
+        // Keep the fallback pair if the live list is missing either asset family.
+        if (
+          networkOnly && (!nextAssets.some((asset) => asset.kind === "bitcoin")
+            || !nextAssets.some((asset) => asset.kind === "evm"))
+        ) return;
         setAssets(nextAssets);
-        setSource((current) => nextAssets.find((asset) => asset.id === current.id) ?? nextAssets[0]);
+        setSource((current) =>
+          nextAssets.find((asset) => asset.id === current.id)
+            ?? (networkOnly ? nextAssets.find((asset) => asset.kind === current.kind) ?? current : nextAssets[0])
+        );
         setTarget((current) => {
           const matching = nextAssets.find((asset) => asset.id === current.id);
           if (matching) return matching;
+          if (networkOnly) return nextAssets.find((asset) => asset.kind === current.kind) ?? current;
           return nextAssets.find((asset) => asset.kind === "evm") ?? nextAssets[0];
         });
       })
@@ -226,7 +249,7 @@ export default function HomepageSwapWidget() {
       });
 
     return () => controller.abort();
-  }, []);
+  }, [assetScope, networkOnly]);
 
   useEffect(() => {
     const activeAsset = lastEdited === "source" ? source : target;
@@ -382,7 +405,8 @@ export default function HomepageSwapWidget() {
         <TokenSelector
           side={selector}
           selected={selector === "source" ? source : target}
-          assets={selector === "source" ? assets : availableTargets}
+          assets={selector === "source" ? availableSources : availableTargets}
+          networkOnly={networkOnly}
           onClose={() => setSelector(null)}
           onSelect={(asset) => {
             if (selector === "source") handleSourceSelect(asset);
@@ -497,12 +521,14 @@ function TokenSelector({
   side,
   selected,
   assets,
+  networkOnly = false,
   onClose,
   onSelect,
 }: {
   side: SelectorSide;
   selected: SwapAsset;
   assets: SwapAsset[];
+  networkOnly?: boolean;
   onClose: () => void;
   onSelect: (asset: SwapAsset) => void;
 }) {
@@ -550,7 +576,9 @@ function TokenSelector({
       >
         <div className="flex items-center justify-between px-5 pb-2 pt-5">
           <h2 id="token-selector-title" className="text-lg font-semibold">
-            Select a currency to {side === "source" ? "sell" : "buy"}
+            {networkOnly
+              ? `Select a ${selected.symbol} network`
+              : `Select a currency to ${side === "source" ? "sell" : "buy"}`}
           </h2>
           <button
             type="button"
@@ -562,32 +590,34 @@ function TokenSelector({
           </button>
         </div>
 
-        <div className="flex flex-wrap gap-2 px-5 py-3">
-          {visibleCategories.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => setCategory(item.id)}
-              className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
-                category === item.id
-                  ? "bg-black text-white dark:bg-white dark:text-black"
-                  : "bg-black/[0.06] text-black/60 hover:bg-black/[0.1] dark:bg-white/[0.07] dark:text-white/55 dark:hover:bg-white/[0.11]"
-              }`}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
+        {!networkOnly && (
+          <div className="flex flex-wrap gap-2 px-5 py-3">
+            {visibleCategories.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setCategory(item.id)}
+                className={`rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                  category === item.id
+                    ? "bg-black text-white dark:bg-white dark:text-black"
+                    : "bg-black/[0.06] text-black/60 hover:bg-black/[0.1] dark:bg-white/[0.07] dark:text-white/55 dark:hover:bg-white/[0.11]"
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="px-5 pb-2 pt-1">
           <label className="flex h-11 items-center gap-3 rounded-2xl bg-black/[0.05] px-4 text-black/45 focus-within:ring-1 focus-within:ring-black/20 dark:bg-white/[0.07] dark:text-white/45 dark:focus-within:ring-white/20">
             <span aria-hidden="true">⌕</span>
-            <span className="sr-only">Search by name or network</span>
+            <span className="sr-only">{networkOnly ? "Search networks" : "Search by name or network"}</span>
             <input
               autoFocus
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search by name or network"
+              placeholder={networkOnly ? "Search networks" : "Search by name or network"}
               className="min-w-0 flex-1 bg-transparent text-sm text-gray-950 outline-none placeholder:text-black/40 dark:text-white dark:placeholder:text-white/35"
             />
           </label>
@@ -604,8 +634,9 @@ function TokenSelector({
               >
                 <AssetIcon asset={asset} size="large" />
                 <span className="min-w-0 flex-1">
-                  <span className="block font-semibold">{asset.symbol}</span>
-                  <span className="block text-sm text-black/50 dark:text-white/45">{asset.chain}</span>
+                  <span className="block font-semibold">{networkOnly ? asset.chain : asset.symbol}</span>
+                  {!networkOnly && <span className="block text-sm text-black/50 dark:text-white/45">{asset.chain}
+                  </span>}
                 </span>
                 {selected.id === asset.id && (
                   <span className="grid h-6 w-6 place-items-center rounded-full bg-lime-light text-sm font-bold text-black">
@@ -692,6 +723,14 @@ function getAmountPrefix(asset: SwapAsset): string {
 
 function getAvailableTargets(source: SwapAsset, assets: SwapAsset[]): SwapAsset[] {
   return assets.filter((asset) => isValidPair(source, asset));
+}
+
+function filterAssetsForScope(assets: SwapAsset[], scope: HomepageSwapWidgetProps["assetScope"]): SwapAsset[] {
+  if (scope !== "bitcoin-usdc") return assets;
+  return assets.filter((asset) =>
+    (asset.kind === "bitcoin" && asset.symbol.toUpperCase() === "BTC")
+    || (asset.kind === "evm" && asset.symbol.toUpperCase() === "USDC")
+  );
 }
 
 function isValidPair(source: SwapAsset, target: SwapAsset): boolean {

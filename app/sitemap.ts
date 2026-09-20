@@ -10,6 +10,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "",
     "/blog",
     "/developers",
+    "/swap/bitcoin-to-usdc",
     "/press",
     "/privacy",
     "/terms",

@@ -28,6 +28,9 @@ export default function Footer() {
               Product
             </p>
             <div className="space-y-2.5">
+              <Link href="/swap/bitcoin-to-usdc" className={linkClass + " block"}>
+                Bitcoin to USDC
+              </Link>
               <Link href="/developers" className={linkClass + " block"}>
                 Developers
               </Link>
