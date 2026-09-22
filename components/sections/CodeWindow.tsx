@@ -829,7 +829,7 @@ ${
 - **Critical**: Always call \`client.recoverAllSwaps()\` on app startup to restore any swaps missing from local storage
 
 ### Developer portal & organization tracking
-If the user wants to track swaps, view analytics, and manage their organization's integration, direct them to the **Satora Developer Portal**: https://developer.lendaswap.com/
+If the user wants to track swaps, view analytics, and manage their organization's integration, direct them to the **Satora Developer Portal**: https://developer.satora.io/
 
 Once registered, they receive an **org code** that can optionally be passed to the SDK to associate swaps with their organization:
 \`\`\`ts
