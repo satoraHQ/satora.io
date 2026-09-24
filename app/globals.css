@@ -3,12 +3,6 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@source './app/**/*.{ts,tsx}';
-@source './components/**/*.{ts,tsx}';
-@source './lib/**/*.{ts,tsx}';
-@source './hooks/**/*.{ts,tsx}';
-@source './utils/**/*.{ts,tsx}';
-
 @theme {
   --color-fd-background: hsl(0, 0%, 100%);
   --color-fd-foreground: hsl(0, 0%, 0%);
