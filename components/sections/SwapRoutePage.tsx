@@ -47,6 +47,10 @@ export function swapRouteMetadata(title: string, description: string, path: stri
 
 export default function SwapRoutePage(props: SwapRoutePageProps) {
   const { title, introduction, explanation, steps, networkGuides, questions, children } = props;
+  const toBitcoin = !props.initialSourceId.endsWith(":BTC");
+  const evmAssetId = toBitcoin ? props.initialSourceId : props.initialTargetId;
+  const currentToken = evmAssetId.split(":")[1];
+
   return (
     <>
       <Header />
@@ -132,10 +136,8 @@ export default function SwapRoutePage(props: SwapRoutePageProps) {
 
         <SwapRouteTree
           key={props.initialSourceId + props.initialTargetId}
-          currentToken={(props.initialSourceId.endsWith(":BTC") ? props.initialTargetId : props.initialSourceId).split(
-            ":",
-          )[1]}
-          toBitcoin={!props.initialSourceId.endsWith(":BTC")}
+          currentToken={currentToken}
+          toBitcoin={toBitcoin}
         />
 
         <section className="border-t border-black/[0.07] bg-[#f8f8f5] px-4 py-16 sm:px-8 sm:py-24 dark:border-white/[0.07] dark:bg-[#080808]">

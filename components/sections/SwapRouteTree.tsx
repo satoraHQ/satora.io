@@ -20,19 +20,25 @@ const bitcoinNetworks = [
   { name: "Arkade", icon: "/assets/chains/arkade.svg" },
 ];
 
+type SwapRouteTreeProps = {
+  currentToken?: string;
+  toBitcoin?: boolean;
+};
+
+function pairPath(tokenSlug: string, toBitcoin: boolean): string {
+  return toBitcoin ? `/swap/${tokenSlug}-to-bitcoin` : `/swap/bitcoin-to-${tokenSlug}`;
+}
+
 export default function SwapRouteTree({
   currentToken = "USDC",
   toBitcoin = false,
-}: {
-  currentToken?: string;
-  toBitcoin?: boolean;
-}) {
+}: SwapRouteTreeProps) {
   const [reverse, setReverse] = useState(toBitcoin);
   const [hovered, setHovered] = useState<string | null>(null);
-  const active = hovered ?? currentToken.toLowerCase();
-  const reverseRoute = toBitcoin
-    ? `bitcoin-to-${currentToken.toLowerCase()}`
-    : `${currentToken.toLowerCase()}-to-bitcoin`;
+  const currentTokenSlug = currentToken.toLowerCase();
+  const active = hovered ?? currentTokenSlug;
+  // This link always reverses the current page, independently of the diagram toggle.
+  const reverseRoute = pairPath(currentTokenSlug, !toBitcoin);
   return (
     <section className={styles.section} aria-labelledby="swap-route-tree-title">
       <div className={styles.inner}>
@@ -63,6 +69,7 @@ export default function SwapRouteTree({
             ))}
           </div>
           <div className={styles.connections}>
+            {/* Node centers match the row heights and spacing in the CSS module. */}
             <svg viewBox="0 0 600 384" preserveAspectRatio="none" aria-hidden="true">
               {bitcoinNetworks.map((network, index) => (
                 <path
@@ -104,8 +111,8 @@ export default function SwapRouteTree({
           </div>
           <nav className={styles.tokens} aria-label="Explore Bitcoin swap pairs">
             {tokens.map((token) => {
-              const href = `/swap/${reverse ? `${token.slug}-to-bitcoin` : `bitcoin-to-${token.slug}`}`;
-              const isCurrent = reverse === toBitcoin && token.symbol.toLowerCase() === currentToken.toLowerCase();
+              const href = pairPath(token.slug, reverse);
+              const isCurrent = reverse === toBitcoin && token.slug === currentTokenSlug;
               return (
                 <Link
                   key={token.slug}
@@ -136,7 +143,7 @@ export default function SwapRouteTree({
           </span>
           <div>
             <p>Pair overview, not live transaction activity. Networks and availability depend on the selected route.</p>
-            <Link href={`/swap/${reverseRoute}`} className={styles.reverseRoute}>
+            <Link href={reverseRoute} className={styles.reverseRoute}>
               {toBitcoin ? `Explore Bitcoin → ${currentToken}` : `Explore ${currentToken} → Bitcoin`}
             </Link>
           </div>
