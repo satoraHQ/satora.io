@@ -1,5 +1,6 @@
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
+import SwapRouteTree from "@/components/sections/SwapRouteTree";
 import HomepageSwapWidget from "@/components/sections/HomepageSwapWidget";
 import type { Metadata } from "next";
 
@@ -32,22 +33,45 @@ const questions = [
   {
     question: "Can I swap Bitcoin on-chain, Lightning or Arkade to USDC?",
     answer:
-      "Satora supports these Bitcoin networks. This page starts with on-chain Bitcoin; use the BTC selector to choose another network. Available routes and quotes depend on the networks you select.",
+      "Yes. Choose your network in the BTC selector. The module shows available USDC destinations and requests a quote for your selection.",
   },
   {
     question: "Which network will my USDC arrive on?",
     answer:
-      "The network shown in the Buy field is your destination. This page starts with USDC on Ethereum. You can change it before continuing. Your receiving wallet must support USDC on the selected network; an EVM address alone does not identify a network.",
+      "Your USDC arrives on the network selected in the Buy field. Make sure your recipient accepts USDC on that network before funding; the same EVM address can exist on multiple networks.",
   },
   {
     question: "What exchange rate and fees apply?",
     answer:
-      "Enter an amount to request a live quote for your selected route. Review the amount you will receive and the fee breakdown in the app before funding. Quotes can change with market and network conditions.",
+      "Satora charges a 0.5% service fee, plus applicable network fees. Enter an amount to see the current quote, then review the final quote in the app before funding your swap.",
   },
   {
     question: "Do I need to send my Bitcoin to an exchange first?",
     answer:
-      "No exchange deposit is required. In the app, enter your receiving address, review the swap details and follow the funding instructions from your Bitcoin wallet. Your USDC is sent to the destination you provide.",
+      "No. You fund the swap from your Bitcoin wallet, and the USDC goes directly to the receiving address you provide in the app.",
+  },
+  {
+    question: "How long does a Bitcoin to USDC swap take?",
+    answer:
+      "Timing depends on the route and network conditions. On-chain BTC requires Bitcoin confirmations; Lightning and Arkade use different funding flows. The destination network and any additional bridging steps also affect settlement. Track progress in the app.",
+  },
+  {
+    question: "Are there minimum or maximum swap amounts?",
+    answer:
+      "Yes. Limits vary by route and can change. Enter your amount and check the current quote in the app before funding.",
+    link: {
+      href: "https://docs.satora.io/quotes-rates/exchange-rate",
+      label: "How quotes and limits work",
+    },
+  },
+  {
+    question: "What happens if my swap cannot complete?",
+    answer:
+      "Recovery depends on your route and swap status. An on-chain Bitcoin refund requires the timelock to expire and a network fee; Lightning and Arkade have different recovery flows. Keep your swap details and recovery material, and follow the route-specific instructions. Refunds are not necessarily immediate.",
+    link: {
+      href: "https://docs.satora.io/faq/troubleshooting",
+      label: "Read the recovery and troubleshooting guide",
+    },
   },
 ];
 
@@ -62,12 +86,16 @@ export default function BitcoinToUsdcPage() {
             <h1 className="text-center text-[2.25rem] font-semibold leading-tight tracking-[-0.055em] text-gray-950 sm:text-6xl dark:text-white">
               Swap Bitcoin to <span className="whitespace-nowrap">USDC.</span>
             </h1>
+            <p className="mx-auto mt-5 max-w-2xl text-center text-base leading-relaxed text-gray-600 dark:text-gray-400">
+              Convert Bitcoin from on-chain, Lightning or Arkade to USDC on your preferred supported network, without
+              depositing funds on a centralized exchange.
+            </p>
             <div className="mx-auto mt-7 w-full min-w-0 max-w-xl sm:mt-9">
               <HomepageSwapWidget initialSourceId="bitcoin:BTC" initialTargetId="1:USDC" assetScope="bitcoin-usdc" />
             </div>
             <p className="mx-auto mt-5 max-w-xl text-center text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-              Swap opens the Satora app with your selected assets and amount. Add your receiving address and review the
-              final quote there.
+              Choose your networks and amount, then continue in the Satora app to add your receiving address and complete
+              the swap.
             </p>
           </div>
         </section>
@@ -76,23 +104,22 @@ export default function BitcoinToUsdcPage() {
           <div className="mx-auto max-w-5xl">
             <div className="grid gap-8 lg:grid-cols-[1fr_1.2fr] lg:gap-20">
               <h2 className="text-3xl font-semibold leading-tight tracking-[-0.04em] text-gray-950 sm:text-4xl dark:text-white">
-                From Bitcoin.<br />To your USDC wallet.
+                Swap Bitcoin to USDC without a centralized exchange
               </h2>
               <div className="space-y-5 text-base leading-relaxed text-gray-600 dark:text-gray-400">
                 <p>
-                  Convert BTC to USDC without depositing funds on a centralized exchange. Choose the Bitcoin network you
-                  are sending from and the network where you want to receive USDC.
+                  Send Bitcoin from your wallet and receive USDC at your chosen address. There is no exchange balance
+                  to top up or withdraw from.
                 </p>
                 <p>
-                  USDC is available on multiple networks. Satora supports destinations including Arbitrum, Ethereum and
-                  Polygon, with additional routes through Circle CCTP. Check the selector and live quote for your chosen
-                  route before proceeding.
+                  Satora uses atomic swaps to link the Bitcoin payment and the release of funds on the receiving side.
+                  If a funded swap cannot complete, recovery follows the conditions and deadlines of your selected route.
                 </p>
                 <a
-                  href="https://docs.satora.io/quotes-rates/supported-tokens"
+                  href="https://docs.satora.io/advanced/htlc"
                   className="inline-block font-medium text-[#607300] underline underline-offset-4 hover:text-black dark:text-lime-light dark:hover:text-white"
                 >
-                  See supported tokens and networks
+                  How atomic swaps and timelocks work
                 </a>
               </div>
             </div>
@@ -121,6 +148,58 @@ export default function BitcoinToUsdcPage() {
           </div>
         </section>
 
+        <section className="border-t border-black/[0.07] bg-[#f8f8f5] px-4 py-16 sm:px-8 sm:py-24 dark:border-white/[0.07] dark:bg-[#080808]">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="text-3xl font-semibold leading-tight tracking-[-0.04em] text-gray-950 sm:text-4xl dark:text-white">
+              Choose your Bitcoin and USDC networks
+            </h2>
+            <p className="mt-5 max-w-3xl text-base leading-relaxed text-gray-600 dark:text-gray-400">
+              Choose the network your Bitcoin wallet uses, then the network where you want to receive USDC.
+            </p>
+            <h3 className="mt-9 text-xl font-semibold text-gray-950 dark:text-white">Sending Bitcoin</h3>
+            <dl className="mt-5 grid gap-7 md:grid-cols-3">
+              {[
+                [
+                  "Bitcoin on-chain",
+                  "Send to the Bitcoin address provided by the app. Funding requires Bitcoin confirmations and a network fee.",
+                ],
+                [
+                  "Lightning",
+                  "Pay the swap invoice from a Lightning wallet. Payment routing and fees depend on your wallet.",
+                ],
+                [
+                  "Arkade",
+                  "Use BTC held in an Arkade-compatible wallet and follow the Arkade payment instructions in the app.",
+                ],
+              ].map(([network, guidance]) => (
+                <div key={network} className="border-t border-black/10 pt-5 dark:border-white/10">
+                  <dt className="text-lg font-semibold text-gray-950 dark:text-white">{network}</dt>
+                  <dd className="mt-3 text-base leading-relaxed text-gray-600 dark:text-gray-400">{guidance}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="mt-10 grid gap-6 border-t border-black/10 pt-8 lg:grid-cols-[1fr_1.2fr] lg:gap-20 dark:border-white/10">
+              <h3 className="text-xl font-semibold text-gray-950 dark:text-white">Receiving USDC</h3>
+              <div className="space-y-5 text-base leading-relaxed text-gray-600 dark:text-gray-400">
+                <p>
+                  Ethereum is selected by default. Change it to the network accepted by your receiving wallet, app or
+                  recipient. An EVM address alone does not tell you which network to use.
+                </p>
+                <p>
+                  Use the USDC selector to see available networks. Compare the amount you will receive and plan for
+                  network fees when you later send or spend your USDC.
+                </p>
+                <a
+                  href="https://docs.satora.io/quotes-rates/supported-tokens"
+                  className="inline-block font-medium text-[#607300] underline underline-offset-4 hover:text-black dark:text-lime-light dark:hover:text-white"
+                >
+                  See supported tokens and networks
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="border-t border-black/[0.07] bg-white px-4 py-16 sm:px-8 sm:py-24 dark:border-white/[0.07] dark:bg-black">
           <div className="mx-auto max-w-5xl space-y-12 sm:space-y-16">
             <div className="grid gap-6 lg:grid-cols-[1fr_1.2fr] lg:gap-20">
@@ -129,14 +208,12 @@ export default function BitcoinToUsdcPage() {
               </h2>
               <div className="space-y-5 text-base leading-relaxed text-gray-600 dark:text-gray-400">
                 <p>
-                  You can receive USDC in a newly created wallet instead of reusing an address associated with your
-                  previous activity. Create a receiving address in a wallet that supports your chosen network, then
-                  enter it in the Satora app when setting up your swap.
+                  Receive USDC in a new wallet instead of reusing an address associated with your previous activity.
+                  Create an address on your chosen network, then enter it in the Satora app.
                 </p>
                 <p>
-                  A fresh address starts without previous transaction history. It does not make your swap anonymous or
-                  erase the history of your funds. On-chain transactions remain public and may be linked to other
-                  activity.
+                  A fresh address has no previous transaction history, but it does not guarantee anonymity. On-chain
+                  transactions remain public and may be linked to other activity.
                 </p>
               </div>
             </div>
@@ -146,41 +223,55 @@ export default function BitcoinToUsdcPage() {
               </h2>
               <div className="space-y-5 text-base leading-relaxed text-gray-600 dark:text-gray-400">
                 <p>
-                  Your receiving wallet does not need a gas balance to receive USDC. Sending it or using it in other
-                  apps generally requires the network&apos;s native token, such as ETH on Ethereum. This Satora swap
-                  delivers USDC, not a separate balance of gas tokens.
+                  You do not need gas to receive USDC. To send or use it afterwards, you generally need the network&apos;s
+                  native token, such as ETH on Ethereum. This swap delivers USDC, not a separate gas balance.
                 </p>
                 <p>
-                  One option is to swap a small portion of your USDC for the network&apos;s native token through
-                  1inch Fusion, where supported. Resolvers cover swap execution, and eligible tokens can use a signed
-                  permit instead of a separate paid approval. This can let you swap without holding gas tokens first.
+                  Where supported, 1inch Fusion can help you exchange some USDC for gas tokens without holding gas first.
+                  Check the requirements below before relying on this option.
                 </p>
-                <p>
-                  Check that both Fusion and a gasless permit are available for your token, network and wallet. If a
-                  paid approval is required, you will still need gas to start. Gasless does not mean fee-free; review
-                  the quote and choose the native gas token, not its wrapped version.
-                </p>
-                <div className="flex flex-wrap gap-x-6 gap-y-3">
-                  <a
-                    href="https://help.1inch.com/en/articles/6796085-what-is-1inch-fusion-and-how-does-it-work"
-                    className="font-medium text-[#607300] underline underline-offset-4 hover:text-black dark:text-lime-light dark:hover:text-white"
-                  >
-                    How 1inch Fusion works
-                  </a>
-                  <a
-                    href="https://help.1inch.com/en/articles/5435386-permit-signed-token-approvals-and-how-they-work-on-1inch"
-                    className="font-medium text-[#607300] underline underline-offset-4 hover:text-black dark:text-lime-light dark:hover:text-white"
-                  >
-                    Check permit requirements
-                  </a>
-                </div>
-                <p className="text-sm">
-                  1inch is an external service. Availability, fees and requirements are set by 1inch, not Satora.
-                </p>
+                <details className="group border-t border-black/10 pt-4 dark:border-white/10">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-gray-950 dark:text-white">
+                    Before using 1inch without gas
+                    <span
+                      aria-hidden="true"
+                      className="text-xl text-[#607300] group-open:rotate-45 dark:text-lime-light"
+                    >
+                      +
+                    </span>
+                  </summary>
+                  <div className="mt-4 space-y-4">
+                    <p>
+                      Resolvers cover Fusion swap execution. Eligible tokens can authorize spending with a signed permit
+                      instead of a separate paid approval. Check support for your token, network and wallet; if a paid
+                      approval is required, you will still need gas to start.
+                    </p>
+                    <p>
+                      Review the quote and choose the network&apos;s native gas token, not its wrapped version. 1inch is
+                      an external service with its own availability, fees and requirements. Gasless does not mean fee-free.
+                    </p>
+                    <div className="flex flex-wrap gap-x-6 gap-y-3">
+                      <a
+                        href="https://help.1inch.com/en/articles/6796085-what-is-1inch-fusion-and-how-does-it-work"
+                        className="font-medium text-[#607300] underline underline-offset-4 hover:text-black dark:text-lime-light dark:hover:text-white"
+                      >
+                        How 1inch Fusion works
+                      </a>
+                      <a
+                        href="https://help.1inch.com/en/articles/5435386-permit-signed-token-approvals-and-how-they-work-on-1inch"
+                        className="font-medium text-[#607300] underline underline-offset-4 hover:text-black dark:text-lime-light dark:hover:text-white"
+                      >
+                        Check permit requirements
+                      </a>
+                    </div>
+                  </div>
+                </details>
               </div>
             </div>
           </div>
         </section>
+
+        <SwapRouteTree currentToken="USDC" />
 
         <section className="border-t border-black/[0.07] bg-[#f8f8f5] px-4 py-16 sm:px-8 sm:py-24 dark:border-white/[0.07] dark:bg-[#080808]">
           <div className="mx-auto max-w-3xl">
@@ -188,7 +279,7 @@ export default function BitcoinToUsdcPage() {
               Before you swap BTC to USDC
             </h2>
             <div className="mt-8 divide-y divide-black/10 dark:divide-white/10">
-              {questions.map(({ question, answer }) => (
+              {questions.map(({ question, answer, link }) => (
                 <details key={question} className="group py-6">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-lg font-semibold text-gray-950 dark:text-white">
                     {question}
@@ -200,6 +291,14 @@ export default function BitcoinToUsdcPage() {
                     </span>
                   </summary>
                   <p className="mt-4 text-base leading-relaxed text-gray-600 dark:text-gray-400">{answer}</p>
+                  {link && (
+                    <a
+                      href={link.href}
+                      className="mt-4 inline-block font-medium text-[#607300] underline underline-offset-4 hover:text-black dark:text-lime-light dark:hover:text-white"
+                    >
+                      {link.label}
+                    </a>
+                  )}
                 </details>
               ))}
             </div>

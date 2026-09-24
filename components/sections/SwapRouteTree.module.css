@@ -1,0 +1,60 @@
+.section {
+  background: #080a07;
+  color: #fff;
+  padding: 80px 24px;
+  border-top: 1px solid #252920;
+}
+.inner { max-width: 1024px; margin: auto; }
+.heading { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; }
+.eyebrow { color: var(--color-lime-light, #c2e821); font-size: 12px; letter-spacing: .14em; margin-bottom: 16px; }
+.heading h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 600; line-height: 1.12; letter-spacing: -.04em; scroll-margin-top: 110px; }
+.description { color: #a6afa0; max-width: 520px; font-size: 16px; line-height: 1.6; margin-top: 16px; }
+.labels { display: flex; justify-content: space-between; color: #8f9b85; font-size: 12px; letter-spacing: .12em; margin-top: 48px; margin-bottom: 16px; }
+.tree { display: grid; grid-template-columns: 160px minmax(0, 1fr) 212px; align-items: center; }
+.bitcoinNetworks { display: grid; grid-template-rows: repeat(3, 64px); gap: 32px; padding: 64px 0; }
+.bitcoin { border: 1px solid #475631; border-radius: 12px; background: #12180d; display: flex; gap: 12px; align-items: center; padding: 8px 14px; }
+.bitcoin strong { display: block; font-size: 16px; white-space: nowrap; }
+.bitcoin small { color: #a6b29b; font-size: 12px; }
+.bitcoin img { flex-shrink: 0; }
+.connections { height: 384px; position: relative; }
+.connections svg { width: 100%; height: 100%; overflow: visible; }
+.path, .activePath { fill: none; stroke-width: 2; transition: stroke .2s; }
+.path { stroke: #354722; }
+.activePath { stroke: var(--color-lime-light, #c2e821); stroke-width: 3; }
+.swapLabel { position: absolute; top: 232px; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 11px; letter-spacing: .12em; color: #879779; }
+.reverseButton { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 52px; height: 52px; display: grid; place-items: center; border-radius: 50%; background: var(--color-lime-light, #c2e821); color: #101407; border: 6px solid #080a07; box-sizing: content-box; cursor: pointer; }
+.reverseButton:hover { filter: brightness(1.12); }
+.reverseButton svg { width: 26px; height: 26px; transition: transform .2s; }
+.reverseButton .reversed { transform: rotate(180deg); }
+.tokens { display: grid; grid-template-rows: repeat(6, 56px); gap: 8px; padding: 4px 0; }
+.token { display: flex; align-items: center; gap: 12px; padding: 8px 14px; border: 1px solid #2b3325; border-radius: 12px; background: #10150d; text-decoration: none; transition: border-color .2s, background .2s; }
+.token:hover, .token[aria-current="page"] { border-color: var(--color-lime-light, #c2e821); background: #19210f; }
+.token strong { display: block; font-size: 16px; line-height: 1.25; }
+.token small { display: block; font-size: 12px; line-height: 1.5; color: #a6b29b; }
+.tokenDot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-lime-light, #c2e821); flex-shrink: 0; }
+.arrow { margin-left: auto; color: var(--color-lime-light, #c2e821); }
+.token:focus-visible, .reverseButton:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+.footer { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; border-top: 1px solid #252d20; margin-top: 32px; padding-top: 20px; font-size: 12px; color: #929f87; }
+.footer > span { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.footer i { width: 6px; height: 6px; border-radius: 50%; background: var(--color-lime-light, #c2e821); }
+.footer p { max-width: 440px; line-height: 1.6; }
+.reverseRoute { display: inline-block; margin-top: 12px; color: var(--color-lime-light, #c2e821); text-decoration: underline; text-underline-offset: 4px; }
+.reverseRoute:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+@media (max-width: 720px) {
+  .section { padding: 48px 16px; }
+  .heading { align-items: flex-start; flex-direction: column; gap: 24px; }
+  .labels { margin-top: 32px; }
+  .tree { grid-template-columns: 96px minmax(56px, 1fr) 128px; }
+  .bitcoin { padding: 6px; gap: 5px; }
+  .bitcoin img { width: 20px; height: 20px; }
+  .bitcoin strong { font-size: 12px; }
+  .bitcoin small { font-size: 11px; }
+  .reverseButton { width: 40px; height: 40px; border-width: 4px; }
+  .token { gap: 7px; padding: 8px; }
+  .token small { font-size: 11px; }
+  .swapLabel { display: none; }
+  .footer { flex-direction: column; gap: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .path, .activePath, .token, .reverseButton svg { transition: none; }
+}

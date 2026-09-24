@@ -48,6 +48,39 @@ type QuoteStatus = "idle" | "loading" | "success" | "error";
 const DECIMAL_AMOUNT_PATTERN = /^\d+(\.\d*)?$/;
 
 const ASSETS: SwapAsset[] = [
+  // Core token routes available before the live asset list finishes loading.
+  {
+    id: "1:WBTC",
+    symbol: "WBTC",
+    chain: "Ethereum",
+    decimals: 8,
+    kind: "evm",
+    networkIcon: "/assets/chains/ethereum.svg",
+  },
+  {
+    id: "1:tBTC",
+    symbol: "tBTC",
+    chain: "Ethereum",
+    decimals: 18,
+    kind: "evm",
+    networkIcon: "/assets/chains/ethereum.svg",
+  },
+  {
+    id: "1:USAT",
+    symbol: "USAT",
+    chain: "Ethereum",
+    decimals: 6,
+    kind: "evm",
+    networkIcon: "/assets/chains/ethereum.svg",
+  },
+  {
+    id: "1:XAUt",
+    symbol: "XAUt",
+    chain: "Ethereum",
+    decimals: 6,
+    kind: "evm",
+    networkIcon: "/assets/chains/ethereum.svg",
+  },
   {
     id: "lightning:BTC",
     symbol: "BTC",
@@ -171,13 +204,22 @@ const CATEGORIES: { id: Category; label: string }[] = [
   { id: "other", label: "Other" },
 ];
 
-const DEFAULT_SOURCE = ASSETS[0];
-const DEFAULT_TARGET = ASSETS[3];
+const DEFAULT_SOURCE = ASSETS.find((asset) => asset.id === "lightning:BTC")!;
+const DEFAULT_TARGET = ASSETS.find((asset) => asset.id === "42161:USDC")!;
+
+export type SwapAssetScope =
+  | "all"
+  | "bitcoin-usdc"
+  | "bitcoin-usdt"
+  | "bitcoin-wbtc"
+  | "bitcoin-tbtc"
+  | "bitcoin-usat"
+  | "bitcoin-xaut";
 
 interface HomepageSwapWidgetProps {
   initialSourceId?: string;
   initialTargetId?: string;
-  assetScope?: "all" | "bitcoin-usdc";
+  assetScope?: SwapAssetScope;
 }
 
 export default function HomepageSwapWidget({
@@ -195,7 +237,7 @@ export default function HomepageSwapWidget({
   const [quote, setQuote] = useState<QuoteResponse | null>(null);
   const [quoteStatus, setQuoteStatus] = useState<QuoteStatus>("idle");
 
-  const networkOnly = assetScope === "bitcoin-usdc";
+  const networkOnly = assetScope !== "all";
   const availableSources = networkOnly ? assets.filter((asset) => asset.kind === source.kind) : assets;
   const availableTargets = getAvailableTargets(source, assets)
     .filter((asset) => !networkOnly || asset.kind !== source.kind);
@@ -635,6 +677,9 @@ function TokenSelector({
                 <AssetIcon asset={asset} size="large" />
                 <span className="min-w-0 flex-1">
                   <span className="block font-semibold">{networkOnly ? asset.chain : asset.symbol}</span>
+                  {networkOnly && asset.symbol.toUpperCase().startsWith("USDT") && (
+                    <span className="block text-sm text-black/50 dark:text-white/45">{asset.symbol}</span>
+                  )}
                   {!networkOnly && <span className="block text-sm text-black/50 dark:text-white/45">{asset.chain}
                   </span>}
                 </span>
@@ -726,10 +771,12 @@ function getAvailableTargets(source: SwapAsset, assets: SwapAsset[]): SwapAsset[
 }
 
 function filterAssetsForScope(assets: SwapAsset[], scope: HomepageSwapWidgetProps["assetScope"]): SwapAsset[] {
-  if (scope !== "bitcoin-usdc") return assets;
+  if (!scope || scope === "all") return assets;
+  const tokenSymbol = scope.slice("bitcoin-".length).toUpperCase();
+  const tokenSymbols = tokenSymbol === "USDT" ? ["USDT", "USDT0"] : [tokenSymbol];
   return assets.filter((asset) =>
     (asset.kind === "bitcoin" && asset.symbol.toUpperCase() === "BTC")
-    || (asset.kind === "evm" && asset.symbol.toUpperCase() === "USDC")
+    || (asset.kind === "evm" && tokenSymbols.includes(asset.symbol.toUpperCase()))
   );
 }
 
