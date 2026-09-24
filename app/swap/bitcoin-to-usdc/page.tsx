@@ -1,7 +1,7 @@
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
-import SwapRouteTree from "@/components/sections/SwapRouteTree";
 import HomepageSwapWidget from "@/components/sections/HomepageSwapWidget";
+import SwapRouteTree from "@/components/sections/SwapRouteTree";
 import type { Metadata } from "next";
 
 const title = "Swap Bitcoin to USDC";
@@ -94,8 +94,8 @@ export default function BitcoinToUsdcPage() {
               <HomepageSwapWidget initialSourceId="bitcoin:BTC" initialTargetId="1:USDC" assetScope="bitcoin-usdc" />
             </div>
             <p className="mx-auto mt-5 max-w-xl text-center text-sm leading-relaxed text-gray-600 dark:text-gray-400">
-              Choose your networks and amount, then continue in the Satora app to add your receiving address and complete
-              the swap.
+              Choose your networks and amount, then continue in the Satora app to add your receiving address and
+              complete the swap.
             </p>
           </div>
         </section>
@@ -108,12 +108,13 @@ export default function BitcoinToUsdcPage() {
               </h2>
               <div className="space-y-5 text-base leading-relaxed text-gray-600 dark:text-gray-400">
                 <p>
-                  Send Bitcoin from your wallet and receive USDC at your chosen address. There is no exchange balance
-                  to top up or withdraw from.
+                  Send Bitcoin from your wallet and receive USDC at your chosen address. There is no exchange balance to
+                  top up or withdraw from.
                 </p>
                 <p>
                   Satora uses atomic swaps to link the Bitcoin payment and the release of funds on the receiving side.
-                  If a funded swap cannot complete, recovery follows the conditions and deadlines of your selected route.
+                  If a funded swap cannot complete, recovery follows the conditions and deadlines of your selected
+                  route.
                 </p>
                 <a
                   href="https://docs.satora.io/advanced/htlc"
@@ -223,12 +224,13 @@ export default function BitcoinToUsdcPage() {
               </h2>
               <div className="space-y-5 text-base leading-relaxed text-gray-600 dark:text-gray-400">
                 <p>
-                  You do not need gas to receive USDC. To send or use it afterwards, you generally need the network&apos;s
-                  native token, such as ETH on Ethereum. This swap delivers USDC, not a separate gas balance.
+                  You do not need gas to receive USDC. To send or use it afterwards, you generally need the
+                  network&apos;s native token, such as ETH on Ethereum. This swap delivers USDC, not a separate gas
+                  balance.
                 </p>
                 <p>
-                  Where supported, 1inch Fusion can help you exchange some USDC for gas tokens without holding gas first.
-                  Check the requirements below before relying on this option.
+                  Where supported, 1inch Fusion can help you exchange some USDC for gas tokens without holding gas
+                  first. Check the requirements below before relying on this option.
                 </p>
                 <details className="group border-t border-black/10 pt-4 dark:border-white/10">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-gray-950 dark:text-white">
@@ -248,7 +250,8 @@ export default function BitcoinToUsdcPage() {
                     </p>
                     <p>
                       Review the quote and choose the network&apos;s native gas token, not its wrapped version. 1inch is
-                      an external service with its own availability, fees and requirements. Gasless does not mean fee-free.
+                      an external service with its own availability, fees and requirements. Gasless does not mean
+                      fee-free.
                     </p>
                     <div className="flex flex-wrap gap-x-6 gap-y-3">
                       <a
