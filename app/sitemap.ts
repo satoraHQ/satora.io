@@ -1,4 +1,5 @@
 import { blogSource } from "@/config/blog-source";
+import { swapRoutePaths } from "@/config/swap-routes";
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -10,18 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "",
     "/blog",
     "/developers",
-    "/swap/bitcoin-to-usdc",
-    "/swap/usdc-to-bitcoin",
-    "/swap/bitcoin-to-usdt",
-    "/swap/usdt-to-bitcoin",
-    "/swap/wbtc-to-bitcoin",
-    "/swap/bitcoin-to-wbtc",
-    "/swap/tbtc-to-bitcoin",
-    "/swap/bitcoin-to-tbtc",
-    "/swap/usat-to-bitcoin",
-    "/swap/bitcoin-to-usat",
-    "/swap/xaut-to-bitcoin",
-    "/swap/bitcoin-to-xaut",
+    ...swapRoutePaths,
     "/press",
     "/privacy",
     "/terms",

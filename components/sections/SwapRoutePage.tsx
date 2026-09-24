@@ -1,27 +1,10 @@
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
-import HomepageSwapWidget, { type SwapAssetScope } from "@/components/sections/HomepageSwapWidget";
+import HomepageSwapWidget from "@/components/sections/HomepageSwapWidget";
 import SwapRouteTree from "@/components/sections/SwapRouteTree";
+import type { SwapRoute } from "@/config/swap-routes";
 import type { Metadata } from "next";
-import type { ReactNode } from "react";
 
-type Question = { question: string; answer: string };
-type Guide = { title: string; text: string };
-
-interface SwapRoutePageProps {
-  title: string;
-  introduction: string;
-  initialSourceId: string;
-  initialTargetId: string;
-  assetScope: Exclude<SwapAssetScope, "all">;
-  explanation: { title: string; paragraphs: string[] };
-  steps: Guide[];
-  networkGuides: Guide[];
-  questions: Question[];
-  children: ReactNode;
-}
-
-// Keep route titles and canonical URLs explicit in each page for easy review.
 export function swapRouteMetadata(title: string, description: string, path: string): Metadata {
   return {
     title,
@@ -45,10 +28,10 @@ export function swapRouteMetadata(title: string, description: string, path: stri
   };
 }
 
-export default function SwapRoutePage(props: SwapRoutePageProps) {
-  const { title, introduction, explanation, steps, networkGuides, questions, children } = props;
-  const toBitcoin = !props.initialSourceId.endsWith(":BTC");
-  const evmAssetId = toBitcoin ? props.initialSourceId : props.initialTargetId;
+export default function SwapRoutePage({ route }: { route: SwapRoute }) {
+  const { title, introduction, explanation, steps, networkGuides, questions, sections } = route;
+  const toBitcoin = !route.initialSourceId.endsWith(":BTC");
+  const evmAssetId = toBitcoin ? route.initialSourceId : route.initialTargetId;
   const currentToken = evmAssetId.split(":")[1];
 
   return (
@@ -66,9 +49,9 @@ export default function SwapRoutePage(props: SwapRoutePageProps) {
             </p>
             <div className="mx-auto mt-7 w-full min-w-0 max-w-xl sm:mt-9">
               <HomepageSwapWidget
-                initialSourceId={props.initialSourceId}
-                initialTargetId={props.initialTargetId}
-                assetScope={props.assetScope}
+                initialSourceId={route.initialSourceId}
+                initialTargetId={route.initialTargetId}
+                assetScope={route.assetScope}
               />
             </div>
             <p className="mx-auto mt-5 max-w-xl text-center text-sm leading-relaxed text-gray-600 dark:text-gray-400">
@@ -130,12 +113,34 @@ export default function SwapRoutePage(props: SwapRoutePageProps) {
 
         <section className="bg-white px-4 py-16 sm:px-8 sm:py-24 dark:bg-black">
           <div className="mx-auto max-w-5xl space-y-10 text-base leading-relaxed text-gray-600 dark:text-gray-400">
-            {children}
+            {sections.map((section, index) => (
+              <div
+                key={section.title}
+                className={index === 0
+                  ? "grid gap-6 lg:grid-cols-[1fr_1.2fr] lg:gap-20"
+                  : "grid gap-6 border-t border-black/10 pt-10 lg:grid-cols-[1fr_1.2fr] lg:gap-20 dark:border-white/10"}
+              >
+                <h2 className="text-3xl font-semibold tracking-[-0.04em] text-gray-950 sm:text-4xl dark:text-white">
+                  {section.title}
+                </h2>
+                <div className="space-y-5">
+                  {section.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+                  {section.link && (
+                    <a
+                      href={section.link.href}
+                      className="font-medium text-[#607300] underline underline-offset-4 dark:text-lime-light"
+                    >
+                      {section.link.label}
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
         <SwapRouteTree
-          key={props.initialSourceId + props.initialTargetId}
+          key={route.initialSourceId + route.initialTargetId}
           currentToken={currentToken}
           toBitcoin={toBitcoin}
         />
