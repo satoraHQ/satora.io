@@ -75,11 +75,11 @@ Use ordinary crawlable links with meaningful labels. Do not add every possible l
 
 ## Blog support after the pages are validated
 
-| Proposed topic | Primary page to support | Distinct value |
-| --- | --- | --- |
-| Choosing a network to receive USDC from Bitcoin | Bitcoin → USDC | Recipient compatibility, native versus bridged token, spending gas |
-| Funding a Lightning wallet with stablecoins | USDC → Bitcoin; secondary USDT → Bitcoin | Wallet receiving requirements, invoices, amounts and limits |
-| USDT and USDT0 when swapping to or from Bitcoin | Both USDT pages | Token/network identification and common mistakes; no generic TRC20 claims |
+| Proposed topic                                  | Primary page to support                  | Distinct value                                                            |
+| ----------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------- |
+| Choosing a network to receive USDC from Bitcoin | Bitcoin → USDC                           | Recipient compatibility, native versus bridged token, spending gas        |
+| Funding a Lightning wallet with stablecoins     | USDC → Bitcoin; secondary USDT → Bitcoin | Wallet receiving requirements, invoices, amounts and limits               |
+| USDT and USDT0 when swapping to or from Bitcoin | Both USDT pages                          | Token/network identification and common mistakes; no generic TRC20 claims |
 
 These are article proposals, not published pages. Avoid copying the landing-page FAQ into a new article solely to create a backlink. Existing relevant posts can support the launch without waiting for new publications.
 
