@@ -1,0 +1,56 @@
+---
+title: "Can You Hold USDT and USDC in a Bitcoin Wallet?"
+date: "2026-10-06"
+author: "Marius"
+authorImage: "/favicon/dot.svg"
+excerpt: "Can you hold USDT and USDC in a Bitcoin wallet? Learn which wallets support them, how networks and gas fees work, and how to swap with Satora."
+tags:
+  - bitcoin
+  - stablecoins
+  - self-custody
+  - satora
+---
+
+**Holding Bitcoin and stablecoins in the same wallet is possible, provided it supports the networks on which those assets circulate. For users who want to keep a dollar balance alongside their BTC, choosing the right wallet also means understanding how to receive and spend those tokens without handing control to an exchange.**
+
+Receiving a payment in Bitcoin does not mean you want to keep the whole amount exposed to its price. When part of that money is meant to cover an upcoming expense, a stablecoin lets you set it aside in the currency in which that expense is priced, while keeping it in your own wallet.
+
+Tether USD (USDT), issued by Tether, and USD Coin (USDC), issued by Circle, are designed to track the US dollar. Neither guarantees a permanent $1 price, and a dollar balance still fluctuates against the euro. For expenses priced in euros, alternatives include Circle's EURC, Monerium's EURe and SG-FORGE's EUR CoinVertible (EURCV), whose availability also depends on the wallet and network.
+
+## Can your Bitcoin wallet hold stablecoins?
+
+A wallet can bring several blockchains into the same application, allowing you to manage BTC on Bitcoin and stablecoins on networks such as Ethereum. Although the balances appear together, each asset remains on its own network, with its own receiving instructions. **An ordinary Bitcoin address cannot receive USDT or USDC sent over Ethereum.**
+
+Hardware wallets such as Ledger, Trezor and BitBox Multi can secure the keys for both Bitcoin and Ethereum-based stablecoins. Support varies by model, firmware and the application used with the device, so the name on the box is not enough to establish compatibility. BitBox's Bitcoin-only editions, for example, cannot manage the stablecoins supported by its Multi editions.
+
+Browser extensions offer another way to access those assets. MetaMask supports Bitcoin as well as other networks, while Rabby focuses on Ethereum and compatible chains, making it useful for managing stablecoins alongside a separate Bitcoin wallet. These applications can also connect to compatible hardware wallets, which keep the keys on the device while the extension provides the interface. That connection should never require entering the hardware wallet's recovery phrase into the browser.
+
+## What about USDT and USDC on Bitcoin and Lightning?
+
+Some stablecoins already circulate within the wider Bitcoin ecosystem. [USDT is available on Liquid](https://docs.liquid.net/docs/liquid-assets), a sidechain with its own security model, while Tether has also announced projects involving Taproot Assets, Lightning and RGB. Those approaches have different deployment stages and require specific wallet support, so an announcement does not make USDT available in every Bitcoin wallet.
+
+Circle does not currently list Bitcoin's base layer among USDC's native networks. For someone looking to hold BTC and USDC today, a wallet that accesses their respective networks remains a practical option. We will cover further Bitcoin integrations as they become available, with guides based on what users can actually do.
+
+## Receiving stablecoins is easier than spending them without gas
+
+Once you have chosen a wallet, the sender and recipient need to agree on the network as well as the token. An Ethereum-compatible address can look identical across several chains without giving access to the same balance on each, which is why selecting USDC alone is not enough to prepare a transfer.
+
+Receiving the tokens does not require you to hold gas, but sending them usually does. On Ethereum, transaction fees are paid in ETH, so a wallet containing only USDC can receive a payment and still lack what it needs to make the next transfer. Our page on [swapping Bitcoin to USDC](https://satora.io/swap/bitcoin-to-usdc) explains this step, including how to prepare for using the funds after they arrive.
+
+There are ways to obtain gas without buying it separately. On eligible routes, **1inch Fusion lets you exchange a fraction of your stablecoins for the network's gas token**, with another participant paying the execution fee. CoW Swap also supports gasless trading and signed approvals for eligible tokens, while MetaMask offers gasless swaps that can deduct fees from the asset being sold. Their availability depends on the token, network and wallet configuration.
+
+These services still charge costs, and they cannot always bypass the initial permission needed to spend your tokens. As [1inch's approval documentation explains](https://help.1inch.com/en/articles/4585113-why-do-i-need-to-approve-my-tokens-before-a-trade), that permission may itself require a paid transaction if a signed approval is unavailable. Before relying on this option, check that you can authorize the swap without gas and receive the native fee token, such as ETH rather than WETH.
+
+## Keeping your keys does not remove the stablecoin issuer
+
+With a self-custodial wallet, you hold the keys that authorize transactions, instead of asking an exchange to process a withdrawal. That gives you control over how you use your wallet, but it does not give USDT or USDC the same properties as Bitcoin.
+
+Both depend on their issuers and reserves to maintain their peg, and certain implementations allow the issuer to freeze tokens held in external wallets. [Circle's USDC terms](https://www.circle.com/legal/usdc-terms) explicitly describe its blocking powers. Self-custody removes the exchange from the custody relationship, while the dependence on the stablecoin issuer remains.
+
+## Moving between Bitcoin and stablecoins with Satora
+
+For users who want to convert part of their BTC, Satora connects Bitcoin on-chain, Lightning and Arkade with USDT, USDC and other supported assets. The available routes work in both directions, so you can move into a stablecoin balance or use that balance to receive Bitcoin, depending on the selected asset and network.
+
+Satora uses self-custodial atomic swaps, linking the exchange to conditions that allow it to complete or let the sender recover the funds if it cannot finish. The operator cannot freely take or redirect the funds locked under those conditions, although recovery may involve a waiting period and an action from the user. Our guide to [how atomic swaps work](https://satora.io/blog/what-atomic-swap) explains the mechanism and its limits in more detail.
+
+You can [explore the routes in the Satora app](https://app.satora.io/), choose what to send and receive, and review the quote and fees before funding the swap from your wallet. You receive the chosen asset in a compatible wallet, without first depositing into a custodial exchange account.
