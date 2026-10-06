@@ -34,7 +34,7 @@ You can also use a browser extension. MetaMask supports Bitcoin and other networ
 
 Being able to manage these assets together does not mean you can send USDT through any Bitcoin or Lightning wallet. There are Bitcoin-related stablecoin projects, but using them requires support for the particular protocol involved, beyond the ability to receive BTC.
 
-[USDT already exists on Liquid](https://docs.liquid.net/docs/liquid-assets), a Bitcoin sidechain with its own security model. Tether has also announced projects involving Taproot Assets, Lightning and RGB, whose deployment and wallet compatibility need to be assessed separately. We will cover these integrations as they become available for practical use.
+In recent years and months, Tether has also announced projects involving Taproot Assets, Lightning, and RGB, whose deployment and wallet compatibility need to be assessed separately. We will cover these integrations as they become available for practical use.
 
 For USDC, Circle does not currently list Bitcoin's base layer among its native networks. If you want to keep BTC and USDC in the same application today, you can therefore do so through accounts on separate networks, without waiting for stablecoin support in your Bitcoin wallet's BTC account.
 
@@ -46,7 +46,7 @@ Receiving USDC on Ethereum does not require you to own ETH, but an ordinary tran
 
 If you already have stablecoins but no gas, some services can help you obtain it from the balance you hold. On eligible routes, 1inch Fusion lets you swap a fraction of your tokens for the network's native fee token while another participant pays the execution fee. CoW Swap also offers gasless trading and signed approvals for eligible tokens, while MetaMask's gasless swaps can deduct fees from the asset being sold.
 
-Availability depends on the token, network and wallet configuration. As [1inch explains](https://help.1inch.com/en/articles/4585113-why-do-i-need-to-approve-my-tokens-before-a-trade), an initial spending approval can still require gas when a signed approval is unavailable. Check this before relying on the service, and select the native gas token, such as ETH rather than WETH, since a gasless swap still has costs and must leave you with something you can actually use to pay fees.
+Availability depends on the token, network, and wallet configuration. As [1inch explains](https://help.1inch.com/en/articles/4585113-why-do-i-need-to-approve-my-tokens-before-a-trade), an initial spending approval can still require gas when a signed approval is unavailable. Check this before relying on the service, and select the native gas token, such as ETH rather than WETH, since a gasless swap still has costs and must leave you with something you can actually use to pay fees.
 
 ## What control do you keep over USDT and USDC?
 
@@ -54,11 +54,11 @@ Managing your own keys lets you send funds without asking an exchange to approve
 
 Certain implementations also allow the issuer to freeze tokens in external wallets, as [Circle describes in its USDC terms](https://www.circle.com/legal/usdc-terms). Choosing self-custody removes the exchange from the custody relationship, but it does not remove the issuer or give its stablecoin Bitcoin's resistance to censorship.
 
-The currency itself deserves consideration too. If your expenses are in euros, a dollar stablecoin still exposes you to changes in the dollar-euro exchange rate. Euro-denominated alternatives include Circle's EURC, Monerium's EURe and SG-FORGE's EUR CoinVertible (EURCV), with the same need to check which networks your wallet supports.
+The currency itself deserves consideration too. If your expenses are in euros, a dollar stablecoin still exposes you to changes in the dollar-euro exchange rate. Euro-denominated alternatives include Circle's EURC, Monerium's EURe, and SG-FORGE's EUR CoinVertible (EURCV), with the same need to check which networks your wallet supports.
 
 ## Moving between Bitcoin and stablecoins with Satora
 
-With a compatible wallet ready, you can convert BTC into a stablecoin balance without first depositing into an exchange account. Satora connects Bitcoin on-chain, Lightning and Arkade with USDT, USDC and other supported assets, with routes in both directions depending on the selected asset and network.
+With a compatible wallet ready, you can convert BTC into a stablecoin balance without first depositing into an exchange account. Satora connects Bitcoin on-chain, Lightning, and Arkade with USDT, USDC, and other supported assets, with routes in both directions depending on the selected asset and network.
 
 Satora uses self-custodial atomic swaps, where funds are locked under conditions that allow the exchange to complete or the sender to recover them if it cannot finish. The operator cannot freely take or redirect those funds, although recovery may require a waiting period and an action from the user. Our guide to [how atomic swaps work](https://satora.io/blog/what-atomic-swap) explains these conditions in more detail.
 
