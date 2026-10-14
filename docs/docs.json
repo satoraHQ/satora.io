@@ -40,6 +40,18 @@
   },
   "redirects": [
     {
+      "source": "/mtp",
+      "destination": "/api-reference/mtp"
+    },
+    {
+      "source": "/api/delegate/settle",
+      "destination": "/api-reference/delegate/settle"
+    },
+    {
+      "source": "/legal/privacy",
+      "destination": "https://satora.io/privacy"
+    },
+    {
       "source": "/faq/legal/lendasat/privacy",
       "destination": "https://satora.io/privacy"
     },
