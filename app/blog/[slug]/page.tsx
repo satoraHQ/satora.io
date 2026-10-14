@@ -205,10 +205,12 @@ export async function generateMetadata(props: {
     title,
     description,
     authors: [{ name: author }],
+    alternates: { canonical: `https://satora.io/blog/${params.slug}` },
     openGraph: {
       title,
       description,
       type: "article",
+      url: `https://satora.io/blog/${params.slug}`,
       images: [{ url: ogImage }],
     },
     twitter: {

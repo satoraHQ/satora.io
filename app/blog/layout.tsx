@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Bitcoin Swaps, Stablecoins & Product Updates",
   description:
     "Bitcoin and stablecoin swap guides, Lightning and Arkade insights, product updates, and developer integrations from the Satora team.",
+  alternates: { canonical: "https://satora.io/blog" },
   openGraph: {
     title: "Bitcoin Swaps, Stablecoins & Product Updates | Satora",
     description:

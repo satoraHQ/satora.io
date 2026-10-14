@@ -1,6 +1,27 @@
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
+
+export const metadata: Metadata = {
+  title: "Security & Vulnerability Reporting",
+  description:
+    "How to report security vulnerabilities to Satora, contact the security team, and use our PGP key for responsible disclosure.",
+  alternates: { canonical: "https://satora.io/security" },
+  openGraph: {
+    title: "Security & Vulnerability Reporting | Satora",
+    description:
+      "How to report security vulnerabilities to Satora and contact the security team for responsible disclosure.",
+    url: "https://satora.io/security",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Security & Vulnerability Reporting | Satora",
+    description:
+      "How to report security vulnerabilities to Satora and contact the security team for responsible disclosure.",
+  },
+};
 
 function SecurityPage(): ReactNode {
   return (
