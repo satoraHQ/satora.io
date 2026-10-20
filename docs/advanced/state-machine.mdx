@@ -76,6 +76,7 @@ flowchart TD
     ClientRedeemed -->|Edge case: refund after redeem| ClientRedeemedAndClientRefunded(ClientRedeemedAndClientRefunded)
 
     ClientRefundedServerFunded -->|Server refunds HTLC| ClientRefundedServerRefunded(ClientRefundedServerRefunded)
+    ClientFundedServerRefunded -->|Client refunds| ClientRefundedServerRefunded
 
     style ServerRedeemed fill:#a3c410,color:#000,stroke:#a3c410
     style Expired fill:#e5e7eb,color:#4a5565,stroke:#d1d5dc
@@ -213,6 +214,7 @@ Client funded but requested a refund before the server funded its side.
 | ServerFunded               | Client refunds early    | ClientRefundedServerFunded      | Critical: client refunded but server already funded                         |
 | ClientRedeeming            | Client refunds          | ClientRefundedServerFunded      | Critical: client refunded mid-redeem                                        |
 | ClientRefundedServerFunded | Server refunds          | ClientRefundedServerRefunded    | Server reclaims its HTLC funds, both sides refunded                         |
+| ClientFundedServerRefunded | Client refunds          | ClientRefundedServerRefunded    | Client reclaims its funds after the server's refund, both sides refunded    |
 
 ---
 
