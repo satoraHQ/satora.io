@@ -1150,7 +1150,6 @@ Satora uses a two-contract architecture on each EVM chain (Polygon, Ethereum, Ar
 **HTLCCoordinator** - An orchestration layer that combines DEX swaps with HTLC operations in a single atomic transaction:
 - `executeAndCreate` - Execute DEX swap calls, then lock the result in an HTLC
 - `redeemAndExecute` - Redeem an HTLC via EIP-712 signature, execute DEX swap, sweep tokens to destination
-- `refundAndExecute` - Refund an expired HTLC, optionally swap tokens back, sweep to destination
 - `refundTo` - Simple refund of an expired HTLC directly to the original depositor or a specified address
 
 **DEX-agnostic design:** The coordinator accepts arbitrary call arrays, currently routing through Uniswap V3 (primary) (fallback) for DEX aggregation.
@@ -1262,13 +1261,6 @@ function redeemAndExecute(
     address htlcSender, uint256 timelock, Call[] calls,
     address sweepToken, uint256 minAmountOut,
     address destination, uint8 v, bytes32 r, bytes32 s
-) external;
-
-// HTLC refund + DEX swap-back + sweep
-function refundAndExecute(
-    bytes32 preimageHash, uint256 amount, address token,
-    address claimAddress, uint256 timelock,
-    Call[] calls, address sweepToken, uint256 minAmountOut
 ) external;
 
 // Simple refund to original depositor or specified address
