@@ -11,7 +11,7 @@ When claiming EVM tokens (BTC → EVM swaps), you don't need to hold ETH/MATIC f
 </Accordion>
 
 <Accordion title="Can I pay gas myself instead of using gasless?">
-Yes. You can claim manually by calling the HTLC contract directly with your own wallet. This requires holding native gas tokens (ETH/MATIC/ARB) but avoids the gasless fee deduction.
+You can claim manually by calling the HTLC contract directly with your own wallet, which requires holding native gas tokens (ETH/MATIC/ARB). Doing so does not reduce what you receive: the gas for a server-submitted claim is already included in the network fee of every quote, so a manual claim means paying gas a second time from your own wallet. Manual claiming is mainly useful as a fallback if the server does not submit the claim for you.
 </Accordion>
 
 <Accordion title="How is the exchange rate determined?">
