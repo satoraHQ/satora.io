@@ -1,0 +1,66 @@
+---
+title: "Bitcoin Swap Fees Explained"
+date: "2026-10-28"
+author: "Marius"
+authorImage: "/favicon/dot.svg"
+excerpt: "Understand Bitcoin swap fees, network costs and gasless transactions, and learn how to compare the estimated amount you receive."
+tags:
+  - bitcoin
+  - swaps
+  - fees
+  - satora
+---
+
+If you want to turn some Bitcoin into USDC, you probably want to know how much will reach your wallet before sending any BTC. The service fee helps answer that question, but the exchange rate, network costs and transaction fee charged by your wallet also matter.
+
+A quote brings most of these elements together. Understanding what it includes lets you compare swaps without counting the same cost twice or overlooking a fee paid separately.
+
+## What makes up the cost of a Bitcoin swap?
+
+The exchange rate determines how much USDC your Bitcoin is worth in the quote. The provider then charges for the service, while network fees cover the transactions required to carry out the swap. What remains is the estimated net amount you receive.
+
+On Satora, the service fee is labelled “protocol fee”. It can vary and applies in addition to network fees, so use the percentage in your quote rather than assuming the same rate applies to every swap.
+
+For example, a hypothetical service fee of 0.5% on 1,000,000 sats would represent 5,000 sats. That calculation describes the service fee alone, before network costs. It is an illustration of how a percentage works, not a current Satora tariff.
+
+The exchange rate deserves a separate look. A difference between a quote and a price displayed elsewhere, often called a spread, can reflect different liquidity or the time at which each price was recorded. It does not necessarily mean an extra commission was added. Satora confirms that it adds no additional margin to its quoted exchange rate.
+
+The net amount is still an estimate, rather than a guarantee of the exact amount delivered when the swap completes. Atomic settlement does not, by itself, make an earlier price quote exact.
+
+## Which network fees are included, and which are paid separately?
+
+Some transactions are handled by Satora. Its [quote documentation](https://docs.satora.io/quotes-rates/exchange-rate) describes the network fee as covering server-paid contract transactions and Bitcoin mining fees where applicable. These quoted costs are already reflected in the estimated net amount.
+
+You also need to fund the swap. When sending Bitcoin on-chain from your wallet, the funding transaction pays a mining fee of its own. Check the wallet's confirmation screen for that charge before signing. It is separate from the deductions used to calculate the quote's net result.
+
+This distinction matters particularly for small amounts. A Bitcoin transaction fee depends on the transaction's size and network conditions, rather than simply on the value sent. The same transaction cost therefore takes a larger share of a smaller payment, even if the service fee percentage stays unchanged.
+
+Receiving the stablecoins can leave another expense for later. You do not need ETH simply to receive USDC on Ethereum, but an ordinary transfer from that wallet requires it. That future transaction belongs to the cost of using your USDC, rather than the swap that delivered it.
+
+## How can you compare quotes fairly?
+
+Start with the same amount, asset pair and source and destination networks. Request quotes close together, since comparing a fresh quote with an older estimate can confuse market movement with a difference in fees.
+
+Then look at the estimated net amount and any costs paid separately. A provider with a lower service fee does not necessarily leave you with more USDC if its exchange rate or network charges are less favourable. Equally, a fee already deducted from the net result should not be subtracted again.
+
+If your receiving wallet supports several networks, you can compare those destinations too. Changing the network can affect both transaction costs and available liquidity. A lower network fee alone is therefore not enough to identify the better quote, and the destination must still support what you intend to do with the tokens afterwards.
+
+## What does gasless mean for fees and recovery?
+
+On supported Bitcoin-to-EVM routes, you can authorize the claim with a signature while Satora submits the transaction. This lets you receive the tokens without first obtaining the destination network's gas token. The [gasless and fees documentation](https://docs.satora.io/faq/gasless-and-fees) explains that the transaction cost is deducted from the swap amount.
+
+You are still paying for that operation through the quote. Gasless changes how the fee is handled, and does not remove the network cost or cover every later transaction from your wallet.
+
+In the opposite direction, sending stablecoins into a swap may require the network's native token to approve and transfer them. Recovery can involve another transaction, with its own requirements.
+
+If a swap fails after the EVM swap contract has been funded, you may recover WBTC or tBTC, the Bitcoin-backed token held by that contract, rather than the stablecoin originally sent. Satora also provides the option to retry the swap. Check the options for the affected swap before proceeding, since recovering tokens and completing the intended exchange are different outcomes.
+
+The [EVM recovery guide](https://docs.satora.io/handle-failures/refund-evm-htlc) distinguishes server-assisted recovery from manual recovery after the contract's waiting period expires. The manual path requires gas from your own wallet. Neither the original quote nor the word gasless should be read as a promise that every recovery action is free.
+
+## What should you check before sending your Bitcoin?
+
+First, confirm the asset and network on each side of the swap. Receiving USDC on a network your wallet can display is not enough if the service you plan to pay accepts it only on another network.
+
+Next, read the service fee, network costs and estimated net amount together. Keep any separate wallet funding fee outside those deductions, and make sure you have what you need to use the received tokens afterwards.
+
+You can [get a Bitcoin-to-USDC quote](https://satora.io/swap/bitcoin-to-usdc) for your own amount and destination, then review the final details in the app before funding. The figure to assess is the estimated amount reaching your wallet, alongside the costs your wallet asks you to pay separately.
