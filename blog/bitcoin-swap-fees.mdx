@@ -24,7 +24,7 @@ On Satora, the service fee is labelled “protocol fee”. It can vary and appli
 
 For example, a hypothetical service fee of 0.5% on 1,000,000 sats would represent 5,000 sats. That calculation describes the service fee alone, before network costs. It is an illustration of how a percentage works, not a current Satora tariff.
 
-The exchange rate deserves a separate look. A difference between a quote and a price displayed elsewhere, often called a spread, can reflect different liquidity or the time at which each price was recorded. It does not necessarily mean an extra commission was added. Satora confirms that it adds no additional margin to its quoted exchange rate.
+The exchange rate deserves a separate look. A difference between a quote and a price displayed elsewhere, often called a spread, can reflect different liquidity or the time at which each price was recorded. It does not necessarily mean an extra commission was added. Our quoted rate comes from the DEX liquidity available when the quote is created, with an estimated slippage allowance already included, and the protocol fee shown in the quote is the only charge we add on top of it. Integrations that use their own API key can apply their own markup, so a quote obtained through a partner may differ from one obtained directly.
 
 The net amount is still an estimate, rather than a guarantee of the exact amount delivered when the swap completes. Atomic settlement does not, by itself, make an earlier price quote exact.
 
@@ -56,7 +56,7 @@ You are still paying for that operation through the quote. Gasless changes how t
 
 In the opposite direction, sending stablecoins into a swap may require the network's native token to approve and transfer them. Recovery can involve another transaction, with its own requirements.
 
-If a swap fails after the EVM swap contract has been funded, you may recover WBTC or tBTC, the Bitcoin-backed token held by that contract, rather than the stablecoin originally sent. Satora also provides the option to retry the swap. Check the options for the affected swap before proceeding, since recovering tokens and completing the intended exchange are different outcomes.
+If a swap fails after the EVM swap contract has been funded, you may recover WBTC or tBTC, the Bitcoin-backed token held by that contract, rather than the stablecoin originally sent. The failed swap itself cannot be retried: once the tokens are recovered, completing the intended exchange means starting a new swap at the rate quoted at that time. Check the options for the affected swap before proceeding, since recovering tokens and completing the intended exchange are different outcomes.
 
 The [EVM recovery guide](https://docs.satora.io/handle-failures/refund-evm-htlc) distinguishes server-assisted recovery from manual recovery after the contract's waiting period expires. The manual path requires gas from your own wallet. Neither the original quote nor the word gasless should be read as a promise that every recovery action is free.
 
