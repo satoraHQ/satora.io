@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1500" viewBox="0 0 1200 1500" role="img" aria-labelledby="title desc">
+<title id="title">Reading your swap costs</title><desc id="desc">The quote deducts service and network costs from the swap value to estimate what you receive. Wallet funding and later transfers or recovery are separate costs.</desc>
+<rect width="1200" height="1500" rx="32" fill="#080a09"/>
+<g font-family="Arial, Helvetica, sans-serif">
+<circle cx="80" cy="82" r="11" fill="#c2e821"/>
+<text x="112" y="96" fill="#c2e821" font-size="35" letter-spacing="3">BITCOIN → USDC</text>
+<text x="68" y="183" fill="#ffffff" font-size="66" font-weight="700">Reading your swap costs</text>
+<rect x="64" y="240" width="1072" height="668" rx="28" fill="#131715" stroke="#c2e821" stroke-width="3"/>
+<text x="112" y="318" fill="#c2e821" font-size="42" font-weight="700">IN YOUR QUOTE</text>
+<line x1="112" y1="351" x2="1088" y2="351" stroke="#394038" stroke-width="2"/>
+<text x="112" y="434" fill="#fff" font-size="48">Swap value at the quoted rate</text>
+<text x="112" y="533" fill="#c2e821" font-size="58">−</text>
+<text x="180" y="527" fill="#fff" font-size="48">Service fee</text>
+<text x="112" y="626" fill="#c2e821" font-size="58">−</text>
+<text x="180" y="620" fill="#fff" font-size="48">Quoted network costs</text>
+<line x1="112" y1="666" x2="1088" y2="666" stroke="#394038" stroke-width="2"/>
+<text x="112" y="753" fill="#c2e821" font-size="58">=</text>
+<text x="180" y="748" fill="#fff" font-size="48" font-weight="700">Estimated amount to receive</text>
+<text x="112" y="838" fill="#b8c0b9" font-size="36">Quoted fees are already deducted.</text>
+<rect x="64" y="952" width="1072" height="384" rx="28" fill="#131715" stroke="#454d45" stroke-width="2"/>
+<text x="112" y="1032" fill="#ffffff" font-size="42" font-weight="700">PAID SEPARATELY BY YOUR WALLET</text>
+<circle cx="121" cy="1110" r="7" fill="#c2e821"/>
+<text x="152" y="1124" fill="#fff" font-size="44">Funding transaction fee</text>
+<circle cx="121" cy="1192" r="7" fill="#c2e821"/>
+<text x="152" y="1206" fill="#fff" font-size="44">Later transfers or recovery</text>
+<text x="152" y="1263" fill="#b8c0b9" font-size="36">When needed, depending on the route.</text>
+<text x="68" y="1426" fill="#b8c0b9" font-size="37">Check the quote and your wallet before signing.</text>
+</g></svg>
