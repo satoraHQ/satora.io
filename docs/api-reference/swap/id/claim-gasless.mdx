@@ -2,3 +2,8 @@
 title: "Claims an EVM-targeted swap gaslessly via the HTLCCoordinator contract."
 openapi: "POST /swap/{id}/claim-gasless"
 ---
+
+Rootstock swaps use `HTLCNative` directly and are not relayed by this endpoint.
+Without Rootstock/RIF sponsorship, use `client.claimEvmWithSigner()` with the
+payout wallet, funded with RBTC for gas. Other EVM chains retain their existing
+gasless claim behavior.
