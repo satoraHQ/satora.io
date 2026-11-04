@@ -184,6 +184,11 @@ export default async function BlogPost(props: {
   );
 }
 
+// Blog MDX is bundled at build time, so every valid slug is known up front.
+// Reject anything else before rendering so unknown slugs return a real 404
+// instead of a streamed (loading.tsx) response with a 200 status.
+export const dynamicParams = false;
+
 export async function generateStaticParams() {
   return blogSource.getPages().map((page) => ({
     slug: page.slugs[0],

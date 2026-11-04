@@ -11,6 +11,8 @@ const config = {
 	async redirects() {
 		return [
 			{ source: "/impressum", destination: "/imprint", permanent: true },
+			// Resolve article trailing-slash variants before the static slug check.
+			{ source: "/blog/:slug/", destination: "/blog/:slug", permanent: true },
 		];
 	},
 	turbopack: {
