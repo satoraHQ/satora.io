@@ -4,43 +4,44 @@ import { swapRoutes } from "@/config/swap-routes";
 // Built at build time, like the sitemap, so new routes and posts appear without editing this file.
 export const dynamic = "force-static";
 
-const baseUrl = "https://satora.io";
+const site = "https://satora.io";
 
-function link(title: string, path: string, description?: string): string {
-  return description ? `- [${title}](${baseUrl}${path}): ${description}` : `- [${title}](${baseUrl}${path})`;
+function item(title: string, url: string, description?: string): string {
+  return description ? `- [${title}](${url}): ${description}` : `- [${title}](${url})`;
 }
 
 export function GET(): Response {
   const routes = [
-    link(
+    // Bitcoin to USDC has its own page under app/swap, outside the shared swapRoutes list.
+    item(
       "Swap Bitcoin to USDC",
-      "/swap/bitcoin-to-usdc",
+      `${site}/swap/bitcoin-to-usdc`,
       "Convert Bitcoin to USDC without an exchange deposit.",
     ),
-    ...swapRoutes.map((route) => link(route.title, `/swap/${route.slug}`, route.introduction)),
+    ...swapRoutes.map((route) => item(route.title, `${site}/swap/${route.slug}`, route.introduction)),
   ];
 
   const posts = blogSource
     .getPages()
-    .map((post) => link(post.data.title, `/blog/${post.slugs.join("/")}`, post.data.subtitle ?? post.data.description));
+    .map((post) =>
+      item(post.data.title, `${site}/blog/${post.slugs.join("/")}`, post.data.subtitle ?? post.data.description)
+    );
 
   const body = [
     "# Satora",
     "",
     "> Satora is a self-custodial swap service between Bitcoin and stablecoins. It connects Bitcoin on-chain, Lightning and Arkade with tokens such as USDC, USDT and EURe on EVM networks, using hash time-locked contracts (HTLCs).",
     "",
-    "Developer documentation, the API reference and SDK guides are on docs.satora.io, which publishes its own index.",
-    "",
     "## Product",
     "",
-    "- [Satora app](https://app.satora.io): Swap Bitcoin and stablecoins from your wallet.",
-    link(
+    item("Satora app", "https://app.satora.io", "Swap Bitcoin and stablecoins from your wallet."),
+    item(
       "Developers",
-      "/developers",
-      "Integrate swaps between Bitcoin and stablecoins with the Satora TypeScript SDK.",
+      `${site}/developers`,
+      "Integrate swaps between Bitcoin and stablecoins with the TypeScript SDK.",
     ),
-    link("Security", "/security"),
-    link("Press kit", "/press"),
+    item("Security", `${site}/security`),
+    item("Press kit", `${site}/press`),
     "",
     "## Swap routes",
     "",
@@ -48,8 +49,8 @@ export function GET(): Response {
     "",
     "## Documentation",
     "",
-    "- [Documentation index](https://docs.satora.io/llms.txt)",
-    "- [Full documentation](https://docs.satora.io/llms-full.txt)",
+    item("Documentation index", "https://docs.satora.io/llms.txt", "API reference, SDK guides and FAQ."),
+    item("Full documentation", "https://docs.satora.io/llms-full.txt"),
     "",
     "## Blog",
     "",
@@ -57,8 +58,8 @@ export function GET(): Response {
     "",
     "## Optional",
     "",
-    link("Terms", "/terms"),
-    link("Privacy", "/privacy"),
+    item("Terms", `${site}/terms`),
+    item("Privacy", `${site}/privacy`),
     "",
   ].join("\n");
 
