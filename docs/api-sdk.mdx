@@ -65,10 +65,12 @@ X-Lendaswap-Client: @satora/swap/0.5.0
 x-satora-bitcoin-htlc-version: 1
 x-satora-arkade-vhtlc-version: 1
 x-satora-lightning-version: 1
-x-satora-evm-erc20-htlc-version: 1
-x-satora-evm-native-htlc-version: 1
+x-satora-evm-erc20-htlc-version: 2
+x-satora-evm-native-htlc-version: 2
 ```
 
 `X-Lendaswap-Client` identifies the SDK and SDK version. EVM-target swap creation requires a recognizable `<sdk-name>/<semver>` value.
 
 Each `x-satora-<component>-version` header carries the integer protocol epoch the client speaks for that component. Swap creation and the signing-sensitive per-swap endpoints check the components the swap uses and reject a client whose epoch for one of them is older than the server supports. Clients that still send the legacy `x-satora-server-version` header are accepted while every component is at epoch 1.
+
+The EVM epoch also selects the contracts a new swap is created on. Epoch 2 gets HTLCErc20 v7 / HTLCCoordinator v5 / HTLCNative v2, where the depositor is the lock's sender (collaborative refund and rehash available). Epoch 1 and legacy clients keep getting the HTLCErc20 v6 / HTLCCoordinator v4 / HTLCNative v1 deployment while the server still serves it. Every later request about a swap follows the contracts and `evm_htlc_version` recorded on that swap.
