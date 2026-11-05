@@ -11,11 +11,11 @@ const BRAND_COLORS = [
   { name: "Secondary Gray", hex: "#737373", desc: "Secondary text" },
 ];
 
-const KEY_FACTS = [
-  { label: "Bitcoin networks", value: "On-chain, Lightning, Arkade" },
-  { label: "Stablecoins", value: "USDC, USDT, EURe" },
-  { label: "Custody", value: "Self-custodial" },
-  { label: "Integration", value: "SDK, API, widget" },
+const STATS = [
+  { label: "Active Users", value: "2,400+" },
+  { label: "Fund Losses", value: "Zero" },
+  { label: "Platform Status", value: "Live" },
+  { label: "Security Audit", value: "Passed" },
 ];
 
 function PressPage(): ReactNode {
@@ -41,13 +41,13 @@ function PressPage(): ReactNode {
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {KEY_FACTS.map((fact) => (
+            {STATS.map((stat) => (
               <div
-                key={fact.label}
+                key={stat.label}
                 className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg"
               >
-                <div className="text-lg font-medium">{fact.value}</div>
-                <div className="text-sm text-gray-500">{fact.label}</div>
+                <div className="text-2xl font-medium">{stat.value}</div>
+                <div className="text-sm text-gray-500">{stat.label}</div>
               </div>
             ))}
           </div>
