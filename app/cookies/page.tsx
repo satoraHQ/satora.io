@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Cookie Policy",
-  description: "Cookie Policy for Lendasat",
+  description: "Cookie Policy for Satora, operated by Lendasat Inc.",
   alternates: { canonical: "/cookies" },
 };
 
