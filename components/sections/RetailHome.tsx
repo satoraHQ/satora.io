@@ -18,7 +18,7 @@ const FAQS = [
   ],
   [
     "What fees will I pay?",
-    "Satora charges a 0.5% service fee on every swap. Network fees are not included and depend on the networks used. The live quote shows the amount you receive and fees before you continue.",
+    "Satora charges a 0.5% service fee on every swap. Network fees come on top and depend on the chains used. The live quote shows the amount you receive and fees before you continue.",
   ],
   [
     "How long does a swap take?",
