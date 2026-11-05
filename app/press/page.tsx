@@ -11,11 +11,11 @@ const BRAND_COLORS = [
   { name: "Secondary Gray", hex: "#737373", desc: "Secondary text" },
 ];
 
-const STATS = [
-  { label: "Active Users", value: "2,400+" },
-  { label: "Fund Losses", value: "Zero" },
-  { label: "Platform Status", value: "Live" },
-  { label: "Security Audit", value: "Passed" },
+const KEY_FACTS = [
+  { label: "Bitcoin networks", value: "On-chain, Lightning, Arkade" },
+  { label: "Stablecoins", value: "USDC, USDT, EURe" },
+  { label: "Custody", value: "Self-custodial" },
+  { label: "Integration", value: "SDK, API, widget" },
 ];
 
 function PressPage(): ReactNode {
@@ -35,19 +35,19 @@ function PressPage(): ReactNode {
         <section className="px-6 py-16 max-w-5xl mx-auto border-t border-gray-200 dark:border-gray-800">
           <h2 className="text-2xl font-medium mb-6">About Satora</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-3xl">
-            Satora is a Bitcoin-backed lending platform that enables Bitcoiners to access liquidity without selling
-            their BTC. Through non-custodial smart contracts, users lock Bitcoin as collateral and receive loans while
-            maintaining exposure to Bitcoin&apos;s price appreciation.
+            Satora lets people and apps swap between Bitcoin and stablecoins without sending funds to an exchange. Swaps
+            connect Bitcoin on-chain, Lightning and Arkade with tokens such as USDC, USDT and EURe on EVM networks. Hash
+            time-locked contracts (HTLCs) define how each swap is claimed, or refunded if it cannot complete.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {STATS.map((stat) => (
+            {KEY_FACTS.map((fact) => (
               <div
-                key={stat.label}
+                key={fact.label}
                 className="p-4 bg-gray-50 dark:bg-gray-900 rounded-lg"
               >
-                <div className="text-2xl font-medium">{stat.value}</div>
-                <div className="text-sm text-gray-500">{stat.label}</div>
+                <div className="text-lg font-medium">{fact.value}</div>
+                <div className="text-sm text-gray-500">{fact.label}</div>
               </div>
             ))}
           </div>
@@ -100,21 +100,21 @@ function PressPage(): ReactNode {
             <div>
               <h3 className="font-medium mb-2">Short (50 words)</h3>
               <p className="text-gray-600 dark:text-gray-400 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                Satora is a Bitcoin-backed lending platform that enables users to access liquidity without selling their
-                BTC. Through non-custodial smart contracts, users lock Bitcoin as collateral and receive cash loans
-                while maintaining exposure to Bitcoin&apos;s price appreciation.
+                Satora is a self-custodial swap service between Bitcoin and stablecoins. Users move between Bitcoin
+                on-chain, Lightning or Arkade and tokens such as USDC, USDT and EURe on EVM networks, without opening an
+                exchange account. Hash time-locked contracts define how each swap is claimed or refunded.
               </p>
             </div>
 
             <div>
               <h3 className="font-medium mb-2">Medium (100 words)</h3>
               <p className="text-gray-600 dark:text-gray-400 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-                Satora provides Bitcoin-backed loans that let Bitcoiners access liquidity without selling their
-                holdings. The platform uses non-custodial smart contract technology where users lock Bitcoin as
-                collateral to receive cash in USD, EUR, or USDC. Unlike selling Bitcoin -which triggers immediate
-                capital gains tax -borrowing creates no taxable event. With 2,400+ active users, hundreds of successful
-                loans completed, and zero customer fund losses, we&apos;ve proven that non-custodial Bitcoin lending
-                works in practice.
+                Satora is a self-custodial swap service that connects Bitcoin and stablecoins. Users swap between
+                Bitcoin on-chain, Lightning or Arkade and tokens such as USDC, USDT and EURe on Ethereum, Polygon and
+                Arbitrum, from their own wallet and without opening an exchange account. Each swap relies on hash
+                time-locked contracts (HTLCs), which define how funds are claimed and how they are refunded if a swap
+                cannot complete. Wallets, fintechs and payment apps integrate Satora through a TypeScript SDK, an API or
+                an embeddable widget. Satora was formerly known as Lendasat and LendaSwap.
               </p>
             </div>
           </div>
