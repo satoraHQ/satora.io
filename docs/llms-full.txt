@@ -962,7 +962,7 @@ const { txHash } = await client.refundEvmWithSigner(
 console.log("Refund TX:", txHash);
 ```
 
-Without the SDK, `GET /swap/{id}` returns every refund argument for EVM-sourced swaps, so you don't need to parse the HTLC's `SwapCreated` log: `hash_lock` (`evm_hash_lock` on `evm_to_bitcoin`) → `preimageHash`, `evm_htlc_locked_amount` → `amount` (base units of the lock token, as observed on-chain), `wbtc_address` → `token`, `evm_htlc_sender` → `sender`, `server_evm_address` → `claimAddress`, `evm_refund_locktime` → `timelock`. `evm_htlc_locked_amount` and `evm_htlc_sender` are `null` until the lock is seen. On HTLCErc20 v7+ / HTLCNative v2+ the sender (your depositor) calls `refund` on `evm_htlc_address`, or anyone calls `refundFor`. On older versions anyone calls `refundTo` on `evm_coordinator_address`.
+Without the SDK, `GET /swap/{id}` returns every refund argument for EVM-sourced swaps, so you don't need to parse the HTLC's `SwapCreated` log: `hash_lock` (`evm_hash_lock` on `evm_to_bitcoin`) → `preimageHash`, `evm_htlc_locked_amount` → `amount` (base units of the lock token, as observed on-chain), `wbtc_address` → `token`, `evm_htlc_sender` → `sender`, `server_evm_address` → `claimAddress`, `evm_refund_locktime` → `timelock`. `evm_htlc_locked_amount` and `evm_htlc_sender` are `null` until the lock is seen. On HTLCErc20 v7+ / HTLCNative v2+ the sender (your depositor) calls `refund` on `evm_htlc_address`, or anyone calls `refundFor`. On older versions anyone calls `refundTo` on `evm_coordinator_address`. A lock funded with a token other than `wbtc_address` (status `clientinvalidfunded`) is keyed under that token, which the server doesn't return: take `token` and `amount` from its `SwapCreated` log.
 
 #### Refund Methods Summary
 

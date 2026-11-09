@@ -93,6 +93,8 @@ console.log("Refund TX:", txHash);
 
 `evm_htlc_locked_amount` and `evm_htlc_sender` are `null` until the server has seen the lock. `evm_htlc_locked_amount` is read from the `SwapCreated` event, so it can differ from `evm_expected_sats` after the DEX swap. Always pass `evm_htlc_locked_amount`: any other amount addresses a lock that doesn't exist and the call reverts.
 
+The lock token is fixed per chain, so `wbtc_address` is the `token` of every lock funded as quoted. A lock funded with a different token (status `clientinvalidfunded`) is keyed under that token instead, which the server doesn't return: take `token` and `amount` from the lock's `SwapCreated` log.
+
 Which contract you call depends on `evm_htlc_kind` and `evm_htlc_version`:
 
 - **HTLCErc20 v7+ / HTLCNative v2+**: `evm_htlc_sender` is your depositor address. After `evm_refund_locktime`, send `refund(preimageHash, amount, token, claimAddress, timelock)` to `evm_htlc_address` from that address. Native locks drop the `token` argument. Anyone can also call `refundFor(preimageHash, amount, token, sender, claimAddress, timelock)`, and the funds still go to `sender`.
