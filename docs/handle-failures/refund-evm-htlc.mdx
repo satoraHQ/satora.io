@@ -78,6 +78,26 @@ console.log("Refund TX:", txHash);
 // ... "0xabc123..."
 ```
 
+### Timeout-based refund over REST (without the SDK)
+
+`GET /swap/{id}` returns every argument of the refund call, so you don't need to parse the HTLC's `SwapCreated` log on-chain. The fields are the same for `evm_to_bitcoin`, `evm_to_lightning` and `evm_to_arkade` swaps, including CCTP-bridged ones:
+
+| Refund argument | Response field                                                           |
+| --------------- | ------------------------------------------------------------------------ |
+| `preimageHash`  | `hash_lock` (`evm_hash_lock` on `evm_to_bitcoin`)                        |
+| `amount`        | `evm_htlc_locked_amount`: the amount the lock holds, in token base units |
+| `token`         | `wbtc_address` (only on `erc20` locks; `native` locks take no token)     |
+| `sender`        | `evm_htlc_sender`: the address the lock is keyed under                   |
+| `claimAddress`  | `server_evm_address`                                                     |
+| `timelock`      | `evm_refund_locktime`                                                    |
+
+`evm_htlc_locked_amount` and `evm_htlc_sender` are `null` until the server has seen the lock. `evm_htlc_locked_amount` is read from the `SwapCreated` event, so it can differ from `evm_expected_sats` after the DEX swap. Always pass `evm_htlc_locked_amount`: any other amount addresses a lock that doesn't exist and the call reverts.
+
+Which contract you call depends on `evm_htlc_kind` and `evm_htlc_version`:
+
+- **HTLCErc20 v7+ / HTLCNative v2+**: `evm_htlc_sender` is your depositor address. After `evm_refund_locktime`, send `refund(preimageHash, amount, token, claimAddress, timelock)` to `evm_htlc_address` from that address. Native locks drop the `token` argument. Anyone can also call `refundFor(preimageHash, amount, token, sender, claimAddress, timelock)`, and the funds still go to `sender`.
+- **Older versions**: `evm_htlc_sender` is the coordinator (`evm_coordinator_address`). After `evm_refund_locktime`, call `refundTo(preimageHash, amount, token, claimAddress, timelock)` on the coordinator. Anyone can call it, and the funds always go to the depositor.
+
 ---
 
 ## Refund Methods Summary
