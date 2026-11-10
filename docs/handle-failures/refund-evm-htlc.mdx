@@ -91,16 +91,22 @@ console.log("Refund TX:", txHash);
 | `claimAddress`  | `server_evm_address`                                                     |
 | `timelock`      | `evm_refund_locktime`                                                    |
 
-`evm_htlc_locked_amount` and `evm_htlc_sender` are `null` until the server has seen the lock. `evm_htlc_locked_amount` is read from the `SwapCreated` event, so it can differ from `evm_expected_sats` after the DEX swap. Always pass `evm_htlc_locked_amount`: any other amount addresses a lock that doesn't exist and the call reverts.
+These values describe the lock as the server recorded it when it accepted the funding. `evm_htlc_locked_amount` and `evm_htlc_sender` are `null` until then. `evm_htlc_locked_amount` is read from the `SwapCreated` event, so it can differ from `evm_expected_sats` after the DEX swap. Always pass `evm_htlc_locked_amount`: any other amount addresses a lock that doesn't exist and the call reverts.
 
-The lock token is fixed per chain (tBTC on Ethereum and Arbitrum, WBTC on Polygon), so `evm_htlc_token` is the `token` of every lock funded as quoted. `wbtc_address` carries the same value but is deprecated; read it only from servers that don't send `evm_htlc_token` yet. A lock funded with a different token (status `clientinvalidfunded`) is keyed under that token instead, which the server doesn't return: take `token` and `amount` from the lock's `SwapCreated` log.
+The lock token is fixed per chain (tBTC on Ethereum and Arbitrum, WBTC on Polygon), so `evm_htlc_token` is the `token` of every lock funded as quoted. `wbtc_address` carries the same value but is deprecated; read it only from servers that don't send `evm_htlc_token` yet.
 
-A lock worth more than the route's maximum swap amount is refused: the swap moves to `serverwontfund` and the server never pays out. `evm_htlc_locked_amount` then holds the exact amount locked, so refund it as above, or collaboratively right away.
+The table doesn't apply to a lock the server didn't accept as quoted. That covers a lock with status `clientinvalidfunded` (wrong token, claim address or timelock), and a lock that landed after the swap ended, which the server doesn't record. Such a lock is keyed under the values it was created with, so take every argument (`amount`, `token`, `sender`, `claimAddress`, `timelock`) from its `SwapCreated` log.
 
-Which contract you call depends on `evm_htlc_kind` and `evm_htlc_version`:
+A lock worth well above the route's maximum swap amount is refused: the swap moves to `serverwontfund` and the server doesn't fund it. Locks slightly above the maximum (up to 5% by default) are still accepted, because the DEX leg aims above the quote on purpose. A refused lock is recorded as it exists, so refund it as above, or collaboratively right away.
+
+Which contract you call depends on `evm_htlc_kind`, `evm_htlc_version` and `evm_coordinator_address`:
 
 - **HTLCErc20 v7+ / HTLCNative v2+**: `evm_htlc_sender` is your depositor address. After `evm_refund_locktime`, send `refund(preimageHash, amount, token, claimAddress, timelock)` to `evm_htlc_address` from that address. Native locks drop the `token` argument. Anyone can also call `refundFor(preimageHash, amount, token, sender, claimAddress, timelock)`, and the funds still go to `sender`.
-- **Older versions**: `evm_htlc_sender` is the coordinator (`evm_coordinator_address`). After `evm_refund_locktime`, call `refundTo(preimageHash, amount, token, claimAddress, timelock)` on the coordinator. Anyone can call it, and the funds always go to the depositor.
+- **HTLCErc20 up to v6**: `evm_htlc_sender` is the coordinator (`evm_coordinator_address`). After `evm_refund_locktime`, anyone can call `refundTo(preimageHash, amount, token, claimAddress, timelock)` on the coordinator, and the funds always go to the depositor.
+- **HTLCNative v1 with a coordinator**: as above, but the native coordinator's `refundTo(preimageHash, amount, claimAddress, timelock)` takes no `token`.
+- **HTLCNative v1 without a coordinator** (`evm_coordinator_address` is the zero address): the lock is your own. `evm_htlc_sender` is your address; after `evm_refund_locktime`, send `refund(preimageHash, amount, claimAddress, timelock)` to `evm_htlc_address` from it. Don't send anything to the zero address: the call would succeed without refunding.
+
+`GET /swap/{id}/refund-and-swap-calldata` builds the right call for the cases above.
 
 ---
 
