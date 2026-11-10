@@ -95,6 +95,8 @@ console.log("Refund TX:", txHash);
 
 The lock token is fixed per chain (tBTC on Ethereum and Arbitrum, WBTC on Polygon), so `evm_htlc_token` is the `token` of every lock funded as quoted. `wbtc_address` carries the same value but is deprecated; read it only from servers that don't send `evm_htlc_token` yet. A lock funded with a different token (status `clientinvalidfunded`) is keyed under that token instead, which the server doesn't return: take `token` and `amount` from the lock's `SwapCreated` log.
 
+A lock worth more than the route's maximum swap amount is refused: the swap moves to `serverwontfund` and the server never pays out. `evm_htlc_locked_amount` then holds the exact amount locked, so refund it as above, or collaboratively right away.
+
 Which contract you call depends on `evm_htlc_kind` and `evm_htlc_version`:
 
 - **HTLCErc20 v7+ / HTLCNative v2+**: `evm_htlc_sender` is your depositor address. After `evm_refund_locktime`, send `refund(preimageHash, amount, token, claimAddress, timelock)` to `evm_htlc_address` from that address. Native locks drop the `token` argument. Anyone can also call `refundFor(preimageHash, amount, token, sender, claimAddress, timelock)`, and the funds still go to `sender`.
