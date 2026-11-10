@@ -12,7 +12,7 @@ const BRAND_COLORS = [
 ];
 
 const STATS = [
-  { label: "Active Users", value: "2,400+" },
+  { label: "Swaps Completed", value: "10,000+" },
   { label: "Fund Losses", value: "Zero" },
   { label: "Platform Status", value: "Live" },
   { label: "Security Audit", value: "Passed" },
@@ -36,8 +36,10 @@ function PressPage(): ReactNode {
           <h2 className="text-2xl font-medium mb-6">About Satora</h2>
           <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-3xl">
             Satora lets people and apps swap between Bitcoin and stablecoins without sending funds to an exchange. Swaps
-            connect Bitcoin on-chain, Lightning and Arkade with tokens such as USDC, USDT and EURe on EVM networks. Hash
-            time-locked contracts (HTLCs) define how each swap is claimed, or refunded if it cannot complete.
+            connect Bitcoin on-chain, Lightning and Arkade with USDC, USDT, EURe and other tokens on Ethereum, Polygon
+            and Arbitrum, and with RBTC on Rootstock. USDC and USDT can also be delivered to many more chains, such as
+            Base, Solana, Optimism and Avalanche, through the CCTP and LayerZero bridges. Hash time-locked contracts
+            (HTLCs) define how each swap is claimed, or refunded if it cannot complete.
           </p>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -101,8 +103,9 @@ function PressPage(): ReactNode {
               <h3 className="font-medium mb-2">Short (50 words)</h3>
               <p className="text-gray-600 dark:text-gray-400 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                 Satora is a self-custodial swap service between Bitcoin and stablecoins. Users move between Bitcoin
-                on-chain, Lightning or Arkade and tokens such as USDC, USDT and EURe on EVM networks, without opening an
-                exchange account. Hash time-locked contracts define how each swap is claimed or refunded.
+                on-chain, Lightning or Arkade and USDC, USDT or EURe on Ethereum, Polygon, Arbitrum and, through CCTP
+                and LayerZero, many more chains, without opening an exchange account. Hash time-locked contracts define
+                how each swap is claimed or refunded.
               </p>
             </div>
 
@@ -110,11 +113,13 @@ function PressPage(): ReactNode {
               <h3 className="font-medium mb-2">Medium (100 words)</h3>
               <p className="text-gray-600 dark:text-gray-400 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
                 Satora is a self-custodial swap service that connects Bitcoin and stablecoins. Users swap between
-                Bitcoin on-chain, Lightning or Arkade and tokens such as USDC, USDT and EURe on Ethereum, Polygon and
-                Arbitrum, from their own wallet and without opening an exchange account. Each swap relies on hash
-                time-locked contracts (HTLCs), which define how funds are claimed and how they are refunded if a swap
-                cannot complete. Wallets, fintechs and payment apps integrate Satora through a TypeScript SDK, an API or
-                an embeddable widget. Satora was formerly known as Lendasat and LendaSwap.
+                Bitcoin on-chain, Lightning or Arkade and USDC, USDT, EURe and other tokens on Ethereum, Polygon and
+                Arbitrum, or RBTC on Rootstock, from their own wallet and without opening an exchange account. USDC and
+                USDT can also be delivered to many more chains, including Base, Solana, Optimism and Avalanche, through
+                the CCTP and LayerZero bridges. Each swap relies on hash time-locked contracts (HTLCs), which define how
+                funds are claimed and how they are refunded if a swap cannot complete. Wallets, fintechs and payment
+                apps integrate Satora through a TypeScript SDK, an API or an embeddable widget. Satora was formerly
+                known as Lendasat and LendaSwap.
               </p>
             </div>
           </div>
