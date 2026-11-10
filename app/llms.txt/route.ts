@@ -1,5 +1,5 @@
 import { blogSource } from "@/config/blog-source";
-import { swapRoutes } from "@/config/swap-routes";
+import { customSwapRoutes, swapRoutes } from "@/config/swap-routes";
 
 // Built at build time, like the sitemap, so new routes and posts appear without editing this file.
 export const dynamic = "force-static";
@@ -11,18 +11,14 @@ function item(title: string, url: string, description?: string): string {
 }
 
 export function GET(): Response {
-  const routes = [
-    // Bitcoin to USDC has its own page under app/swap, outside the shared swapRoutes list.
-    item(
-      "Swap Bitcoin to USDC",
-      `${site}/swap/bitcoin-to-usdc`,
-      "Convert Bitcoin to USDC without an exchange deposit.",
-    ),
-    ...swapRoutes.map((route) => item(route.title, `${site}/swap/${route.slug}`, route.introduction)),
-  ];
+  const routes = [...customSwapRoutes, ...swapRoutes].map((route) =>
+    item(route.title, `${site}/swap/${route.slug}`, route.introduction)
+  );
 
+  // Newest first, like the blog index.
   const posts = blogSource
     .getPages()
+    .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
     .map((post) =>
       item(post.data.title, `${site}/blog/${post.slugs.join("/")}`, post.data.subtitle ?? post.data.description)
     );
@@ -30,7 +26,7 @@ export function GET(): Response {
   const body = [
     "# Satora",
     "",
-    "> Satora is a self-custodial swap service between Bitcoin and stablecoins. It connects Bitcoin on-chain, Lightning and Arkade with tokens such as USDC, USDT and EURe on EVM networks, using hash time-locked contracts (HTLCs).",
+    "> Satora is a self-custodial swap service between Bitcoin and stablecoins. It connects Bitcoin on-chain, Lightning and Arkade with USDC, USDT, EURe and other tokens on Ethereum, Polygon and Arbitrum, and with RBTC on Rootstock, using hash time-locked contracts (HTLCs). USDC and USDT can also be delivered to many more chains, such as Base, Solana, Optimism and Avalanche, through the CCTP and LayerZero bridges.",
     "",
     "## Product",
     "",
