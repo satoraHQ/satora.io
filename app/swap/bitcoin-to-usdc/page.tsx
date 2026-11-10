@@ -43,7 +43,7 @@ const questions = [
   {
     question: "What exchange rate and fees apply?",
     answer:
-      "Satora charges a 0.5% service fee, plus applicable network fees. Enter an amount to see the current quote, then review the final quote in the app before funding your swap.",
+      "Satora charges a service fee that varies by pair and direction, plus applicable network fees. Both are shown in the quote. Enter an amount to see the current quote, then review the final quote in the app before funding your swap.",
   },
   {
     question: "Do I need to send my Bitcoin to an exchange first?",

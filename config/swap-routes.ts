@@ -80,7 +80,7 @@ function tokenRoute(token: TokenRouteKey, direction: Direction): SwapRoute {
       {
         question: "What fees will I pay?",
         answer:
-          "Satora charges a 0.5% service fee, plus applicable network fees. Review the final quote in the app and any wallet approval or funding fees before paying.",
+          "Satora charges a service fee that varies by pair and direction, plus applicable network fees. Both are shown in the quote. Review the final quote in the app and any wallet approval or funding fees before paying.",
       },
       {
         question: toBitcoin ? "Do I need gas to send the token?" : "Will I need gas after receiving the token?",
@@ -191,7 +191,7 @@ const usdcToBitcoin: SwapRoute = {
     {
       question: "What fees will I pay?",
       answer:
-        "Satora charges a 0.5% service fee, plus applicable network fees. Compare the BTC you receive and review the final quote before funding.",
+        "Satora charges a service fee that varies by pair and direction, plus applicable network fees. Both are shown in the quote. Compare the BTC you receive and review the final quote before funding.",
     },
     {
       question: "Can I choose an exact BTC amount to receive?",
@@ -284,7 +284,7 @@ const bitcoinToUsdt: SwapRoute = {
     {
       question: "What fees will I pay?",
       answer:
-        "Satora charges a 0.5% service fee, plus applicable network fees. Review the final quote in the app before funding.",
+        "Satora charges a service fee that varies by pair and direction, plus applicable network fees. Both are shown in the quote. Review the final quote in the app before funding.",
     },
     {
       question: "How long does the swap take?",
@@ -387,7 +387,7 @@ const usdtToBitcoin: SwapRoute = {
     {
       question: "What fees will I pay?",
       answer:
-        "Satora charges a 0.5% service fee, plus applicable network fees. Check the final BTC amount and any source-wallet transaction fees before funding.",
+        "Satora charges a service fee that varies by pair and direction, plus applicable network fees. Both are shown in the quote. Check the final BTC amount and any source-wallet transaction fees before funding.",
     },
     {
       question: "Can I receive Bitcoin directly on Lightning?",
@@ -435,10 +435,16 @@ export const swapRoutes: SwapRoute[] = [
 
 // Swap pages with their own hand-built layout under `app/swap/<slug>`. A static
 // folder takes precedence over the `[route]` segment.
-export const customSwapRouteSlugs = ["bitcoin-to-usdc"] as const;
+export const customSwapRoutes: Pick<SwapRoute, "slug" | "title" | "introduction">[] = [
+  {
+    slug: "bitcoin-to-usdc",
+    title: "Swap Bitcoin to USDC",
+    introduction: "Convert Bitcoin to USDC without an exchange deposit.",
+  },
+];
 
 export const swapRoutePaths = [
-  ...customSwapRouteSlugs.map((slug) => `/swap/${slug}`),
+  ...customSwapRoutes.map((route) => `/swap/${route.slug}`),
   ...swapRoutes.map((route) => `/swap/${route.slug}`),
 ];
 
