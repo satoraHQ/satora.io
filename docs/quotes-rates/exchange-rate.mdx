@@ -108,4 +108,4 @@ Specify either `sourceAmount` OR `targetAmount`, not both. Use `targetAmount` to
 | `target_amount`       | string         | Pre-calculated target amount in the smallest unit of the target token (pre-fee). String for BigInt safety.                                                                |
 | `net_source_amount`   | string         | Net source amount the user actually sends, including all fees. Equals `source_amount` when `sourceAmount` was provided; otherwise `source_amount + fees_in_source_units`. |
 | `net_target_amount`   | string         | Net target amount the user actually receives, after all fees. Equals `target_amount` when `targetAmount` was provided; otherwise `target_amount - fees_in_target_units`.  |
-| `bridge_fee`          | number \| null | CCTP bridge forwarding fee in USDC smallest units (6 decimals). Only present when `bridge_target_chain` was specified in the quote request.                               |
+| `bridge_fee`          | number \| null | CCTP bridge fee in USDC smallest units (6 decimals). Only present when `bridge_target_chain` was specified in the quote request.                                          |
