@@ -55,6 +55,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Only run on page requests, skip static assets and API routes
-  matcher: ["/((?!_next/static|_next/image|favicon|assets|img|api/).*)"],
+  // Only run on page requests, skip static assets, API routes and llms.txt
+  matcher: ["/((?!_next/static|_next/image|favicon|assets|img|api/|llms.txt).*)"],
 };

@@ -28,7 +28,7 @@ We strongly recommend using the **TypeScript SDK** for all integrations. It hand
 
 The SDK is pure TypeScript - no WASM or native dependencies. It works in browsers, React Native, and Node.js out of the box.
 
-If the TypeScript SDK doesn't work for your use case, contact support@lendasat.com.
+If the TypeScript SDK doesn't work for your use case, contact support@satora.io.
 
 ---
 

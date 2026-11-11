@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Imprint",
-  description: "Company information for Lendasat",
+  description: "Company information for Satora, operated by Lendasat Inc.",
   alternates: { canonical: "/imprint" },
 };
 

@@ -18,7 +18,7 @@ const FAQS = [
   ],
   [
     "What fees will I pay?",
-    "Satora's service fee is dynamic and depends on supply and demand. Applicable network fees are charged separately. The live quote shows the amount you receive and fees before you continue.",
+    "Satora charges a service fee on each swap. Network fees come on top and depend on the chains used. The live quote shows the amount you receive and fees before you continue.",
   ],
   [
     "How long does a swap take?",

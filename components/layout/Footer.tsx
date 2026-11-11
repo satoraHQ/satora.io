@@ -50,7 +50,7 @@ export default function Footer() {
                 Contact
               </a>
               <a
-                href="https://status.lendasat.com/status/satora"
+                href="https://status.satora.io/status/satora"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={linkClass + " flex items-center gap-2"}
