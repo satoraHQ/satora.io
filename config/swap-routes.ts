@@ -4,6 +4,15 @@ import { tokenRouteContent, type TokenRouteKey } from "@/config/token-route-cont
 export type Guide = { title: string; text: string };
 export type Question = { question: string; answer: string };
 export type ContentSection = { title: string; paragraphs: string[]; link?: { href: string; label: string } };
+export type DedicatedSite = { href: string; name: string };
+
+// Satora's single-pair sites. A swap page links to the one for its token.
+export const dedicatedSites = {
+  usdc: { href: "https://usdc2bitcoin.com", name: "usdc2bitcoin.com" },
+  usdt: { href: "https://usdt2bitcoin.com", name: "usdt2bitcoin.com" },
+  tbtc: { href: "https://tbtc2bitcoin.com", name: "tbtc2bitcoin.com" },
+  cirbtc: { href: "https://cirbtc2bitcoin.com", name: "cirbtc2bitcoin.com" },
+} satisfies Record<string, DedicatedSite>;
 
 // One entry per `/swap/<slug>` landing page, rendered by `app/swap/[route]`.
 export interface SwapRoute {
@@ -19,6 +28,7 @@ export interface SwapRoute {
   networkGuides: Guide[];
   questions: Question[];
   sections: ContentSection[];
+  dedicatedSite?: DedicatedSite;
 }
 
 type Direction = "to-bitcoin" | "from-bitcoin";
@@ -115,6 +125,7 @@ function tokenRoute(token: TokenRouteKey, direction: Direction): SwapRoute {
         ],
       },
     ],
+    dedicatedSite: token in dedicatedSites ? dedicatedSites[token as keyof typeof dedicatedSites] : undefined,
   };
 }
 
@@ -128,6 +139,7 @@ const usdcToBitcoin: SwapRoute = {
   initialSourceId: "1:USDC",
   initialTargetId: "bitcoin:BTC",
   assetScope: "bitcoin-usdc",
+  dedicatedSite: dedicatedSites.usdc,
   explanation: {
     title: "Get BTC where you want to use it",
     paragraphs: [
@@ -232,6 +244,7 @@ const bitcoinToUsdt: SwapRoute = {
   initialSourceId: "bitcoin:BTC",
   initialTargetId: "1:USDT",
   assetScope: "bitcoin-usdt",
+  dedicatedSite: dedicatedSites.usdt,
   explanation: {
     title: "Pay in Bitcoin, receive Tether",
     paragraphs: [
@@ -325,6 +338,7 @@ const usdtToBitcoin: SwapRoute = {
   initialSourceId: "1:USDT",
   initialTargetId: "bitcoin:BTC",
   assetScope: "bitcoin-usdt",
+  dedicatedSite: dedicatedSites.usdt,
   explanation: {
     title: "Turn your USDT balance into Bitcoin",
     paragraphs: [
@@ -427,6 +441,8 @@ export const swapRoutes: SwapRoute[] = [
   tokenRoute("wbtc", "from-bitcoin"),
   tokenRoute("tbtc", "to-bitcoin"),
   tokenRoute("tbtc", "from-bitcoin"),
+  tokenRoute("cirbtc", "to-bitcoin"),
+  tokenRoute("cirbtc", "from-bitcoin"),
   tokenRoute("usat", "to-bitcoin"),
   tokenRoute("usat", "from-bitcoin"),
   tokenRoute("xaut", "to-bitcoin"),

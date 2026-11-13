@@ -66,6 +66,14 @@ const ASSETS: SwapAsset[] = [
     networkIcon: "/assets/chains/ethereum.svg",
   },
   {
+    id: "1:cirBTC",
+    symbol: "cirBTC",
+    chain: "Ethereum",
+    decimals: 8,
+    kind: "evm",
+    networkIcon: "/assets/chains/ethereum.svg",
+  },
+  {
     id: "1:USAT",
     symbol: "USAT",
     chain: "Ethereum",
@@ -213,6 +221,7 @@ export type SwapAssetScope =
   | "bitcoin-usdt"
   | "bitcoin-wbtc"
   | "bitcoin-tbtc"
+  | "bitcoin-cirbtc"
   | "bitcoin-usat"
   | "bitcoin-xaut";
 
@@ -726,6 +735,8 @@ function TokenBadge({ symbol, size }: { symbol: string; size: "small" | "large" 
       return <TokenWBTC size={iconSize} variant="branded" aria-hidden="true" />;
     case "TBTC":
       return <TokenTBTC size={iconSize} variant="branded" aria-hidden="true" />;
+    case "CIRBTC":
+      return <Image src="/assets/tokens/cirbtc.svg" alt="" width={iconSize} height={iconSize} />;
     case "XAUT":
       return <TokenXAUT size={iconSize} variant="branded" aria-hidden="true" />;
     case "EURC":
@@ -759,7 +770,7 @@ function getTokenBadge(symbol: string): { label: string; className: string } {
 
 function getAmountPrefix(asset: SwapAsset): string {
   const symbol = asset.symbol.toUpperCase();
-  if (["BTC", "WBTC", "TBTC"].includes(symbol)) return "₿";
+  if (["BTC", "WBTC", "TBTC", "CIRBTC"].includes(symbol)) return "₿";
   if (["EURC", "EURE"].includes(symbol)) return "€";
   if (symbol === "XAUT") return "Au";
   if (["USDC", "USDT", "USDT0", "USAT"].includes(symbol)) return "$";

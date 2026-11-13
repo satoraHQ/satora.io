@@ -1,7 +1,9 @@
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import HomepageSwapWidget from "@/components/sections/HomepageSwapWidget";
+import { DedicatedSiteLink } from "@/components/sections/SwapRoutePage";
 import SwapRouteTree from "@/components/sections/SwapRouteTree";
+import { dedicatedSites } from "@/config/swap-routes";
 import type { Metadata } from "next";
 
 const title = "Swap Bitcoin to USDC";
@@ -97,6 +99,7 @@ export default function BitcoinToUsdcPage() {
               Choose your networks and amount, then continue in the Satora app to add your receiving address and
               complete the swap.
             </p>
+            <DedicatedSiteLink site={dedicatedSites.usdc} pair="USDC and Bitcoin" />
           </div>
         </section>
 

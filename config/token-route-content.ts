@@ -45,6 +45,29 @@ export const tokenRouteContent = {
       "No. tBTC is an EVM token. Use the swap to receive BTC at compatible Bitcoin receiving details; do not transfer tBTC itself to a Bitcoin address.",
     source: "https://docs.threshold.network/tbtc-v2",
   },
+  cirbtc: {
+    symbol: "cirBTC",
+    name: "Circle Wrapped Bitcoin",
+    assetId: "1:cirBTC",
+    networks: "Ethereum",
+    definition:
+      "cirBTC is Circle Wrapped Bitcoin, a token backed by Bitcoin and issued by Circle. Holding it in an EVM wallet is different from holding BTC in a Bitcoin wallet.",
+    toBitcoin:
+      "Swap your cirBTC balance for BTC in a Bitcoin, Lightning or Arkade wallet, without an exchange deposit.",
+    fromBitcoin: "Get cirBTC on Ethereum from Bitcoin without first depositing BTC on a centralized exchange.",
+    toHeading: "From cirBTC to the Bitcoin network you use",
+    fromHeading: "Receive cirBTC for an EVM use case",
+    toUse:
+      "Choose on-chain Bitcoin if you want BTC at a Bitcoin address, or select Lightning or Arkade for a compatible wallet. You receive BTC through the selected route, not another wrapped token.",
+    fromUse:
+      "Receive cirBTC in a compatible Ethereum wallet. Confirm that the application or recipient accepts cirBTC on Ethereum; other Bitcoin tokens such as WBTC or tBTC are different contracts.",
+    distinction:
+      "This is a market swap, not a request to mint or redeem cirBTC with Circle. Review the net quote instead of assuming you receive exactly 1 BTC for 1 cirBTC after fees.",
+    question: "Does swapping cirBTC to BTC mean redeeming it with Circle?",
+    answer:
+      "No. Satora provides a swap route. It is separate from Circle's minting and redemption process, and the amount received depends on the quote and fees.",
+    source: "https://www.circle.com/cirbtc",
+  },
   usat: {
     symbol: "USAT",
     name: "USA₮",

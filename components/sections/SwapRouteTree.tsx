@@ -10,6 +10,7 @@ const tokens = [
   { symbol: "USDT", slug: "usdt", caption: "USDT & USDT0" },
   { symbol: "WBTC", slug: "wbtc", caption: "Wrapped Bitcoin" },
   { symbol: "tBTC", slug: "tbtc", caption: "Tokenized Bitcoin" },
+  { symbol: "cirBTC", slug: "cirbtc", caption: "Wrapped by Circle" },
   { symbol: "USAT", slug: "usat", caption: "Dollar stablecoin" },
   { symbol: "XAUt", slug: "xaut", caption: "Tokenized gold" },
 ];
@@ -70,11 +71,11 @@ export default function SwapRouteTree({
           </div>
           <div className={styles.connections}>
             {/* Node centers match the row heights and spacing in the CSS module. */}
-            <svg viewBox="0 0 600 384" preserveAspectRatio="none" aria-hidden="true">
+            <svg viewBox="0 0 600 448" preserveAspectRatio="none" aria-hidden="true">
               {bitcoinNetworks.map((network, index) => (
                 <path
                   key={network.name}
-                  d={`M 0 ${96 + index * 96} C 145 ${96 + index * 96}, 155 192, 300 192`}
+                  d={`M 0 ${128 + index * 96} C 145 ${128 + index * 96}, 155 224, 300 224`}
                   className={styles.path}
                   vectorEffect="non-scaling-stroke"
                 />
@@ -82,7 +83,7 @@ export default function SwapRouteTree({
               {tokens.map((token, index) => (
                 <path
                   key={token.slug}
-                  d={`M 300 192 C 445 192, 455 ${32 + index * 64}, 600 ${32 + index * 64}`}
+                  d={`M 300 224 C 445 224, 455 ${32 + index * 64}, 600 ${32 + index * 64}`}
                   className={active === token.slug ? styles.activePath : styles.path}
                   vectorEffect="non-scaling-stroke"
                 />

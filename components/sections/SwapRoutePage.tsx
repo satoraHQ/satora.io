@@ -2,8 +2,21 @@ import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
 import HomepageSwapWidget from "@/components/sections/HomepageSwapWidget";
 import SwapRouteTree from "@/components/sections/SwapRouteTree";
-import type { SwapRoute } from "@/config/swap-routes";
+import type { DedicatedSite, SwapRoute } from "@/config/swap-routes";
 import type { Metadata } from "next";
+
+// Points to Satora's single-pair site for the page's token, when there is one.
+export function DedicatedSiteLink({ site, pair }: { site: DedicatedSite; pair: string }) {
+  return (
+    <p className="mx-auto mt-3 max-w-xl text-center text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+      Only swapping {pair}? Use our dedicated site{" "}
+      <a href={site.href} className="font-medium text-[#607300] underline underline-offset-4 dark:text-lime-light">
+        {site.name}
+      </a>
+      .
+    </p>
+  );
+}
 
 export function swapRouteMetadata(title: string, description: string, path: string): Metadata {
   return {
@@ -58,6 +71,9 @@ export default function SwapRoutePage({ route }: { route: SwapRoute }) {
               Choose your networks and amount, then continue in the Satora app to add your receiving details and
               complete the swap.
             </p>
+            {route.dedicatedSite && (
+              <DedicatedSiteLink site={route.dedicatedSite} pair={`${currentToken} and Bitcoin`} />
+            )}
           </div>
         </section>
 

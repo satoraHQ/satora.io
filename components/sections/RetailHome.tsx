@@ -14,7 +14,7 @@ const FAQS = [
   ],
   [
     "Which assets and EVM networks are available?",
-    "Available EVM assets include USDC, USDT and USDT0, USAT, EURC, EURe, WBTC, tBTC and XAUt. Availability varies by network and swap direction, while USDC and USDT bridge routes extend to additional supported networks. The Satora app shows the live routes for your chosen source.",
+    "Available EVM assets include USDC, USDT and USDT0, USAT, EURC, EURe, WBTC, tBTC, cirBTC and XAUt. Availability varies by network and swap direction, while USDC and USDT bridge routes extend to additional supported networks. The Satora app shows the live routes for your chosen source.",
   ],
   [
     "What fees will I pay?",
