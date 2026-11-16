@@ -1,0 +1,189 @@
+---
+title: "MCP endpoint"
+description: "Connect AI assistants and agents to Satora for asset discovery, swap quotes, and status checks."
+icon: "plug"
+---
+
+Satora exposes a public, read-only [Model Context Protocol (MCP)](https://modelcontextprotocol.io/)
+endpoint. Connect an MCP-compatible assistant or agent to look up supported
+assets and routes, request an indicative quote, or check an existing swap.
+
+## Connect
+
+- **Server URL:** `https://api.satora.io/mcp`
+- **Transport:** Streamable HTTP
+- **Authentication:** No API key or wallet connection required for these tools.
+
+In your client's MCP server settings, add a remote server named `satora`, select
+Streamable HTTP, and enter the server URL above. Configuration file formats vary
+by client; use its remote MCP server instructions. The client handles protocol
+negotiation and tool discovery.
+
+For self-hosted Satora deployments, use your API base URL followed by `/mcp`.
+The endpoint runs in the main daemon and requires a version containing MCP
+support.
+
+<Note>
+  These tools provide information only. They cannot create, fund, sign, claim,
+  or refund a swap. Use the [SDK integration](/api-sdk) to execute swaps.
+  Never provide a seed phrase or private key to the MCP server.
+</Note>
+
+## Available tools
+
+| Tool              | Arguments                                                         | Result                                                                             |
+| ----------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `list_tokens`     | `{}`                                                              | Configured Bitcoin and EVM assets, including identifiers and decimals.             |
+| `list_swap_pairs` | `{}`                                                              | Enabled routes, swap size limits, and protocol fees.                               |
+| `get_swap_quote`  | Source and target assets, exactly one amount, and optional `ref`. | An indicative BTC-to/from-EVM quote using the public API's pricing and validation. |
+| `get_swap_status` | `swap_id`: one existing swap UUID.                                | `statuses` and `not_found` arrays for that ID.                                     |
+
+All four tools are marked read-only. Tool results include `structuredContent`
+for programmatic use and text content for clients that display text results.
+
+### Discover assets and routes
+
+Start with `list_tokens` and `list_swap_pairs`. Use the returned chain and token
+identifiers when requesting a quote. Bitcoin-side identifiers include
+`Bitcoin`, `Lightning`, and `Arkade`; EVM identifiers are chain ID strings, such
+as `"137"` for Polygon. EVM token identifiers are contract addresses; Bitcoin
+uses `"btc"`.
+
+A configured route does not guarantee current liquidity. Request a quote for
+the intended amount before presenting an estimate to a user.
+
+### Request a quote
+
+`get_swap_quote` accepts these arguments:
+
+| Argument        | Required   | Description                                                           |
+| --------------- | ---------- | --------------------------------------------------------------------- |
+| `source_chain`  | Yes        | Source chain identifier from discovery.                               |
+| `source_token`  | Yes        | Source token identifier from discovery.                               |
+| `target_chain`  | Yes        | Destination chain identifier from discovery.                          |
+| `target_token`  | Yes        | Destination token identifier from discovery.                          |
+| `source_amount` | One amount | Positive integer **string** in the source asset's smallest unit.      |
+| `target_amount` | One amount | Positive integer **string** in the destination asset's smallest unit. |
+| `ref`           | No         | Referral code, using the same fee attribution as the REST API.        |
+
+Supply exactly one of `source_amount` or `target_amount`. Amounts use satoshis
+for Bitcoin and raw token units for EVM assets. For example, `"100000"` means
+100,000 satoshis for BTC; `"1000000"` means one token for a token with six
+decimals. Read decimals from discovery and preserve amounts as integer strings
+to avoid floating-point rounding.
+
+Example tool arguments for a Bitcoin-to-Polygon-USDC quote:
+
+```json
+{
+  "source_chain": "Bitcoin",
+  "source_token": "btc",
+  "target_chain": "137",
+  "target_token": "0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359",
+  "source_amount": "100000"
+}
+```
+
+The quote uses the same response data as [GET /quote](/api-reference/quote).
+It does not reserve a price or authorize spending. Fetch a fresh quote when
+needed. Bridged routes and bridge-specific quote parameters are not exposed by
+this MCP tool.
+
+### Check swap status
+
+Call `get_swap_status` with a UUID supplied by the user:
+
+```json
+{
+  "swap_id": "00000000-0000-4000-8000-000000000000"
+}
+```
+
+Replace the example UUID with the actual swap ID. A found swap appears in
+`statuses` as an object with `id` and `status`; an unknown UUID appears in
+`not_found`. An invalid UUID is a tool error. See the
+[swap state machine](/advanced/state-machine) for status meanings.
+
+Anyone who knows a swap UUID can look up its status. This tool returns no
+addresses, invoices, secrets, or wallet history, and provides no way to list a
+user's swaps.
+
+## HTTP example
+
+An MCP client normally handles these exchanges. For a manual request, the
+following example initializes protocol version `2025-11-25`, which the endpoint
+supports. Check the returned `protocolVersion` and use that negotiated version
+on subsequent requests.
+
+```bash
+curl --fail-with-body https://api.satora.io/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  --data '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"satora-example","version":"1.0.0"}}}'
+```
+
+Send the initialized notification, then discover the tool schemas:
+
+```bash
+curl --fail-with-body https://api.satora.io/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H 'MCP-Protocol-Version: 2025-11-25' \
+  --data '{"jsonrpc":"2.0","method":"notifications/initialized"}'
+
+curl --fail-with-body https://api.satora.io/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H 'MCP-Protocol-Version: 2025-11-25' \
+  --data '{"jsonrpc":"2.0","id":2,"method":"tools/list"}'
+```
+
+Call a tool through the same endpoint:
+
+```bash
+curl --fail-with-body https://api.satora.io/mcp \
+  -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -H 'MCP-Protocol-Version: 2025-11-25' \
+  --data '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"list_swap_pairs","arguments":{}}}'
+```
+
+The transport is stateless and prefers JSON responses. No `Mcp-Session-Id`
+is needed, and persistent SSE sessions are not offered. Other negotiated
+protocol versions can have additional metadata requirements; use a compatible
+MCP client for those versions.
+
+## Errors and limits
+
+Check both the HTTP response and the MCP result. A tool can return HTTP 200
+with `result.isError: true`. API handler failures include an `error` message
+and a numeric `status` in `result.structuredContent`. Protocol errors, such as
+an unknown method, use the JSON-RPC `error` field. Internal service details are
+redacted.
+
+The endpoint allows 120 requests per minute per caller IP, limits request bodies
+to 16 KiB, and applies a 30-second handler timeout. Avoid frequent status
+polling and back off when you receive HTTP 429.
+
+Browser requests carrying an `Origin` header are rejected by default. A native
+or server-side MCP client without that header can connect. Operators can permit
+specific browser origins with `MCP_ALLOWED_ORIGINS`; a browser integration
+requires an allowed origin on its target deployment.
+
+## Self-hosted configuration
+
+The endpoint uses the daemon's public API listener. Configure these
+comma-separated environment variables before starting the daemon:
+
+- `MCP_ALLOWED_HOSTS`: permitted request hosts. Defaults to
+  `api.satora.io,localhost,127.0.0.1,::1`. Set your deployment's hostname and
+  preserve `Host` in the reverse proxy. An empty value retains the defaults.
+- `MCP_ALLOWED_ORIGINS`: permitted browser origins, for example
+  `https://your-app.example:443`. By default, every request with an `Origin`
+  header is rejected. Requests without that header are accepted subject to the
+  other endpoint checks.
+
+Forward the original caller IP according to the daemon's trusted-proxy setup
+so rate limits apply to individual clients. See the
+[deployment README](https://github.com/satoraHQ/swap#deployment) for proxy
+configuration.

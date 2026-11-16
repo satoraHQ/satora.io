@@ -131,6 +131,7 @@
             "icon": "heart-pulse",
             "pages": [
               "api-reference/health",
+              "api-reference/mcp",
               "api-reference/version",
               "api-reference/mtp"
             ]

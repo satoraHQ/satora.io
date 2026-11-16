@@ -20,6 +20,17 @@ Satora is designed for developers and power users who need a seamless, non-custo
 
 ---
 
+## MCP endpoint
+
+- Server URL: https://api.satora.io/mcp
+- Transport: Streamable HTTP, stateless; no API key required for these read-only tools.
+- Guide: https://docs.satora.io/api-reference/mcp
+- Tools: `list_tokens`, `list_swap_pairs`, `get_swap_quote`, `get_swap_status`.
+- Quotes accept source_chain, source_token, target_chain, target_token, exactly one of source_amount or target_amount (positive integer strings in base units), and optional ref. Bridged routes are not exposed.
+- Status lookup accepts one swap_id UUID and returns statuses and not_found arrays. Anyone who knows the UUID can look up its status; no wallet history, addresses, or invoices are returned.
+- Limits: 120 requests/minute per caller IP, 16 KiB request bodies, 30-second handler timeout. Browser Origin headers require an operator allowlist.
+- Quotes are indicative. The server cannot create, fund, sign, claim, or refund swaps and never needs wallet seeds or private keys.
+
 ## API & SDK
 
 **The REST API is not intended for direct production use.** The API surface may change without notice and lacks guarantees around stability, rate limits, and support.

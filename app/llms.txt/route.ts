@@ -47,6 +47,11 @@ export function GET(): Response {
     "",
     item("Documentation index", "https://docs.satora.io/llms.txt", "API reference, SDK guides and FAQ."),
     item("Full documentation", "https://docs.satora.io/llms-full.txt"),
+    item(
+      "MCP endpoint",
+      "https://docs.satora.io/api-reference/mcp",
+      "Connect to https://api.satora.io/mcp over Streamable HTTP for read-only asset discovery, quotes and swap status.",
+    ),
     "",
     "## Blog",
     "",
