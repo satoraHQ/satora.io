@@ -27,7 +27,9 @@ Tell us about your project and we'll work with you on a solution.
 
 Connect an MCP client to `https://api.satora.io/mcp` using Streamable HTTP.
 The public, read-only endpoint offers token and route discovery, indicative
-swap quotes, and status lookup for a supplied swap UUID. No API key is required.
+swap quotes, status lookup for a supplied swap UUID, and discovery of CCTP USDC
+and LayerZero OFT USDT0 bridge capabilities. Bridge quotes and execution use
+`@satora/swap`. No API key is required for MCP discovery.
 Swap execution and wallet signing remain in your SDK or wallet integration.
 
 <Card title="MCP endpoint" icon="plug" href="/api-reference/mcp">

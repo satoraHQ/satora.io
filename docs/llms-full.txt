@@ -25,7 +25,8 @@ Satora is designed for developers and power users who need a seamless, non-custo
 - Server URL: https://api.satora.io/mcp
 - Transport: Streamable HTTP, stateless; no API key required for these read-only tools.
 - Guide: https://docs.satora.io/api-reference/mcp
-- Tools: `list_tokens`, `list_swap_pairs`, `get_swap_quote`, `get_swap_status`.
+- Tools: `list_tokens`, `list_swap_pairs`, `list_bridge_capabilities`, `get_swap_quote`, `get_swap_status`.
+- Bridge discovery advertises CCTP USDC outbound/inbound and LayerZero OFT USDT0 outbound via Arbitrum, filtered by enabled directions. Solana inbound uses a separate SDK signer flow; Tron USDT payouts require a verified configured adapter. These routes require the SDK for quotes and execution; discovery does not guarantee live availability.
 - Quotes accept source_chain, source_token, target_chain, target_token, exactly one of source_amount or target_amount (positive integer strings in base units), and optional ref. Bridged routes are not exposed.
 - Status lookup accepts one swap_id UUID and returns statuses and not_found arrays. Anyone who knows the UUID can look up its status; no wallet history, addresses, or invoices are returned.
 - Limits: 120 requests/minute per caller IP, 16 KiB request bodies, 30-second handler timeout. Browser Origin headers require an operator allowlist.

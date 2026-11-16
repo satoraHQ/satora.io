@@ -38,7 +38,7 @@ support.
 | `get_swap_quote`  | Source and target assets, exactly one amount, and optional `ref`. | An indicative BTC-to/from-EVM quote using the public API's pricing and validation. |
 | `get_swap_status` | `swap_id`: one existing swap UUID.                                | `statuses` and `not_found` arrays for that ID.                                     |
 
-All four tools are marked read-only. Tool results include `structuredContent`
+All five tools are marked read-only. Tool results include `structuredContent`
 for programmatic use and text content for clients that display text results.
 
 ### Discover assets and routes
@@ -51,6 +51,44 @@ uses `"btc"`.
 
 A configured route does not guarantee current liquidity. Request a quote for
 the intended amount before presenting an estimate to a user.
+
+### Discover CCTP and LayerZero bridge routes
+
+Call `list_bridge_capabilities` to discover Satora's bridge support beyond the
+direct routes returned by `list_swap_pairs`. Both bridge families settle through
+Arbitrum (`chain_id: "42161"`):
+
+- **CCTP:** USDC payouts to supported destination chains and inbound USDC funding
+  from supported foreign chains. Solana inbound funding uses the SDK's separate
+  Solana signer flow. Ethereum, Polygon, and Arbitrum inbound funding use the
+  SDK's direct path and are excluded from the inbound CCTP list.
+- **LayerZero OFT:** USDT0 payouts to supported destinations, with native USDT
+  on Ethereum. Native USDT payouts
+  to Tron appear only when the deployment's adapter is configured and verified.
+  This tool does not advertise LayerZero inbound funding.
+
+Each bridge has `outbound.bitcoin_sources` and `outbound.destinations`, plus
+`inbound.sources` and `inbound.bitcoin_destinations`. Directions are filtered by
+the deployment's enabled Bitcoin/Lightning/Arkade routes to and from Arbitrum;
+disabled directions have empty arrays. Chain entries include the asset's symbol,
+token address and decimals, address format, and the protocol-specific domain or
+endpoint ID. `chain_id` is an EVM chain ID string, or `null` for Solana and Tron.
+CCTP domain IDs and LayerZero endpoint IDs are not EVM chain IDs.
+
+The result explicitly sets `mcp_quote_supported` and `mcp_execution_supported`
+to `false` and points to `@satora/swap`. Use that SDK for bridge quotes and
+execution; do not pass these foreign-chain identifiers to `get_swap_quote`.
+Discovery reports configured capabilities, not live liquidity, fee estimates,
+pause status, or a guarantee of settlement. Obtain a fresh SDK quote.
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tools/call",
+  "params": { "name": "list_bridge_capabilities", "arguments": {} }
+}
+```
 
 ### Request a quote
 
@@ -87,7 +125,7 @@ Example tool arguments for a Bitcoin-to-Polygon-USDC quote:
 The quote uses the same response data as [GET /quote](/api-reference/quote).
 It does not reserve a price or authorize spending. Fetch a fresh quote when
 needed. Bridged routes and bridge-specific quote parameters are not exposed by
-this MCP tool.
+this MCP tool. Use `list_bridge_capabilities` to discover those SDK routes.
 
 ### Check swap status
 
