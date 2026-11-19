@@ -1,24 +1,32 @@
 ---
 title: API, SDK, MCP & Iframe
-description: Integrate Satora Swaps into your application using our TypeScript SDK, REST API, MCP endpoint, or iframe embed
+description: Integrate Satora Swaps using the TypeScript or Rust SDK, REST API, MCP endpoint, or iframe embed
 icon: "code"
 ---
 
-## TypeScript SDK (Recommended)
+## TypeScript SDK
 
-Our SDK is pure TypeScript - no WASM or native dependencies. It works in browsers, React Native, and Node.js out of the box.
+`@satora/swap` is the recommended SDK for browsers, React Native, and Node.js. It uses pure TypeScript and has no WASM or native dependencies.
 
 <CardGroup>
     <Card icon="npm" title="NPM Package" href="https://www.npmjs.com/package/@satora/swap" />
-    <Card icon="github" title="GitHub Repository" href="https://github.com/satoraHQ/lendaswap-sdk/tree/main/ts-pure-sdk" />
+    <Card icon="github" title="GitHub Repository" href="https://github.com/satoraHQ/satora-sdk/tree/main/ts-sdk/packages/swap" />
 </CardGroup>
 
-If the TypeScript SDK doesn't work for your use case - whether you're using a different language, need a custom integration, or have specific requirements - please reach out to us directly.
+## Rust SDK
+
+Use `satora-rust-sdk` for Rust integrations. The SDK handles swap creation, key management, and recovery. Its README lists supported swap routes and includes usage examples.
+
+For a native Swift or Kotlin app, you can wrap the Rust SDK with your own bindings. Satora currently ships no Swift or Kotlin bindings.
+
+<Card icon="github" title="Rust SDK README" href="https://github.com/satoraHQ/satora-sdk/blob/main/rust-sdk/README.md" />
+
+If you need help with native bindings or another custom integration, reach out to us.
 
 <Card 
   title="Contact us" 
   icon="envelope" 
-  href="mailto:support@satora.io?subject=Satora%20Swaps%20API%20Integration%20Request&body=Hi%20Satora%20team%2C%0A%0AI%27d%20like%20to%20integrate%20Satora%20Swaps%20but%20the%20TypeScript%20SDK%20doesn%27t%20fit%20my%20use%20case.%0A%0A%23%23%20My%20use%20case%0A%5BDescribe%20what%20you%27re%20building%20and%20how%20you%20plan%20to%20use%20Satora%20Swaps%5D%0A%0A%23%23%20Language%20%2F%20Platform%0A%5Be.g.%20Python%2C%20Go%2C%20Rust%2C%20Swift%2C%20Kotlin%2C%20etc.%5D%0A%0A%23%23%20Expected%20volume%0A%5Be.g.%20number%20of%20swaps%20per%20day%2Fmonth%5D%0A%0AThanks!"
+  href="mailto:support@satora.io?subject=Satora%20Swaps%20Integration"
 >
 Tell us about your project and we'll work with you on a solution.
 </Card>
@@ -62,7 +70,7 @@ Sign up to track your swaps, manage referral codes, and monitor your integration
 ## REST API
 
 <Warning>
-**The REST API is not intended for direct production use.** The API surface may change without notice and lacks guarantees around stability, rate limits, and support. We strongly recommend using the TypeScript SDK instead.
+**The REST API is not intended for direct production use.** The API surface may change without notice and lacks guarantees around stability, rate limits, and support. Use the TypeScript or Rust SDK for production integrations.
 </Warning>
 
 <Card title="API Reference" icon="book" href="/api-reference/health">

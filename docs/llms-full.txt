@@ -3,7 +3,8 @@
 > Satora enables instant, trustless swaps between Bitcoin (via Lightning, Arkade, or on-chain) and EVM tokens on Polygon, Ethereum, and Arbitrum.
 
 - NPM: https://www.npmjs.com/package/@satora/swap
-- GitHub: https://github.com/satoraHQ/lendaswap-sdk/tree/main/ts-pure-sdk
+- TypeScript SDK: https://github.com/satoraHQ/satora-sdk/tree/main/ts-sdk/packages/swap
+- Rust SDK: https://github.com/satoraHQ/satora-sdk/blob/main/rust-sdk/README.md
 - Docs: https://docs.satora.io
 
 ---
@@ -16,7 +17,7 @@ Satora is designed for developers and power users who need a seamless, non-custo
 - **Fast**: Swaps complete in minutes via Lightning/Arkade/On-chain.
 - **Gasless**: Satora covers gas fees on all EVM chains (Polygon, Ethereum, Arbitrum) for token claims. A small gas fee is deducted from the swap amount.
 - **Multi-Token**: Swap to supported ERC-20 tokens via Uniswap V3 DEX routing.
-- **Developer First**: Clean REST API and idiomatic TypeScript SDK.
+- **Developer First**: TypeScript and Rust SDKs.
 
 ---
 
@@ -36,11 +37,11 @@ Satora is designed for developers and power users who need a seamless, non-custo
 
 **The REST API is not intended for direct production use.** The API surface may change without notice and lacks guarantees around stability, rate limits, and support.
 
-We strongly recommend using the **TypeScript SDK** for all integrations. It handles wallet management, state tracking, error recovery, and edge cases that are difficult to get right with raw API calls.
+Use an SDK for production integrations.
 
-The SDK is pure TypeScript - no WASM or native dependencies. It works in browsers, React Native, and Node.js out of the box.
+Use the **TypeScript SDK** (`@satora/swap`) in browsers, React Native, and Node.js. It has no WASM or native dependencies. The setup and code examples below use TypeScript.
 
-If the TypeScript SDK doesn't work for your use case, contact support@satora.io.
+Use the **Rust SDK** (`satora-rust-sdk`) for Rust integrations. You can wrap it for native Swift or Kotlin apps with your own bindings. See the [Rust SDK README](https://github.com/satoraHQ/satora-sdk/blob/main/rust-sdk/README.md) for supported routes and examples.
 
 ---
 
@@ -1494,10 +1495,10 @@ Satora charges a small percentage fee on each swap, plus network fees. Use the q
 ### Integration
 
 **Should I use the SDK or the REST API?**
-Use the TypeScript SDK. It handles wallet management, state tracking, error recovery, and gasless claiming out of the box. The REST API is available but not recommended for production use.
+Use the TypeScript or Rust SDK for production integrations. The REST API may change without notice.
 
-**Which platforms does the SDK support?**
-The SDK is pure TypeScript with zero native dependencies. It works in browsers (any modern browser), React Native (with custom storage adapters), and Node.js (server-side integrations). No WASM, no native modules.
+**Which platforms do the SDKs support?**
+The TypeScript SDK works in browsers, React Native (with custom storage adapters), and Node.js. The Rust SDK works in Rust applications. Native Swift and Kotlin apps can use the Rust SDK through bindings you provide.
 
 **Do I need an API key?**
 No authentication is required to use Satora. You can optionally pass an API key for tracking and analytics purposes.

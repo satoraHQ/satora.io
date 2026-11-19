@@ -7,16 +7,12 @@ icon: "plug"
 <AccordionGroup>
 
 <Accordion title="Should I use the SDK or the REST API?">
-**Use the TypeScript SDK.** It handles key management, state tracking, error recovery, and gasless claiming out of the box. The REST API is available but not recommended for production use - it may change without notice. See [API & SDK](/api-sdk) for details.
+Use an SDK for production integrations. The REST API may change without notice. See [API & SDK](/api-sdk) to choose between the TypeScript and Rust SDKs.
 </Accordion>
 
-<Accordion title="Which platforms does the SDK support?">
-The SDK is pure TypeScript with zero native dependencies. It works in:
-- **Browsers** (any modern browser)
-- **React Native** (with custom storage adapters, see [React Native setup](/setup/react-native))
-- **Node.js** (server-side integrations)
-
-No WASM, no native modules.
+<Accordion title="Which platforms do the SDKs support?">
+- **TypeScript** supports modern browsers, Node.js, and [React Native](/setup/react-native).
+- **Rust** supports Rust applications and can be wrapped for native Swift or Kotlin apps. Satora currently ships no Swift or Kotlin bindings. See the [Rust SDK README](https://github.com/satoraHQ/satora-sdk/blob/main/rust-sdk/README.md) for supported routes and examples.
 </Accordion>
 
 <Accordion title="Do I need an API key?">
