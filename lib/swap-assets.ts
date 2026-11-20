@@ -58,31 +58,38 @@ const NETWORK_ORDER = new Map(
     .map((chain, index) => [chain, index]),
 );
 
-export async function getSwapAssets(): Promise<SwapAssetRecord[]> {
-  const response = await fetch(`${SATORA_API_URL}/tokens`, {
-    next: { revalidate: 300 },
-    headers: { "X-Lendaswap-Client": "satora-website/0.0.9" },
-  });
+async function getSwapPairs(): Promise<{ source: string; target: string }[] | undefined> {
+  try {
+    const response = await fetch(`${SATORA_API_URL}/swap-pairs`, {
+      next: { revalidate: 300 },
+      headers: { "X-Lendaswap-Client": "satora-website/0.0.9" },
+      signal: AbortSignal.timeout(1500),
+    });
+    if (!response.ok) return undefined;
+    const body = await response.json() as { pairs: { source: string; target: string }[] };
+    return Array.isArray(body.pairs) ? body.pairs : undefined;
+  } catch {
+    // Keep the core routes available if optional route discovery fails or times out.
+    return undefined;
+  }
+}
+
+export async function getSwapAssets(
+  { includeRoutes = false }: { includeRoutes?: boolean } = {},
+): Promise<SwapAssetRecord[]> {
+  const [response, pairs] = await Promise.all([
+    fetch(`${SATORA_API_URL}/tokens`, {
+      next: { revalidate: 300 },
+      headers: { "X-Lendaswap-Client": "satora-website/0.0.9" },
+    }),
+    includeRoutes ? getSwapPairs() : Promise.resolve(undefined),
+  ]);
 
   if (!response.ok) {
     throw new Error(`Unable to load Satora tokens (${response.status})`);
   }
 
   const tokens = await response.json() as TokenResponse;
-  // Route discovery is optional: retain the core assets if it is unavailable.
-  let pairs: { source: string; target: string }[] | undefined;
-  try {
-    const routes = await fetch(`${SATORA_API_URL}/swap-pairs`, {
-      next: { revalidate: 300 },
-      headers: { "X-Lendaswap-Client": "satora-website/0.0.9" },
-    });
-    if (routes.ok) {
-      const body = await routes.json() as { pairs: { source: string; target: string }[] };
-      if (Array.isArray(body.pairs)) pairs = body.pairs;
-    }
-  } catch {
-    // The widget retains its conservative fallback routes.
-  }
   const evmAssets = [
     ...tokens.evm_tokens,
     ...BRIDGE_ASSETS.filter((token) => isBridgeAsset(token.symbol)),

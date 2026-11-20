@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const assets = await getSwapAssets();
+    const assets = await getSwapAssets({ includeRoutes: true });
     return NextResponse.json(
       assets.map(({ quoteChain: _quoteChain, quoteToken: _quoteToken, ...asset }) => asset),
       { headers: { "Cache-Control": "public, max-age=60, s-maxage=300" } },
