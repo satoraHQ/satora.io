@@ -27,6 +27,7 @@ export interface SwapAssetRecord {
   kind: "bitcoin" | "evm";
   icon?: string;
   networkIcon?: string;
+  bitcoinTargets?: string[];
   quoteChain: string;
   quoteToken: string;
 }
@@ -68,6 +69,20 @@ export async function getSwapAssets(): Promise<SwapAssetRecord[]> {
   }
 
   const tokens = await response.json() as TokenResponse;
+  // Route discovery is optional: retain the core assets if it is unavailable.
+  let pairs: { source: string; target: string }[] | undefined;
+  try {
+    const routes = await fetch(`${SATORA_API_URL}/swap-pairs`, {
+      next: { revalidate: 300 },
+      headers: { "X-Lendaswap-Client": "satora-website/0.0.9" },
+    });
+    if (routes.ok) {
+      const body = await routes.json() as { pairs: { source: string; target: string }[] };
+      if (Array.isArray(body.pairs)) pairs = body.pairs;
+    }
+  } catch {
+    // The widget retains its conservative fallback routes.
+  }
   const evmAssets = [
     ...tokens.evm_tokens,
     ...BRIDGE_ASSETS.filter((token) => isBridgeAsset(token.symbol)),
@@ -80,6 +95,11 @@ export async function getSwapAssets(): Promise<SwapAssetRecord[]> {
 
   const unique = new Map<string, SwapAssetRecord>();
   for (const record of records) {
+    if (record.kind === "bitcoin" && pairs) {
+      record.bitcoinTargets = pairs
+        .filter((pair) => pair.source === record.quoteChain)
+        .map((pair) => pair.target);
+    }
     if (!unique.has(record.id)) unique.set(record.id, record);
   }
 

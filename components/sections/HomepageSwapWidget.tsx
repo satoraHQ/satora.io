@@ -30,6 +30,7 @@ interface SwapAsset {
   chain: string;
   decimals: number;
   kind: AssetKind;
+  bitcoinTargets?: string[];
   icon?: string;
   networkIcon?: string;
 }
@@ -796,6 +797,11 @@ function isValidPair(source: SwapAsset, target: SwapAsset): boolean {
   if (source.kind === "evm" && target.kind === "evm") return false;
   if (source.kind === "evm" && target.kind === "bitcoin") return true;
   if (source.kind === "bitcoin" && target.kind === "evm") return true;
+
+  if (
+    (source.chain === "Bitcoin" && target.chain === "Lightning")
+    || (source.chain === "Lightning" && target.chain === "Bitcoin")
+  ) return source.bitcoinTargets?.includes(target.chain) ?? false;
 
   if (source.chain === "Arkade") return target.chain === "Lightning";
   return target.chain === "Arkade";
